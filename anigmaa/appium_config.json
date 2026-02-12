@@ -1,0 +1,15 @@
+{
+  "platformName": "Android",
+  "appium:automationName": "UiAutomator2",
+  "appium:deviceName": "emulator-5554",
+  "appium:app": "./build/app/outputs/flutter-apk/app-debug.apk",
+  "appium:platformVersion": "13.0",
+  "appium:udid": "",
+  "appium:noReset": true,
+  "appium:fullReset": false,
+  "appium:autoGrantPermissions": true,
+  "appium:newCommandTimeout": 300,
+  "appium:ensureWebviewsHavePages": true,
+  "appium:nativeWebScreenshot": true,
+  "appium:skipServerInstallation": true
+}

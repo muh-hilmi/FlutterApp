@@ -1,0 +1,39 @@
+# AWS Configuration
+aws_region = "ap-southeast-1"
+
+# Project Configuration
+project_name = "anigmaa"
+environment  = "prod"
+
+# Network Configuration
+vpc_cidr = "10.0.0.0/16"
+
+# Database Configuration
+db_instance_class        = "db.t3.micro"
+db_allocated_storage     = 20
+db_max_allocated_storage = 100
+db_username              = "postgres"
+db_password              = "CHANGE_THIS_SECURE_PASSWORD"
+db_name                  = "anigmaa"
+
+# Redis Configuration
+redis_node_type            = "cache.t3.micro"
+redis_parameter_group_name = "default.redis7"
+
+# ECS Configuration
+ecs_cpu           = 512
+ecs_memory        = 1024
+ecs_desired_count = 2
+
+# S3 Configuration
+s3_bucket_name = "anigmaa-uploads"
+
+# Application Configuration
+jwt_secret          = "CHANGE_THIS_SUPER_SECRET_JWT_KEY"
+midtrans_server_key = "YOUR_MIDTRANS_SERVER_KEY"
+midtrans_client_key = "YOUR_MIDTRANS_CLIENT_KEY"
+allowed_origins     = "https://yourdomain.com,https://www.yourdomain.com"
+
+# Domain Configuration (optional)
+domain_name     = "api.yourdomain.com"
+certificate_arn = "arn:aws:acm:ap-southeast-1:123456789012:certificate/12345678-1234-1234-1234-123456789012"

@@ -1,0 +1,143 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgis/postgis:15-3.4-alpine
+    container_name: anigmaa_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: anigmaa
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - anigmaa_network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: anigmaa_redis
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - anigmaa_network
+
+  # Backend Application
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: anigmaa_backend
+    ports:
+      - "8123:8080"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+      - 10.255.255.254
+    env_file:
+      - .env.docker
+    environment:
+      # Server
+      PORT: 8080
+      ENV: production
+      LOG_LEVEL: info
+
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: anigmaa
+      DB_SSLMODE: disable
+      DB_MAX_OPEN_CONNS: 25
+      DB_MAX_IDLE_CONNS: 5
+      DB_CONN_MAX_LIFETIME: 5m
+
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
+      REDIS_DB: 0
+
+      # JWT
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
+      JWT_EXPIRATION: 24h
+      JWT_REFRESH_EXPIRATION: 168h
+
+      # Storage
+      STORAGE_TYPE: local
+      UPLOAD_DIR: ./uploads
+      MAX_UPLOAD_SIZE: 10485760
+
+      # Midtrans (Payment Gateway)
+      MIDTRANS_SERVER_KEY: ${MIDTRANS_SERVER_KEY:-}
+      MIDTRANS_CLIENT_KEY: ${MIDTRANS_CLIENT_KEY:-}
+      MIDTRANS_IS_PRODUCTION: ${MIDTRANS_IS_PRODUCTION:-false}
+
+      # CORS
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173,http://localhost:8123
+    volumes:
+      - ./uploads:/app/uploads
+      - ./migrations/consolidated:/app/migrations/consolidated
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - anigmaa_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # Fix schema_migrations table structure (runs before migrations)
+  fix_migrations:
+    image: postgis/postgis:15-3.4-alpine
+    container_name: anigmaa_fix_migrations
+    volumes:
+      - ./migrations/consolidated:/migrations
+    command: >
+      sh -c "
+      until PGPASSWORD=postgres psql -h postgres -U postgres -d anigmaa -c 'SELECT 1' > /dev/null 2>&1; do
+        echo 'Waiting for postgres...';
+        sleep 1;
+      done;
+      PGPASSWORD=postgres psql -h postgres -U postgres -d anigmaa -f /migrations/fix_schema_migrations.sql
+      "
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - anigmaa_network
+    restart: "no"
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  anigmaa_network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1280

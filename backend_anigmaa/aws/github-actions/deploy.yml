@@ -1,0 +1,107 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [main, production]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ap-southeast-1
+  ECR_REPOSITORY: anigmaa-backend
+  ECS_SERVICE: anigmaa-backend
+  ECS_CLUSTER: anigmaa-cluster
+  CONTAINER_NAME: anigmaa-backend
+
+jobs:
+  deploy:
+    name: Deploy to AWS
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Update ECS service
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
+            --force-new-deployment
+
+      - name: Wait for service stability
+        run: |
+          aws ecs wait services-stable \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }}
+
+      - name: Get service status
+        run: |
+          aws ecs describe-services \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }} \
+            --query 'services[0].{Status:status,Running:runningCount,Desired:desiredCount}'
+
+      - name: Run database migrations
+        run: |
+          # Get the latest task definition
+          TASK_DEF=$(aws ecs describe-task-definition \
+            --task-definition ${{ env.ECS_CLUSTER }}-migrate \
+            --query 'taskDefinition' \
+            --output json 2>/dev/null || echo "null")
+
+          if [ "$TASK_DEF" = "null" ]; then
+            echo "Migration task definition not found. Skipping migrations."
+            echo "Please run migrations manually using: ./aws/scripts/migrate-database.sh"
+          else
+            # Run migration task
+            aws ecs run-task \
+              --cluster ${{ env.ECS_CLUSTER }} \
+              --task-definition ${{ env.ECS_CLUSTER }}-migrate \
+              --network-configuration "awsvpcConfiguration={subnets=[subnet-xxx,subnet-yyy],securityGroups=[sg-xxx],assignPublicIp=DISABLED}" \
+              --launch-type FARGATE
+          fi
+
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ Deployment successful!"
+            echo "Application is available at: https://your-domain.com"
+          else
+            echo "❌ Deployment failed!"
+            echo "Please check the logs and try again."
+          fi

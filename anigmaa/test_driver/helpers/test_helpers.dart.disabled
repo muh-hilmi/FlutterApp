@@ -1,0 +1,233 @@
+// import 'package:appium_driver/appium_driver.dart';
+// import 'package:appium_driver/async_io.dart';
+import '../appium_setup.dart';
+
+/// Reusable Test Helpers for Anigmaa E2E Tests
+///
+/// Provides common actions like:
+/// - Login/logout
+/// - Navigation
+/// - Waiting for elements
+/// - Taking screenshots
+
+class TestHelpers {
+  final AppiumDriver driver;
+
+  TestHelpers(this.driver);
+
+  /// Take screenshot for debugging
+  Future<void> screenshot(String name) async {
+    try {
+      final bytes = await driver.screenshot();
+      final file = File('screenshots/$name.png');
+      await file.create(recursive: true);
+      await file.writeAsBytes(bytes);
+      print('📸 Screenshot saved: $name');
+    } catch (e) {
+      print('⚠ Failed to take screenshot: $e');
+    }
+  }
+
+  /// Wait for element with retry
+  Future<void> waitForElement(
+    SerializableFinder finder, {
+    Duration timeout = const Duration(seconds: 10),
+    String? description,
+  }) async {
+    final end = DateTime.now().add(timeout);
+    int attempts = 0;
+
+    while (DateTime.now().isBefore(end)) {
+      attempts++;
+      try {
+        await driver.waitFor(finder, timeout: const Duration(seconds: 2));
+        if (description != null) {
+          print('✓ Found: $description (attempt $attempts)');
+        }
+        return;
+      } catch (e) {
+        if (attempts % 5 == 0) {
+          print('  Waiting for element... (attempt $attempts)');
+        }
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+    }
+
+    throw Exception('Element not found after ${attempts} attempts: ${description ?? finder.toString()}');
+  }
+
+  /// Tap with retry
+  Future<void> tapWithRetry(
+    SerializableFinder finder, {
+    int maxAttempts = 3,
+    String? description,
+  }) async {
+    for (int i = 1; i <= maxAttempts; i++) {
+      try {
+        await driver.tap(finder);
+        if (description != null) {
+          print('✓ Tapped: $description (attempt $i)');
+        }
+        return;
+      } catch (e) {
+        if (i == maxAttempts) {
+          throw Exception('Failed to tap after $maxAttempts attempts: ${description ?? finder.toString()}');
+        }
+        print('  Retry tap $i/$maxAttempts...');
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+    }
+  }
+
+  /// Enter text with retry
+  Future<void> enterText(
+    SerializableFinder finder,
+    String text, {
+    bool clearFirst = true,
+    String? description,
+  }) async {
+    try {
+      if (clearFirst) {
+        await driver.clear(finder);
+      }
+      await driver.sendKeys(finder, text);
+      if (description != null) {
+        print('✓ Entered text: $description');
+      }
+    } catch (e) {
+      throw Exception('Failed to enter text in ${description ?? finder.toString()}: $e');
+    }
+  }
+
+  /// Check if element exists
+  Future<bool> elementExists(SerializableFinder finder) async {
+    try {
+      await driver.getText(finder);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Scroll until element is visible
+  Future<void> scrollToElement(
+    SerializableFinder finder, {
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    final end = DateTime.now().add(timeout);
+
+    while (DateTime.now().isBefore(end)) {
+      try {
+        await driver.waitFor(finder, timeout: const Duration(seconds: 1));
+        return;
+      } catch (e) {
+        // Scroll down
+        await driver.execute(
+          'mobile: scroll',
+          <String, dynamic>{'direction': 'down'},
+        );
+        await Future.delayed(const Duration(milliseconds: 300));
+      }
+    }
+
+    throw Exception('Element not found after scrolling: $finder');
+  }
+
+  /// Wait for loading to complete
+  Future<void> waitForLoadingToComplete() async {
+    final loadingIndicator = by.valueKey('loading_indicator');
+
+    try {
+      await driver.waitFor(loadingIndicator, timeout: const Duration(seconds: 2));
+      // Wait for it to disappear
+      final end = DateTime.now().add(const Duration(seconds: 30));
+      while (DateTime.now().isBefore(end)) {
+        try {
+          await driver.getText(loadingIndicator);
+          await Future.delayed(const Duration(milliseconds: 500));
+        } catch (e) {
+          return; // Loading is gone
+        }
+      }
+    } catch (e) {
+      // No loading indicator, which is fine
+    }
+  }
+
+  /// Navigate back
+  Future<void> goBack() async {
+    await driver.execute('mobile: back', <String, dynamic>{});
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
+}
+
+/// Auth Helper - Specific to authentication flows
+class AuthHelper {
+  final AppiumDriver driver;
+  final TestHelpers helpers;
+
+  AuthHelper(this.driver) : helpers = TestHelpers(driver);
+
+  /// Complete first-time onboarding
+  Future<void> completeOnboarding() async {
+    final startBtn = by.text('Gas Mulai!');
+    final skipBtn = by.text('Skip');
+
+    try {
+      if (await helpers.elementExists(startBtn)) {
+        await helpers.tapWithRetry(startBtn, description: 'Start onboarding');
+      }
+    } catch (e) {
+      // Might have already completed onboarding
+    }
+
+    await Future.delayed(const Duration(seconds: 1));
+  }
+
+  /// Check if on login screen
+  Future<bool> isOnLoginScreen() async {
+    final googleSignInBtn = by.text('Sign in with Google');
+    return await helpers.elementExists(googleSignInBtn);
+  }
+
+  /// Check if on home screen
+  Future<bool> isOnHomeScreen() async {
+    final homeIndicator = by.text('Postingan');
+    return await helpers.elementExists(homeIndicator);
+  }
+
+  /// Check if needs profile completion
+  Future<bool> needsProfileCompletion() async {
+    final title = by.text('Lengkapin Profil Lo');
+    return await helpers.elementExists(title);
+  }
+
+  /// Navigate to profile tab
+  Future<void> goToProfileTab() async {
+    final profileTab = by.text('Profil');
+    await helpers.tapWithRetry(profileTab, description: 'Profile tab');
+    await Future.delayed(const Duration(seconds: 1));
+  }
+
+  /// Open profile menu
+  Future<void> openProfileMenu() async {
+    final menuBtn = by.valueKey('profile_menu_button');
+    await helpers.tapWithRetry(menuBtn, description: 'Profile menu');
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
+
+  /// Logout
+  Future<void> logout() async {
+    await openProfileMenu();
+
+    final logoutOption = by.text('Keluar');
+    await helpers.tapWithRetry(logoutOption, description: 'Logout option');
+
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    final confirmBtn = by.text('Keluar');
+    await helpers.tapWithRetry(confirmBtn, description: 'Confirm logout');
+
+    await Future.delayed(const Duration(seconds: 2));
+  }
+}

@@ -1,0 +1,695 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../../domain/entities/event.dart';
+import 'my_tickets_screen.dart';
+import '../../pages/discover/swipeable_events_screen.dart';
+import '../../widgets/notifications/event_notification_scheduler.dart'
+    show EventNotificationScheduler, TicketStatus;
+
+class PostPaymentTicketScreen extends StatefulWidget {
+  final Event event;
+  final String? ticketId;
+
+  const PostPaymentTicketScreen({
+    super.key,
+    required this.event,
+    this.ticketId,
+  });
+
+  @override
+  State<PostPaymentTicketScreen> createState() =>
+      _PostPaymentTicketScreenState();
+}
+
+class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
+  late Timer _countdownTimer;
+  Duration _timeUntilEvent = Duration.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _calculateTimeUntilEvent();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _calculateTimeUntilEvent();
+    });
+
+    // Schedule notifications for this event
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      EventNotificationScheduler.scheduleEventReminders(
+        eventId: widget.event.id,
+        eventName: widget.event.title,
+        eventStartTime: widget.event.startTime,
+        eventLocation: widget.event.location.name,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _countdownTimer.cancel();
+    super.dispose();
+  }
+
+  void _calculateTimeUntilEvent() {
+    final now = DateTime.now();
+    final eventTime = widget.event.startTime;
+    final difference = eventTime.difference(now);
+
+    if (difference.isNegative) {
+      _countdownTimer.cancel();
+    }
+
+    if (mounted) {
+      setState(() {
+        _timeUntilEvent = difference.isNegative ? Duration.zero : difference;
+      });
+    }
+  }
+
+  String _formatCountdown(Duration duration) {
+    if (duration.inDays > 0) {
+      return '${duration.inDays} hari ${duration.inHours % 24} jam';
+    } else if (duration.inHours > 0) {
+      return '${duration.inHours} jam ${duration.inMinutes % 60} menit';
+    } else if (duration.inMinutes > 0) {
+      return '${duration.inMinutes} menit';
+    } else {
+      return 'Segera!';
+    }
+  }
+
+  Color _getCountdownColor() {
+    final days = _timeUntilEvent.inDays;
+    if (days >= 7) return const Color(0xFF9CA3AF); // gray
+    if (days >= 3) return const Color(0xFFBBC863); // green
+    if (days >= 1) return const Color(0xFFF59E0B); // orange
+    return const Color(0xFFEF4444); // red
+  }
+
+  TicketStatus _getTicketStatus() {
+    if (_timeUntilEvent.inHours < 0) return TicketStatus.completed;
+    if (_timeUntilEvent.inHours < 24) return TicketStatus.today;
+    return TicketStatus.upcoming;
+  }
+
+  String _getTicketStatusText() {
+    final status = _getTicketStatus();
+    switch (status) {
+      case TicketStatus.upcoming:
+        return 'AKTIF';
+      case TicketStatus.today:
+        return 'HARI INI';
+      case TicketStatus.completed:
+        return 'SELESAI';
+    }
+  }
+
+  Color _getTicketStatusColor() {
+    final status = _getTicketStatus();
+    switch (status) {
+      case TicketStatus.upcoming:
+        return const Color(0xFFBBC863);
+      case TicketStatus.today:
+        return const Color(0xFFF59E0B);
+      case TicketStatus.completed:
+        return Colors.grey;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ticketId =
+        widget.ticketId ??
+        'TKT-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}';
+    final status = _getTicketStatus();
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFFCFCFC),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF1F2937)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_horiz, color: Color(0xFF1F2937)),
+            onPressed: () => _showMoreOptions(context),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Event Header Image
+            _buildEventHeader(),
+            const SizedBox(height: 20),
+
+            // Event Info
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.event.title,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1F2937),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.calendar_today_rounded,
+                        size: 16,
+                        color: Color(0xFF6B7280),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        DateFormat(
+                          'EEEE, d MMM yyyy • HH:mm',
+                        ).format(widget.event.startTime.toLocal()),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          color: const Color(0xFF6B7280),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on_rounded,
+                        size: 16,
+                        color: Color(0xFF6B7280),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          widget.event.location.name,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14,
+                            color: const Color(0xFF6B7280),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Countdown
+            _buildCountdown(),
+
+            const SizedBox(height: 20),
+
+            // Ticket Card with QR
+            _buildTicketCard(ticketId, status),
+
+            const SizedBox(height: 20),
+
+            // Primary CTA: Cari Temen
+            _buildCariTemenButton(),
+
+            const SizedBox(height: 12),
+
+            // Secondary Actions
+            Row(
+              children: [
+                Expanded(
+                  child: _buildActionButton(
+                    icon: Icons.calendar_month_rounded,
+                    label: 'Add to Calendar',
+                    onTap: _addToCalendar,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildActionButton(
+                    icon: Icons.share_rounded,
+                    label: 'Share',
+                    onTap: _shareEvent,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            // Link to My Tickets
+            TextButton.icon(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MyTicketsScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.confirmation_number_rounded, size: 18),
+              label: Text(
+                'Lihat Semua Tiket Saya',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFFBBC863),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 30),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEventHeader() {
+    return Container(
+      width: double.infinity,
+      height: 180,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFFBBC863),
+            const Color(0xFFBBC863).withValues(alpha: 0.7),
+          ],
+        ),
+      ),
+      child: widget.event.fullImageUrls.isNotEmpty
+          ? ClipRRect(
+              child: CachedNetworkImage(
+                imageUrl: widget.event.fullImageUrls.first,
+                width: double.infinity,
+                height: double.infinity,
+                fit: BoxFit.cover,
+                errorWidget: (context, url, error) => const SizedBox(),
+              ),
+            )
+          : const Icon(Icons.event_rounded, size: 64, color: Colors.white24),
+    );
+  }
+
+  Widget _buildCountdown() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: _getCountdownColor().withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _getCountdownColor().withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.timer_outlined, color: _getCountdownColor()),
+          const SizedBox(width: 10),
+          Text(
+            'Mulai dalam ',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              color: const Color(0xFF6B7280),
+            ),
+          ),
+          Text(
+            _formatCountdown(_timeUntilEvent),
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: _getCountdownColor(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTicketCard(String ticketId, TicketStatus status) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Top section with gradient
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  _getTicketStatusColor(),
+                  _getTicketStatusColor().withValues(alpha: 0.7),
+                ],
+              ),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
+            ),
+            child: Column(
+              children: [
+                // Status badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _getTicketStatusIcon(),
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        _getTicketStatusText(),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // QR Code
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    children: [
+                      QrImageView(
+                        data: ticketId,
+                        version: QrVersions.auto,
+                        size: 160,
+                        backgroundColor: Colors.white,
+                        eyeStyle: const QrEyeStyle(
+                          eyeShape: QrEyeShape.square,
+                          color: Color(0xFF1F2937),
+                        ),
+                        dataModuleStyle: const QrDataModuleStyle(
+                          dataModuleShape: QrDataModuleShape.square,
+                          color: Color(0xFF1F2937),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // Scan line animation
+                      SizedBox(height: 2, width: 120, child: _buildScanLine()),
+                      const SizedBox(height: 8),
+                      Text(
+                        ticketId,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF6B7280),
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Bottom section
+          Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Text(
+                  'Tunjukin QR code ini saat check-in',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    color: const Color(0xFF6B7280),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _copyTicketId(ticketId),
+                        icon: const Icon(Icons.copy, size: 16),
+                        label: const Text('Copy Kode'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF1F2937),
+                          side: const BorderSide(color: Color(0xFFE5E7EB)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _saveTicketImage,
+                        icon: const Icon(Icons.download, size: 16),
+                        label: const Text('Simpan'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF1F2937),
+                          side: const BorderSide(color: Color(0xFFE5E7EB)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScanLine() {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 1500),
+      curve: Curves.easeInOut,
+      builder: (context, value, child) {
+        return Align(
+          alignment: Alignment(value * 2 - 1, 0),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  const Color(0xFFBBC863).withValues(alpha: 0.8),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+            height: 2,
+          ),
+        );
+      },
+      onEnd: () {
+        // Restart animation
+        if (mounted) setState(() {});
+      },
+    );
+  }
+
+  IconData _getTicketStatusIcon() {
+    switch (_getTicketStatus()) {
+      case TicketStatus.upcoming:
+        return Icons.confirmation_number_rounded;
+      case TicketStatus.today:
+        return Icons.event_available_rounded;
+      case TicketStatus.completed:
+        return Icons.check_circle_rounded;
+    }
+  }
+
+  Widget _buildCariTemenButton() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      child: ElevatedButton(
+        onPressed: () => _openFindMatches(context),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFFBBC863),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.group_add_rounded, size: 20),
+            const SizedBox(width: 10),
+            Text(
+              'Cari Temen Buat Bareng',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 18),
+      label: Text(label),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: const Color(0xFF1F2937),
+        side: const BorderSide(color: Color(0xFFE5E7EB)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+      ),
+    );
+  }
+
+  void _showMoreOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.refresh_rounded),
+              title: const Text('Refresh Tiket'),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() {});
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.help_outline_rounded),
+              title: const Text('Bantuan'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _copyTicketId(String ticketId) {
+    Clipboard.setData(ClipboardData(text: ticketId));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Kode tiket disalin!',
+          style: GoogleFonts.plusJakartaSans(),
+        ),
+        backgroundColor: const Color(0xFF1F2937),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _saveTicketImage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Fitur simpan tiket coming soon!',
+          style: GoogleFonts.plusJakartaSans(),
+        ),
+        backgroundColor: const Color(0xFF1F2937),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  void _addToCalendar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Add to Calendar coming soon!',
+          style: GoogleFonts.plusJakartaSans(),
+        ),
+        backgroundColor: const Color(0xFF1F2937),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  void _shareEvent() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Share coming soon!',
+          style: GoogleFonts.plusJakartaSans(),
+        ),
+        backgroundColor: const Color(0xFF1F2937),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  void _openFindMatches(BuildContext context) {
+    // Open find matches modal or navigate to screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SwipeableEventsScreen()),
+    );
+  }
+}

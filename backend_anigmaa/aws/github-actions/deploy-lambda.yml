@@ -1,0 +1,100 @@
+name: Deploy to AWS Lambda
+
+on:
+  push:
+    branches: [main, production]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ap-southeast-1
+  LAMBDA_FUNCTION_NAME: anigmaa-backend
+
+jobs:
+  deploy:
+    name: Deploy to AWS Lambda
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21' # Update sesuai dengan Go version Anda
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Build Go binary for Lambda
+        run: |
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bootstrap .
+
+      - name: Create Lambda deployment package
+        run: |
+          zip lambda-function.zip bootstrap
+          ls -lah lambda-function.zip
+
+      - name: Update Lambda function code
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+            --zip-file fileb://lambda-function.zip \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Wait for function update
+        run: |
+          # Wait a few seconds for the update to propagate
+          sleep 5
+
+          # Check function status
+          aws lambda get-function \
+            --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+            --region ${{ env.AWS_REGION }} \
+            --query 'Configuration.{LastModified:LastModified,CodeSize:CodeSize,State:State}'
+
+      - name: Run Lambda health check
+        run: |
+          # Invoke Lambda with a health check request
+          aws lambda invoke \
+            --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+            --region ${{ env.AWS_REGION }} \
+            --payload '{"requestContext":{"http":{"method":"GET","path":"/health"}},"body":""}' \
+            response.json
+
+          echo "Lambda invocation response:"
+          cat response.json
+
+      - name: Get API Gateway endpoint
+        run: |
+          # Get API Gateway endpoint from Terraform output or environment variable
+          API_ENDPOINT=$(aws apigatewayv2 get-apis \
+            --query 'Items[?Name==`anigmaa-backend-api`].ApiEndpoint' \
+            --region ${{ env.AWS_REGION }} \
+            --output text)
+
+          echo "API Gateway endpoint: $API_ENDPOINT"
+          echo "API_ENDPOINT=$API_ENDPOINT" >> $GITHUB_ENV
+
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ Lambda deployment successful!"
+            echo "API Endpoint: ${{ env.API_ENDPOINT }}"
+            echo "Lambda Function: ${{ env.LAMBDA_FUNCTION_NAME }}"
+            echo "Region: ${{ env.AWS_REGION }}"
+          else
+            echo "❌ Lambda deployment failed!"
+            echo "Please check the logs and try again."
+          fi
+
+      - name: Clean up
+        if: always()
+        run: |
+          rm -f bootstrap lambda-function.zip response.json

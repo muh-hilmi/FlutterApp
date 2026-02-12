@@ -1,0 +1,128 @@
+import 'dart:io';
+import 'package:flutter_driver/flutter_driver.dart';
+import 'package:test/test.dart';
+// import 'package:appium_driver/appium_driver.dart';
+// import 'package:appium_driver/async_io.dart';
+
+/// Appium Configuration for Anigmaa E2E Tests
+///
+/// Platform Configuration:
+/// - Android: Uses UIAutomator2
+/// - iOS: Uses XCUITest
+///
+/// Required: Appium server running on http://localhost:4723/wd/hub
+///
+
+class AppiumConfig {
+  static const String appiumServer = 'http://localhost:4723/wd/hub';
+
+  static AndroidCapabilities get androidCapabilities => AndroidCapabilities(
+    'anigmaa',
+    automationName: 'UIAutomator2',
+    appActivity: '.MainActivity',
+    appPackage: 'com.anigmaa.app',
+    deviceName: 'emulator-5554',
+    platformName: 'Android',
+    autoGrantPermissions: true,
+    noReset: false,
+    fullReset: false,
+    newCommandTimeout: 120,
+  );
+
+  static IOSCapabilities get iosCapabilities => IOSCapabilities(
+    'anigmaa.app',
+    automationName: 'XCUITest',
+    deviceName: 'iPhone Simulator',
+    platformName: 'iOS',
+    autoAcceptAlerts: true,
+    noReset: false,
+    fullReset: false,
+    newCommandTimeout: 120,
+  );
+
+  static AppiumDriver createDriver({bool isAndroid = true}) async {
+    final capabilities = isAndroid ? androidCapabilities : iosCapabilities;
+    return AppiumDriver.create(
+      uri: Uri.parse(appiumServer),
+      capabilities: capabilities,
+    );
+  }
+}
+
+/// Test Keys - Must match Flutter Key widgets
+class TestKeys {
+  // Auth Screens
+  static const String onboardingScreen = 'onboarding_screen';
+  static const String loginScreen = 'login_screen';
+  static const String completeProfileScreen = 'complete_profile_screen';
+
+  // Buttons
+  static const String googleSignInBtn = 'google_sign_in_button';
+  static const String skipOnboardingBtn = 'skip_onboarding';
+  static const String startOnboardingBtn = 'start_onboarding';
+  static const String completeProfileBtn = 'complete_profile_button';
+  static const String skipProfileBtn = 'skip_profile_button';
+
+  // Profile Fields
+  static const String dobField = 'dob_field';
+  static const String genderField = 'gender_field';
+  static const String locationField = 'location_field';
+  static const String phoneField = 'phone_field';
+
+  // Home
+  static const String homeScreen = 'home_screen';
+  static const String profileTab = 'profile_tab';
+  static const String profileName = 'profile_name';
+  static const String editProfileBtn = 'edit_profile_button';
+
+  // Navigation
+  static const String bottomNav = 'bottom_navigation';
+  static const String fabButton = 'fab_button';
+}
+
+/// Wait Helpers
+class WaitHelpers {
+  static Future<void> waitForVisible(
+    AppiumDriver driver,
+    SerializableFinder finder, {
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    final end = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(end)) {
+      try {
+        await driver.waitFor(finder);
+        return;
+      } catch (e) {
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+    }
+    throw TimeoutException('Element not visible: $finder', timeout);
+  }
+
+  static Future<void> waitForAbsent(
+    AppiumDriver driver,
+    SerializableFinder finder, {
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    final end = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(end)) {
+      try {
+        await driver.getText(finder);
+        await Future.delayed(const Duration(milliseconds: 500));
+      } catch (e) {
+        return; // Element is gone, which is what we want
+      }
+    }
+    throw TimeoutException('Element still visible: $finder', timeout);
+  }
+}
+
+class TimeoutException implements Exception {
+  final String message;
+  final Duration timeout;
+
+  TimeoutException(this.message, this.timeout);
+
+  @override
+  String toString() => '$message (timeout: ${timeout.inSeconds}s)';
+}
