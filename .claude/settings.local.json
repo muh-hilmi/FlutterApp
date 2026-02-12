@@ -120,7 +120,12 @@
       "Bash(Select-Object:*)",
       "Bash(dart compile check:*)",
       "Bash(C:flutterbinflutter.bat analyze \"C:\\\\Users\\\\mailh\\\\OneDrive\\\\Desktop\\\\FlutterApp\\\\anigmaa\\\\lib\\\\presentation\\\\pages\\\\feed\\\\modern_feed_screen.dart\" \"C:\\\\Users\\\\mailh\\\\OneDrive\\\\Desktop\\\\FlutterApp\\\\anigmaa\\\\lib\\\\presentation\\\\widgets\\\\posts\\\\modern_post_card.dart\" \"C:\\\\Users\\\\mailh\\\\OneDrive\\\\Desktop\\\\FlutterApp\\\\anigmaa\\\\lib\\\\data\\\\models\\\\event_model.dart\")",
-      "Bash(/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe compose build:*)"
+      "Bash(/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe compose build:*)",
+      "Bash(git rm:*)",
+      "Bash(git config:*)",
+      "Bash(git push:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(gh auth:*)"
     ],
     "deny": [],
     "ask": []
