@@ -13,21 +13,6 @@ class EventDateTimeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Comprehensive timezone debugging
-    final now = DateTime.now();
-    final nowUtc = DateTime.now().toUtc();
-    final localStartTime = event.startTime.toLocal();
-
-    print('[EventDateTimeCard] === TIMEZONE DIAGNOSTICS ===');
-    print('[EventDateTimeCard] Current LOCAL time: $now (offset: ${now.timeZoneOffset})');
-    print('[EventDateTimeCard] Current UTC time: $nowUtc');
-    print('[EventDateTimeCard] Device timezone offset: ${now.timeZoneOffset} hours = ${now.timeZoneOffset.inHours}h ${now.timeZoneOffset.inMinutes % 60}m');
-    print('[EventDateTimeCard] Event startTime raw: ${event.startTime} (isUtc: ${event.startTime.isUtc})');
-    print('[EventDateTimeCard] Event startTime.toLocal(): $localStartTime (isUtc: ${localStartTime.isUtc})');
-    print('[EventDateTimeCard] Formatted time (HH:mm): ${DateFormat('HH:mm').format(localStartTime)}');
-    print('[EventDateTimeCard] Expected: 19:00 if device is WIB (UTC+7)');
-    print('[EventDateTimeCard] === END DIAGNOSTICS ===');
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       padding: const EdgeInsets.all(20),

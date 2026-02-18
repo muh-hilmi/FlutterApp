@@ -5,7 +5,6 @@ import '../../bloc/events/events_bloc.dart';
 import '../../bloc/events/events_event.dart' show LoadEventById;
 import '../../bloc/events/events_state.dart';
 import '../../bloc/my_events/my_events_bloc.dart';
-import '../../bloc/my_events/my_events_event.dart';
 import '../../bloc/my_events/my_events_state.dart';
 import '../edit_event/edit_event_screen.dart';
 import 'host_qna_screen.dart';

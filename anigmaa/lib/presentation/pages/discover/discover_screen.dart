@@ -173,13 +173,15 @@ class DiscoverScreenState extends State<DiscoverScreen>
         // Optional: Call BLOC here to update user location in backend/state if needed
         // context.read<UserBloc>().add(UpdateUserLocation(lat: position.latitude, lng: position.longitude));
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Location updated: ${_locationName ?? 'Jakarta'}'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Location updated: ${_locationName ?? 'Jakarta'}'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       }
     } catch (e) {
       debugPrint('Error getting location: $e');

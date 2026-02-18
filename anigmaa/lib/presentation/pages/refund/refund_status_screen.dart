@@ -312,10 +312,8 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (icon != null) ...[
-            Icon(icon, size: 12, color: textColor),
-            const SizedBox(width: 4),
-          ],
+          Icon(icon, size: 12, color: textColor),
+          const SizedBox(width: 4),
           Text(
             label,
             style: TextStyle(

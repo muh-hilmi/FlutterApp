@@ -50,8 +50,9 @@ class _DiscoverMapViewState extends State<DiscoverMapView> {
   // Filter events within 10km radius
   List<Event> _getEventsInRadius() {
     return widget.events.where((event) {
-      if (event.location.latitude == 0 && event.location.longitude == 0)
+      if (event.location.latitude == 0 && event.location.longitude == 0) {
         return false;
+      }
 
       final distance = _calculateDistance(
         widget.userLocation.latitude,

@@ -137,9 +137,6 @@ class _MyEventsScreenState extends State<MyEventsScreen>
   }
 
   Widget _buildTabBar(List<Event> allEvents) {
-    final activeCount = allEvents.where((e) => e.isActive).length;
-    final completedCount = allEvents.where((e) => e.isCompleted).length;
-
     return Column(
       children: [
         TabBar(
@@ -489,6 +486,7 @@ class _MyEventsScreenState extends State<MyEventsScreen>
                   ),
                 ).then((_) {
                   if (mounted) {
+                    if (!context.mounted) return;
                     context.read<MyEventsBloc>().add(const RefreshMyEvents());
                   }
                 });
@@ -512,6 +510,7 @@ class _MyEventsScreenState extends State<MyEventsScreen>
                   ),
                 ).then((_) {
                   if (mounted) {
+                    if (!context.mounted) return;
                     context.read<MyEventsBloc>().add(const RefreshMyEvents());
                   }
                 });

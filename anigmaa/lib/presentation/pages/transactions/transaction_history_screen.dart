@@ -16,7 +16,7 @@ class TransactionHistoryScreen extends StatefulWidget {
 
 class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> with SingleTickerProviderStateMixin {
   String _selectedFilter = 'all';
-  String _selectedEventFilter = 'all';
+  final String _selectedEventFilter = 'all';
   late TabController _tabController;
 
   // REMOVED MOCK DATA - Ready for API integration

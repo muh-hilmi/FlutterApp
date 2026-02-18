@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import '../../domain/repositories/payment_repository.dart';
 import '../../core/api/dio_client.dart';
-
 import '../../core/services/auth_service.dart';
+import '../../core/utils/app_logger.dart';
 
 class PaymentRepositoryImpl implements PaymentRepository {
   final DioClient _dioClient;
@@ -47,7 +47,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
       // Do not include phone if empty/null
       // requestData['phone'] = '';
 
-      print('PaymentRepository: Initiating payment with data: $requestData');
+      AppLogger().info('PaymentRepository: Initiating payment with data: $requestData');
 
       final response = await _dioClient.post(
         '/payments/initiate',
@@ -60,8 +60,8 @@ class PaymentRepositoryImpl implements PaymentRepository {
             data['redirect_url'] ?? data['payment_url'] ?? data['snap_url'];
         final token = data['token'] ?? data['transaction_id'];
 
-        print('PaymentRepository: Parsed redirect_url: $redirectUrl');
-        print('PaymentRepository: Parsed token: $token');
+        AppLogger().info('PaymentRepository: Parsed redirect_url: $redirectUrl');
+        AppLogger().info('PaymentRepository: Parsed token: $token');
 
         return {
           'payment_url': redirectUrl,
@@ -72,10 +72,10 @@ class PaymentRepositoryImpl implements PaymentRepository {
         throw Exception('Failed to initiate payment');
       }
     } on DioException catch (e) {
-      print('PaymentRepository: DioError: ${e.response?.data}');
+      AppLogger().error('PaymentRepository: DioError: ${e.response?.data}');
       throw _handleDioError(e);
     } catch (e) {
-      print('PaymentRepository: Unexpected error: $e');
+      AppLogger().error('PaymentRepository: Unexpected error: $e');
       throw Exception('Unexpected error: $e');
     }
   }

@@ -129,44 +129,6 @@ class _EditEventScreenState extends State<EditEventScreen>
     );
   }
 
-  bool _hasFieldChanged(String fieldName, dynamic currentValue) {
-    switch (fieldName) {
-      case 'title':
-        return currentValue != widget.event.title;
-      case 'description':
-        return currentValue != widget.event.description;
-      case 'startTime':
-        return !_isSameDateTime(currentValue, widget.event.startTime);
-      case 'endTime':
-        return !_isSameDateTime(currentValue, widget.event.endTime);
-      case 'location':
-        return currentValue?.name != widget.event.location.name;
-      case 'category':
-        return currentValue != widget.event.category;
-      case 'isFree':
-        return currentValue != widget.event.isFree;
-      case 'price':
-        return currentValue != widget.event.price;
-      case 'maxAttendees':
-        return currentValue != widget.event.maxAttendees;
-      case 'imageUrl':
-        return currentValue !=
-            (widget.event.imageUrls.isNotEmpty
-                ? widget.event.imageUrls.first
-                : null);
-      default:
-        return false;
-    }
-  }
-
-  bool _isSameDateTime(DateTime? a, DateTime b) {
-    if (a == null) return false;
-    return a.year == b.year &&
-        a.month == b.month &&
-        a.day == b.day &&
-        a.hour == b.hour &&
-        a.minute == b.minute;
-  }
 
   void _markFieldChanged(String fieldName) {
     if (_updatedFields.add(fieldName)) {
@@ -765,7 +727,7 @@ class _EditEventScreenState extends State<EditEventScreen>
         decoration: BoxDecoration(
           color: const Color(0xFFF8F9FA),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200!),
+          border: Border.all(color: Colors.grey.shade200),
         ),
         child: Row(
           children: [
@@ -831,7 +793,7 @@ class _EditEventScreenState extends State<EditEventScreen>
         decoration: BoxDecoration(
           color: const Color(0xFFF8F9FA),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200!),
+          border: Border.all(color: Colors.grey.shade200),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1084,7 +1046,7 @@ class _EditEventScreenState extends State<EditEventScreen>
               border: Border.all(
                 color: _isFree
                     ? const Color(0xFFBBC863).withValues(alpha: 0.3)
-                    : Colors.grey.shade200!,
+                    : Colors.grey.shade200,
               ),
             ),
             child: Row(
@@ -1135,7 +1097,7 @@ class _EditEventScreenState extends State<EditEventScreen>
                       _markFieldChanged('isFree');
                     });
                   },
-                  activeColor: const Color(0xFFBBC863),
+                  activeTrackColor: const Color(0xFFBBC863),
                 ),
               ],
             ),

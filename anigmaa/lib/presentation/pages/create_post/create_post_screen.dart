@@ -713,11 +713,13 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
           imageUrls = await uploadService.uploadImages(imageFiles);
 
           if (imageUrls.length != _selectedImages.length) {
+            if (!mounted) return;
             _showErrorSnackBar('Beberapa gambar gagal diupload.');
             // Continue with successfully uploaded images
           }
         } catch (e) {
           AppLogger().error('Error uploading images: $e');
+          if (!mounted) return;
           _showErrorSnackBar('Gagal upload gambar: $e');
           setState(() => _isCreating = false);
           return;
@@ -742,6 +744,7 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
       );
 
       // Step 4: Dispatch CreatePostRequested event
+      if (!mounted) return;
       context.read<PostsBloc>().add(CreatePostRequested(post));
 
       // Step 5: Close the sheet

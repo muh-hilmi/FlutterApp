@@ -9,6 +9,7 @@ import '../../../domain/usecases/get_event_by_id.dart';
 import '../../../domain/usecases/update_event.dart';
 import '../../../domain/usecases/toggle_event_interest.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/utils/app_logger.dart';
 
 import 'events_event.dart';
 import 'events_state.dart';
@@ -89,7 +90,7 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
       List<Event> nearbyEvents = [];
       nearbyResult.fold(
         (failure) {
-          print(
+          AppLogger().error(
             '[EventsBloc] Failed to fetch nearby events: ${failure.message}',
           );
           // If real API fails, fallback to simple filtering as "Starting Soon"
@@ -104,9 +105,7 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
         },
       );
 
-      print(
-        '[EventsBloc] Events loaded: ${upcomingEvents.length} feed, ${nearbyEvents.length} nearby',
-      );
+      // Events loaded: ${upcomingEvents.length} feed, ${nearbyEvents.length} nearby
 
       emit(
         EventsLoaded(
@@ -261,8 +260,7 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
           final updatedEvents = [
             createdEvent,
             ...currentState.events
-                .where((e) => e.id != createdEvent.id)
-                .toList(),
+                .where((e) => e.id != createdEvent.id),
           ];
           // Use UTC for comparison since backend sends UTC times
           final isStartingSoon =
@@ -274,8 +272,7 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
               ? [
                   createdEvent,
                   ...currentState.nearbyEvents
-                      .where((e) => e.id != createdEvent.id)
-                      .toList(),
+                      .where((e) => e.id != createdEvent.id),
                 ]
               : currentState.nearbyEvents;
 
@@ -415,9 +412,7 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
               serverEvent.interestedUserIds,
             );
             updatedUserIds.add(currentUserId);
-            print(
-              '[EventsBloc] Refresh - Preserving local interest for ${serverEvent.id}: user $currentUserId added back',
-            );
+            // Refresh - Preserving local interest for ${serverEvent.id}: user $currentUserId added back
             return serverEvent.copyWith(interestedUserIds: updatedUserIds);
           }
 
@@ -427,22 +422,13 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
         // Filter out events that have already ended (for matchmaking context)
         // IMPORTANT: Convert to UTC for comparison because backend sends UTC times
         final now = DateTime.now().toUtc();
-        print('[EventsBloc] _onRefreshEvents - Current time: $now (UTC)');
-        print(
-          '[EventsBloc] _onRefreshEvents - Total events from backend: ${mergedEvents.length}',
-        );
+        // _onRefreshEvents - Current time: $now (UTC)
+        // _onRefreshEvents - Total events from backend: ${mergedEvents.length}
 
         final upcomingEvents = mergedEvents.where((event) {
           final isUpcoming = event.endTime.isAfter(now);
-          print(
-            '[EventsBloc] _onRefreshEvents - Event "${event.title}": endTime=${event.endTime} (${event.endTime.isUtc ? "UTC" : "LOCAL"}), isUpcoming=$isUpcoming',
-          );
           return isUpcoming;
         }).toList();
-
-        print(
-          '[EventsBloc] _onRefreshEvents - Upcoming events after filter: ${upcomingEvents.length}',
-        );
         final nearbyEvents = upcomingEvents
             .where((event) => event.isStartingSoon)
             .toList();
@@ -489,15 +475,12 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
     ToggleInterestRequested event,
     Emitter<EventsState> emit,
   ) async {
-    print(
-      '[EventsBloc] _onToggleInterestRequested called! eventId=${event.event.id}',
-    );
-    print('[EventsBloc] Current state type: ${state.runtimeType}');
+    // _onToggleInterestRequested called! eventId=${event.event.id}
+    // Current state type: ${state.runtimeType}
 
     // Get actual current user ID from AuthService
     final currentUserId = authService.userId;
     if (currentUserId == null) {
-      print('[EventsBloc] User not logged in');
       if (state is EventsLoaded) {
         final currentState = state as EventsLoaded;
         emit(currentState.copyWith(createErrorMessage: 'User not logged in'));
@@ -509,11 +492,11 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
 
     // IDEMPOTENCY LOCK: Prevent re-entry while processing
     if (_processingToggleEventIds.contains(eventId)) {
-      print('[EventsBloc] Toggle ALREADY IN PROGRESS for $eventId - ignoring');
+      // Toggle ALREADY IN PROGRESS for $eventId - ignoring
       return;
     }
     _processingToggleEventIds.add(eventId);
-    print('[EventsBloc] Toggle STARTED for $eventId');
+    // Toggle STARTED for $eventId
 
     try {
       // Helper function to update event in list
@@ -546,13 +529,9 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
       // INTENDED STATE: What we WANT after this operation completes
       final intendedIsInterested = !wasInterested;
 
-      print(
-        '[EventsBloc] ToggleInterest: eventId=$eventId, currentUserId=$currentUserId',
-      );
-      print(
-        '[EventsBloc] Current state: isInterested=$wasInterested, count=${eventInState.interestedCount}',
-      );
-      print('[EventsBloc] Intended state: isInterested=$intendedIsInterested');
+      // ToggleInterest: eventId=$eventId, currentUserId=$currentUserId
+      // Current state: isInterested=$wasInterested, count=${eventInState.interestedCount}
+      // Intended state: isInterested=$intendedIsInterested
 
       // OPTIMISTIC UPDATE: Only emit if state is EventsLoaded
       // Keep track of whether we did an optimistic update for rollback
@@ -600,11 +579,9 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
             nearbyEvents: updatedNearbyEvents,
           ),
         );
-        print('[EventsBloc] Optimistic update emitted');
+        // Optimistic update emitted
       } else {
-        print(
-          '[EventsBloc] State not EventsLoaded, skipping optimistic update',
-        );
+        // State not EventsLoaded, skipping optimistic update
       }
 
       // Call API in background
@@ -612,7 +589,7 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
 
       result.fold(
         (failure) {
-          print('[EventsBloc] API failed: ${failure.message}');
+          // API failed: ${failure.message}
 
           // ROLLBACK: Only if we did an optimistic update
           if (didOptimisticUpdate && updatedEvents != null) {
@@ -648,16 +625,12 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
           }
         },
         (updatedEvent) {
-          print(
-            '[EventsBloc] API success! Updated event: ${updatedEvent.id}, interestedCount=${updatedEvent.interestedCount}',
-          );
+          // API success! Updated event: ${updatedEvent.id}, interestedCount=${updatedEvent.interestedCount}
 
           final latestState = state;
           if (latestState is! EventsLoaded) {
             // If state is not EventsLoaded (e.g., EventsInitial), emit new EventsLoaded state
-            print(
-              '[EventsBloc] State not EventsLoaded, emitting new EventsLoaded with updated event',
-            );
+            // State not EventsLoaded, emitting new EventsLoaded with updated event
             emit(
               EventsLoaded(
                 events: [updatedEvent],
@@ -689,28 +662,22 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
               nearbyEvents: finalNearbyEvents,
             ),
           );
-          print(
-            '[EventsBloc] State emitted: eventId=${updatedEvent.id}, count=${updatedEvent.interestedCount}',
-          );
+          // State emitted: eventId=${updatedEvent.id}, count=${updatedEvent.interestedCount}
 
           // Update permanent lock based on new state
           if (updatedEvent.isInterested) {
             _likedEventIds.add(eventId);
-            print(
-              '[EventsBloc] Added $eventId to permanent liked lock (toggle)',
-            );
+            // Added $eventId to permanent liked lock (toggle)
           } else {
             _likedEventIds.remove(eventId);
-            print(
-              '[EventsBloc] Removed $eventId from permanent liked lock (unlike)',
-            );
+            // Removed $eventId from permanent liked lock (unlike)
           }
         },
       );
     } finally {
       // ALWAYS release lock
       _processingToggleEventIds.remove(eventId);
-      print('[EventsBloc] Toggle COMPLETED for $eventId');
+      // Toggle COMPLETED for $eventId
     }
   }
 
@@ -720,15 +687,13 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
     LikeInterestRequested event,
     Emitter<EventsState> emit,
   ) async {
-    print(
-      '[EventsBloc] _onLikeInterestRequested called! eventId=${event.event.id}',
-    );
-    print('[EventsBloc] Current state type: ${state.runtimeType}');
+    // _onLikeInterestRequested called! eventId=${event.event.id}
+    // Current state type: ${state.runtimeType}
 
     // Get actual current user ID from AuthService
     final currentUserId = authService.userId;
     if (currentUserId == null) {
-      print('[EventsBloc] User not logged in');
+      // User not logged in
       // Can only emit error if we have EventsLoaded state
       if (state is EventsLoaded) {
         final currentState = state as EventsLoaded;
@@ -746,15 +711,13 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
 
     // PERMANENT LOCK: If already liked in this session, skip
     if (_likedEventIds.contains(eventId)) {
-      print(
-        '[EventsBloc] Like ALREADY LIKED in this session for $eventId - ignoring',
-      );
+      // Like ALREADY LIKED in this session for $eventId - ignoring
       return;
     }
 
     // IDEMPOTENCY LOCK: Prevent re-entry while processing
     if (_processingToggleEventIds.contains(eventId)) {
-      print('[EventsBloc] Like ALREADY IN PROGRESS for $eventId - ignoring');
+      // Like ALREADY IN PROGRESS for $eventId - ignoring
       return;
     }
 
@@ -775,13 +738,13 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
     // IDEMPOTENCY: If already interested, we typically do nothing.
     // However, to be safe and ensure UI sync, we only skip if we are 100% sure.
     if (wasInterested) {
-      print('[EventsBloc] Like SKIPPED for $eventId - already interested');
+      // Like SKIPPED for $eventId - already interested
       return;
     }
 
     // Acquire lock
     _processingToggleEventIds.add(eventId);
-    print('[EventsBloc] Like STARTED for $eventId');
+    // Like STARTED for $eventId
 
     try {
       // Helper function to update event in list
@@ -794,12 +757,8 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
         }).toList();
       }
 
-      print(
-        '[EventsBloc] LikeInterest: eventId=$eventId, currentUserId=$currentUserId',
-      );
-      print(
-        '[EventsBloc] Current state: isInterested=false, count=${eventInState.interestedCount}',
-      );
+      // LikeInterest: eventId=$eventId, currentUserId=$currentUserId
+      // Current state: isInterested=false, count=${eventInState.interestedCount}
 
       // OPTIMISTIC UPDATE: Only emit if state is EventsLoaded
       // Keep track of whether we did an optimistic update for rollback
@@ -843,11 +802,9 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
             nearbyEvents: updatedNearbyEvents,
           ),
         );
-        print('[EventsBloc] Optimistic like update emitted');
+        // Optimistic like update emitted
       } else {
-        print(
-          '[EventsBloc] State not EventsLoaded, skipping optimistic update',
-        );
+        // State not EventsLoaded, skipping optimistic update
       }
 
       // Call API in background
@@ -855,7 +812,7 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
 
       result.fold(
         (failure) {
-          print('[EventsBloc] API failed: ${failure.message}');
+          // API failed: ${failure.message}
 
           // ROLLBACK: Only if we did an optimistic update
           if (didOptimisticUpdate && updatedEvents != null) {
@@ -891,16 +848,12 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
           }
         },
         (updatedEvent) {
-          print(
-            '[EventsBloc] API success! Updated event: ${updatedEvent.id}, interestedCount=${updatedEvent.interestedCount}',
-          );
+          // API success! Updated event: ${updatedEvent.id}, interestedCount=${updatedEvent.interestedCount}
 
           final latestState = state;
           if (latestState is! EventsLoaded) {
             // If state is not EventsLoaded (e.g., EventsInitial), emit new EventsLoaded state
-            print(
-              '[EventsBloc] State not EventsLoaded, emitting new EventsLoaded with updated event',
-            );
+            // State not EventsLoaded, emitting new EventsLoaded with updated event
             emit(
               EventsLoaded(
                 events: [updatedEvent],
@@ -932,17 +885,15 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
               nearbyEvents: finalNearbyEvents,
             ),
           );
-          print(
-            '[EventsBloc] State emitted: eventId=${updatedEvent.id}, count=${updatedEvent.interestedCount}',
-          );
+          // State emitted: eventId=${updatedEvent.id}, count=${updatedEvent.interestedCount}
 
           // PERMANENT LOCK: Add to liked set after successful like
           _likedEventIds.add(eventId);
-          print('[EventsBloc] Added $eventId to permanent liked lock');
+          // Added $eventId to permanent liked lock
         },
       );
     } catch (e) {
-      print('[EventsBloc] Like error: $e');
+      // Like error: $e
     } finally {
       // ALWAYS release lock
       _processingToggleEventIds.remove(eventId);
@@ -975,7 +926,7 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
       // FIX: Check for duplicate by ID - replace if exists, otherwise add
       final updatedEvents = [
         event.event,
-        ...currentState.events.where((e) => e.id != event.event.id).toList(),
+        ...currentState.events.where((e) => e.id != event.event.id),
       ];
       final updatedFilteredEvents = currentState.selectedCategory == null
           ? updatedEvents
@@ -991,8 +942,7 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
           ? [
               event.event,
               ...currentState.nearbyEvents
-                  .where((e) => e.id != event.event.id)
-                  .toList(),
+                  .where((e) => e.id != event.event.id),
             ]
           : currentState.nearbyEvents;
 
@@ -1086,9 +1036,7 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
             // If local state differs from server state, preserve local state
             // This handles the case where user just toggled but server hasn't caught up
             if (localIsInterested != serverIsInterested) {
-              print(
-                '[EventsBloc] LoadEventById - Preserving local interest state for ${loadedEvent.id}: local=$localIsInterested, server=$serverIsInterested',
-              );
+              // LoadEventById - Preserving local interest state for ${loadedEvent.id}: local=$localIsInterested, server=$serverIsInterested
 
               // Create a hybrid event with server data but local interest state
               final hybridUserIds = List<String>.from(
@@ -1153,14 +1101,10 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
               nearbyEvents: updatedNearbyEvents,
             ),
           );
-          print(
-            '[EventsBloc] LoadEventById - Emitted EventsLoaded with ${updatedEvents.length} events. First event ID: ${updatedEvents.first.id}',
-          );
+          // LoadEventById - Emitted EventsLoaded with ${updatedEvents.length} events. First event ID: ${updatedEvents.first.id}
         } else {
           // If state is not EventsLoaded, create a new EventsLoaded with just this event
-          print(
-            '[EventsBloc] LoadEventById - State is ${state.runtimeType}, creating new EventsLoaded with event ${loadedEvent.id}',
-          );
+          // LoadEventById - State is ${state.runtimeType}, creating new EventsLoaded with event ${loadedEvent.id}
           emit(
             EventsLoaded(
               events: [loadedEvent],
@@ -1168,14 +1112,10 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
               nearbyEvents: loadedEvent.isStartingSoon ? [loadedEvent] : [],
             ),
           );
-          print(
-            '[EventsBloc] LoadEventById - Emitted new EventsLoaded with 1 event. Event ID: ${loadedEvent.id}',
-          );
+          // LoadEventById - Emitted new EventsLoaded with 1 event. Event ID: ${loadedEvent.id}
         }
 
-        print(
-          '[EventsBloc] LoadEventById - Loaded event ${loadedEvent.id} with interestedCount: ${loadedEvent.interestedUserIds.length}',
-        );
+        // LoadEventById - Loaded event ${loadedEvent.id} with interestedCount: ${loadedEvent.interestedUserIds.length}
       },
     );
   }

@@ -14,7 +14,7 @@ class EnhancedImage extends StatelessWidget {
   final Duration retryDelay;
 
   const EnhancedImage({
-    Key? key,
+    super.key,
     this.imageUrl,
     this.width,
     this.height,
@@ -24,7 +24,7 @@ class EnhancedImage extends StatelessWidget {
     this.enableRetry = true,
     this.maxRetries = 3,
     this.retryDelay = const Duration(seconds: 1),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

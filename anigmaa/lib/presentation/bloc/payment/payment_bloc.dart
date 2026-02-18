@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import '../../../domain/entities/event.dart';
 import '../../../domain/entities/transaction.dart';
 import '../../../domain/repositories/payment_repository.dart';
+import '../../../core/utils/app_logger.dart';
 
 part 'payment_event.dart';
 part 'payment_state.dart';
@@ -33,7 +34,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         paymentMethod: event.paymentMethod.name,
       );
 
-      print('PaymentBloc: Received paymentResult: $paymentResult');
+      AppLogger().info('PaymentBloc: Received paymentResult: $paymentResult');
 
       final newState = state.copyWith(
         status: PaymentStatus.initiated,
@@ -42,11 +43,11 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         event: event.event,
       );
 
-      print('PaymentBloc: New state - status: ${newState.status}, paymentUrl: ${newState.paymentUrl}, transactionId: ${newState.transactionId}');
+      AppLogger().info('PaymentBloc: New state - status: ${newState.status}, paymentUrl: ${newState.paymentUrl}, transactionId: ${newState.transactionId}');
 
       emit(newState);
     } catch (error) {
-      print('PaymentBloc: Error - $error');
+      AppLogger().error('PaymentBloc: Error - $error');
       emit(
         state.copyWith(
           status: PaymentStatus.error,

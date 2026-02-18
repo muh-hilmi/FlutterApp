@@ -4,6 +4,7 @@ import '../../../domain/entities/event.dart';
 import '../../../domain/entities/transaction.dart';
 import '../../bloc/payment/payment_bloc.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../core/utils/app_logger.dart';
 import '../tickets/post_payment_ticket_screen.dart';
 import '../../widgets/tickets/celebration_bottom_sheet.dart';
 import '../../../injection_container.dart';
@@ -55,14 +56,14 @@ class _PaymentScreenState extends State<PaymentScreen>
         backgroundColor: const Color(0xFFF8F9FA),
         body: BlocConsumer<PaymentBloc, PaymentState>(
           listener: (context, state) {
-            print('PaymentBloc Listener: status=${state.status}, isInitiated=${state.isInitiated}, paymentUrl=${state.paymentUrl}');
+            AppLogger().info('PaymentBloc Listener: status=${state.status}, isInitiated=${state.isInitiated}, paymentUrl=${state.paymentUrl}');
 
             if (state.isInitiated && state.paymentUrl != null) {
               final isCurrent = ModalRoute.of(context)?.isCurrent ?? false;
-              print('NAVIGATING TO WEBVIEW: ${state.paymentUrl}, isCurrent=$isCurrent');
+              AppLogger().info('NAVIGATING TO WEBVIEW: ${state.paymentUrl}, isCurrent=$isCurrent');
 
               if (isCurrent) {
-                print('Navigating to MidtransPaymentWebViewScreen...');
+                AppLogger().info('Navigating to MidtransPaymentWebViewScreen...');
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -73,7 +74,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                     ),
                   ),
                 ).then((result) {
-                  print('Payment WebView result: $result');
+                  AppLogger().info('Payment WebView result: $result');
                   if (result == true) {
                     // Payment successful
                     if (!mounted) return;
@@ -89,7 +90,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                   }
                 });
               } else {
-                print('Navigation blocked: route is not current');
+                AppLogger().warning('Navigation blocked: route is not current');
               }
             } else if (state.isSuccess) {
               _showSuccessDialog();

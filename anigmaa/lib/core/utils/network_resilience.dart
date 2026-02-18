@@ -29,12 +29,12 @@ import '../network/error_classifier.dart';
 mixin NetworkResilienceBloc {
   /// Execute a request with automatic retry on transient failures
   ///
-  /// [request]: The function to execute (should return Either<Failure, T>)
-  /// [maxRetries]: Maximum number of retry attempts (default: 3)
-  /// [initialBackoff]: Initial backoff duration (default: 2 seconds)
-  /// [maxBackoff]: Maximum backoff duration (default: 30 seconds)
+  /// `request`: The function to execute (should return `Either<Failure, T>`)
+  /// `maxRetries`: Maximum number of retry attempts (default: 3)
+  /// `initialBackoff`: Initial backoff duration (default: 2 seconds)
+  /// `maxBackoff`: Maximum backoff duration (default: 30 seconds)
   ///
-  /// Returns Either<Failure, T> with the result or failure
+  /// Returns `Either<Failure, T>` with the result or failure
   Future<Either<Failure, T>> executeWithRetry<T>(
     Future<Either<Failure, T>> Function() request, {
     int maxRetries = 3,
@@ -81,9 +81,7 @@ mixin NetworkResilienceBloc {
           maxBackoff,
         );
 
-        print('[NetworkResilience] Retry attempt ${e.attempt}/$maxRetries '
-              'after ${backoff.inSeconds}s - '
-              'Error: ${e.networkError.message}');
+        // Retry attempt ${e.attempt}/$maxRetries after ${backoff.inSeconds}s
 
         // Wait before retrying
         await Future.delayed(backoff);
@@ -119,8 +117,7 @@ mixin NetworkResilienceBloc {
 
         final backoff = _calculateBackoff(attempt, initialBackoff, maxBackoff);
 
-        print('[NetworkResilience] Retry attempt $attempt/$maxRetries '
-              'after ${backoff.inSeconds}s');
+        // Retry attempt $attempt/$maxRetries after ${backoff.inSeconds}s
 
         await Future.delayed(backoff);
       }

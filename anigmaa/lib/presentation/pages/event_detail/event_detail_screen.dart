@@ -120,17 +120,19 @@ class _EventDetailScreenState extends State<EventDetailScreen>
   void _triggerJumpingEmoji(Offset tapPosition) {
     // Get current event from bloc state (has fresh data from API)
     final state = _eventsBloc?.state;
-    Event eventToUse = widget.event;
     if (state is EventsLoaded) {
       final eventFromState = state.events
           .where((e) => e.id == widget.event.id)
           .firstOrNull;
       if (eventFromState != null) {
-        eventToUse = eventFromState;
+        // Use the fresh event data for the API call
+        _eventsBloc?.add(LikeInterestRequested(eventFromState));
+        return;
       }
     }
 
-    // Add a new FlyingEmoji
+    // Fall back to widget event if not found in state
+    _eventsBloc?.add(LikeInterestRequested(widget.event));
     final key = UniqueKey();
 
     // Calculate Target Position (Interest Button)
@@ -156,9 +158,6 @@ class _EventDetailScreenState extends State<EventDetailScreen>
         ),
       );
     });
-
-    // Call API for LIKE ONLY (TikTok/Instagram style)
-    _eventsBloc?.add(LikeInterestRequested(eventToUse));
   }
 
   void _onJoinPressed() {
@@ -289,7 +288,7 @@ class _EventDetailScreenState extends State<EventDetailScreen>
 
                     // Navigate to ticket detail screen after a brief delay
                     Future.delayed(const Duration(milliseconds: 500), () {
-                      if (mounted) {
+                      if (mounted && context.mounted) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -569,161 +568,6 @@ class _EventDetailScreenState extends State<EventDetailScreen>
     );
   }
 
-  void _shareEvent() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    const Text(
-                      'Bagi Event Ini 📤',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    GridView.count(
-                      shrinkWrap: true,
-                      crossAxisCount: 4,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      children: [
-                        _buildShareOption(
-                          icon: Icons.copy,
-                          label: 'Salin Link',
-                          color: Colors.grey[600]!,
-                          onTap: () {
-                            Navigator.pop(context);
-                            _copyEventLink();
-                          },
-                        ),
-                        _buildShareOption(
-                          icon: Icons.share,
-                          label: 'Lainnya',
-                          color: Colors.blue[600]!,
-                          onTap: () {
-                            Navigator.pop(context);
-                            _shareMore();
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildShareOption({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _copyEventLink() {
-    // Generate deep link URL
-    final eventId = widget.event.id;
-    final eventTitle = widget.event.title;
-    final deepLinkUrl = 'https://anigmaa.com/events/$eventId';
-
-    // Copy to clipboard
-    Clipboard.setData(ClipboardData(text: deepLinkUrl)).then((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Link event disalin! 📋\n$deepLinkUrl'),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 3),
-          action: SnackBarAction(
-            label: 'OK',
-            textColor: const Color(0xFFBBC863),
-            onPressed: () {},
-          ),
-        ),
-      );
-    });
-  }
-
-  void _shareMore() {
-    final eventId = widget.event.id;
-    final eventTitle = widget.event.title;
-    final eventDescription = widget.event.description;
-    final deepLinkUrl = 'https://anigmaa.com/events/$eventId';
-
-    // Create share content
-    final shareText =
-        '''
-$eventTitle 🎉
-
-$eventDescription
-
-$deepLinkUrl
-'''
-            .trim();
-
-    // Share using share_plus
-    Share.share(shareText, subject: eventTitle);
-  }
-
-  void _showFullScreenImageWithEvent(Event currentEvent, int initialIndex) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FullScreenImageViewer(
-          imageUrls: currentEvent.fullImageUrls,
-          initialIndex: initialIndex,
-        ),
-      ),
-    );
-  }
 }
 
 class FullScreenImageViewer extends StatefulWidget {

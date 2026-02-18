@@ -40,6 +40,7 @@ class ShareService {
           await _shareToSystem(context, post);
       }
     } catch (e) {
+      if (!context.mounted) return;
       _showErrorSnackBar(context, 'Gagal membagikan ke $platform: $e');
     }
   }
@@ -67,6 +68,7 @@ class ShareService {
         mode: LaunchMode.externalApplication,
       );
     } else {
+      if (!context.mounted) return;
       _showErrorSnackBar(context, 'WhatsApp tidak terinstall');
     }
   }
@@ -84,6 +86,7 @@ class ShareService {
         mode: LaunchMode.externalApplication,
       );
     } else {
+      if (!context.mounted) return;
       _showErrorSnackBar(context, 'Facebook tidak terinstall');
     }
   }
@@ -100,6 +103,7 @@ class ShareService {
         mode: LaunchMode.externalApplication,
       );
     } else {
+      if (!context.mounted) return;
       _showErrorSnackBar(context, 'Twitter/X tidak terinstall');
     }
   }
@@ -118,9 +122,11 @@ class ShareService {
           mode: LaunchMode.externalApplication,
         );
       } else {
+        if (!context.mounted) return;
         _showErrorSnackBar(context, 'Instagram tidak terinstall');
       }
     } catch (e) {
+      if (!context.mounted) return;
       _showErrorSnackBar(context, 'Gagal membuka Instagram: $e');
     }
   }
@@ -139,6 +145,7 @@ class ShareService {
         mode: LaunchMode.externalApplication,
       );
     } else {
+      if (!context.mounted) return;
       _showErrorSnackBar(context, 'Email app tidak tersedia');
     }
   }
@@ -151,6 +158,7 @@ class ShareService {
     // For now, we'll use the share functionality
     await Share.share(postUrl);
 
+    if (!context.mounted) return;
     _showSuccessSnackBar(context, 'Link post berhasil disalin!');
   }
 
@@ -177,8 +185,14 @@ class ShareService {
         final qrCode = QrPainter(
           data: postUrl,
           version: QrVersions.auto,
-          emptyColor: const Color(0xFFFFFFFF),
-          color: const Color(0xFF2D3142),
+          eyeStyle: const QrEyeStyle(
+            eyeShape: QrEyeShape.square,
+            color: Color(0xFF2D3142),
+          ),
+          dataModuleStyle: const QrDataModuleStyle(
+            dataModuleShape: QrDataModuleShape.square,
+            color: Color(0xFF2D3142),
+          ),
           gapless: true,
         );
 
@@ -197,6 +211,7 @@ class ShareService {
         throw Exception('Failed to generate QR code');
       }
     } catch (e) {
+      if (!context.mounted) return '';
       _showErrorSnackBar(context, 'Gagal generate QR code: $e');
       rethrow;
     }
@@ -233,7 +248,14 @@ class ShareService {
                   version: QrVersions.auto,
                   size: 200.0,
                   backgroundColor: Colors.white,
-                  foregroundColor: const Color(0xFF2D3142),
+                  eyeStyle: QrEyeStyle(
+                    eyeShape: QrEyeShape.square,
+                    color: const Color(0xFF2D3142),
+                  ),
+                  dataModuleStyle: QrDataModuleStyle(
+                    dataModuleShape: QrDataModuleShape.square,
+                    color: const Color(0xFF2D3142),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -265,6 +287,7 @@ class ShareService {
         ),
       );
     } catch (e) {
+      if (!context.mounted) return;
       _showErrorSnackBar(context, 'Gagal menampilkan QR code: $e');
     }
   }
@@ -280,6 +303,7 @@ class ShareService {
         await generatePostQRCode(context, post);
 
         // Save to gallery (implementation depends on platform)
+        if (!context.mounted) return;
         if (Platform.isAndroid) {
           // For Android, you might use a plugin like gallery_saver
           _showSuccessSnackBar(context, 'QR Code berhasil disimpan!');
@@ -290,9 +314,11 @@ class ShareService {
 
         Navigator.pop(context);
       } else {
+        if (!context.mounted) return;
         _showErrorSnackBar(context, 'Izin penyimpanan diperlukan');
       }
     } catch (e) {
+      if (!context.mounted) return;
       _showErrorSnackBar(context, 'Gagal menyimpan QR code: $e');
     }
   }
@@ -310,6 +336,7 @@ class ShareService {
 
       await Share.share(content, subject: 'Check out this event on Flyerr!');
     } catch (e) {
+      if (!context.mounted) return;
       _showErrorSnackBar(context, 'Gagal membagikan event: $e');
     }
   }

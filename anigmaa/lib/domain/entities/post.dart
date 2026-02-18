@@ -5,14 +5,17 @@ import 'event.dart';
 /// Enumeration of supported post types
 /// Defines the different formats a post can take
 /// NOTE: Values use snake_case to match backend database enum
+// ignore: constant_identifier_names
 enum PostType {
   /// Plain text post
   text,
 
   /// Text post with attached images
+  // ignore: constant_identifier_names
   text_with_images,
 
   /// Text post with attached event
+  // ignore: constant_identifier_names
   text_with_event,
 
   /// Interactive poll post

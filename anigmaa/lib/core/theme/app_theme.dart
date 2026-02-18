@@ -15,7 +15,6 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         surface: AppColors.surface,
-        background: AppColors.background,
         error: AppColors.error,
         brightness: Brightness.light,
       ),
@@ -30,7 +29,7 @@ class AppTheme {
 
       // App Bar
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.surface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         centerTitle: false,
@@ -121,7 +120,7 @@ class AppTheme {
 
       // Bottom Navigation Bar
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.surface,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textTertiary,
         type: BottomNavigationBarType.fixed,
@@ -141,6 +140,56 @@ class AppTheme {
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: AppColors.secondary, // Lime loading
         circularTrackColor: AppColors.surfaceAlt,
+      ),
+    );
+  }
+
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+
+      // Colors
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.primary,
+        primary: AppColors.primary,
+        secondary: AppColors.secondary,
+        surface: AppColors.surface,
+        error: AppColors.error,
+        brightness: Brightness.dark,
+      ),
+      scaffoldBackgroundColor: AppColors.background,
+      primaryColor: AppColors.primary,
+
+      // Typography
+      textTheme: GoogleFonts.plusJakartaSansTextTheme().apply(
+        bodyColor: AppColors.textPrimary,
+        displayColor: AppColors.textPrimary,
+      ),
+
+      // App Bar
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: false,
+        iconTheme: const IconThemeData(color: AppColors.textPrimary, size: 24),
+        actionsIconTheme: const IconThemeData(
+          color: AppColors.textPrimary,
+          size: 24,
+        ),
+        titleTextStyle: AppTextStyles.h3,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+      ),
+
+      // Cards
+      cardTheme: CardThemeData(
+        color: AppColors.surface,
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppColors.border, width: 1),
+        ),
       ),
     );
   }

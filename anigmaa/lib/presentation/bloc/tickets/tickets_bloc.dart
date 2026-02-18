@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/usecases/check_in_ticket.dart';
 import '../../../domain/usecases/get_user_tickets.dart';
 import '../../../domain/usecases/purchase_ticket.dart';
+import '../../../core/utils/app_logger.dart';
 import 'tickets_event.dart';
 import 'tickets_state.dart';
 
@@ -40,7 +41,7 @@ class TicketsBloc extends Bloc<TicketsEvent, TicketsState> {
   ) async {
     emit(TicketsLoading());
 
-    print('[TicketsBloc] Purchasing ticket for event ${event.eventId}');
+    AppLogger().info('[TicketsBloc] Purchasing ticket for event ${event.eventId}');
 
     final result = await purchaseTicket(
       PurchaseTicketParams(
@@ -55,11 +56,11 @@ class TicketsBloc extends Bloc<TicketsEvent, TicketsState> {
 
     result.fold(
       (failure) {
-        print('[TicketsBloc] Purchase failed: ${failure.message}');
+        AppLogger().error('[TicketsBloc] Purchase failed: ${failure.message}');
         emit(TicketsError(failure.message));
       },
       (ticket) {
-        print('[TicketsBloc] Purchase success: ${ticket.id}');
+        AppLogger().info('[TicketsBloc] Purchase success: ${ticket.id}');
         emit(TicketPurchased(ticket));
       },
     );

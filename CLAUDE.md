@@ -197,13 +197,9 @@ flutter build apk
 cd backend_anigmaa
 
 # Run server
-go run cmd/server/main.go
+docker compose down
+docker compose build --no-cache && docker compose up -d
 
-# Run tests
-go test ./...
-
-# Generate Swagger
-swag init
 ```
 
 ### Appium Tests

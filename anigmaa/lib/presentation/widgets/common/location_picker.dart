@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -581,16 +579,6 @@ class _LocationPickerState extends State<LocationPicker> {
         ),
       );
     }
-  }
-
-  /// Log coordinate tracking summary
-  void _logCoordinateSummary(String action, double lat, double lng) {
-    AppLogger().info('=== COORDINATE TRACKING: $action ===');
-    AppLogger().info('Coordinates: $lat, $lng');
-    AppLogger().info('LatLng created: ${LatLng(lat, lng).latitude}, ${LatLng(lat, lng).longitude}');
-    AppLogger().info('Current _currentPosition: ${_currentPosition.latitude}, ${_currentPosition.longitude}');
-    _validateCoordinates('Summary', lat, lng);
-    AppLogger().info('=== END COORDINATE TRACKING ===');
   }
 
   @override

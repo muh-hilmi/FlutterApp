@@ -39,7 +39,8 @@ class EventModel extends Event {
 
     final isFree = json['is_free'];
     // final isFree = json['is_free']; // Removed duplicate
-    final pendingRequests = json['pending_requests'];
+    // pendingRequests from backend (not used in current implementation)
+    // final pendingRequests = json['pending_requests'];
 
     // Handle interested_user_ids or interested_count from backend
     final interestedUserIds = json['interested_user_ids'];

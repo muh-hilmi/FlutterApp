@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/errors/failures.dart';
 import '../../core/services/payment_service.dart';
 import '../../core/utils/attendance_code_generator.dart';
+import '../../core/utils/app_logger.dart';
 import '../../domain/entities/ticket.dart';
 import '../../domain/entities/ticket_transaction.dart';
 import '../../domain/repositories/ticket_repository.dart';
@@ -122,7 +123,7 @@ class TicketRepositoryImpl implements TicketRepository {
       eventResult.fold(
         (failure) {
           // If event fetch fails, use default values
-          print('[TicketRepository] Failed to fetch event details: $failure');
+          AppLogger().error('[TicketRepository] Failed to fetch event details: $failure');
         },
         (event) {
           eventTitle = event.title;

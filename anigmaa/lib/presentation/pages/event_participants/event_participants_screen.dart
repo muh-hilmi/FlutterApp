@@ -519,7 +519,8 @@ class _EventParticipantsScreenState extends State<EventParticipantsScreen> {
               key: Key('checkin_button_${attendee.id}'),
               onPressed: () async {
                 final confirmed = await CheckinDialog.show(context, attendee);
-                if (confirmed == true && context.mounted) {
+                if (confirmed == true) {
+                  if (!mounted) return;
                   context.read<EventParticipantsBloc>().add(CheckInAttendee(
                         eventId: widget.eventId,
                         userId: attendee.id,

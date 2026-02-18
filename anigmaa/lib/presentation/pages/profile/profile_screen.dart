@@ -13,8 +13,8 @@ import '../event_detail/event_detail_screen.dart';
 import 'edit_profile_screen.dart';
 import 'followers_following_screen.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../../injection_container.dart' as di;
-import '../../../domain/entities/event.dart';
 import '../../bloc/user/user_bloc.dart';
 import '../../bloc/user/user_state.dart';
 import '../../bloc/user/user_event.dart';
@@ -585,11 +585,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                           ),
                           errorWidget: (context, url, error) {
                             // Debug log
-                            print(
+                            AppLogger().error(
                               '[Profile Event Grid] Failed to load image for "${event.title}"',
                             );
-                            print('[Profile Event Grid] URL: $url');
-                            print('[Profile Event Grid] Error: $error');
+                            AppLogger().error('[Profile Event Grid] URL: $url');
+                            AppLogger().error('[Profile Event Grid] Error: $error');
                             return Container(
                               color: const Color(
                                 0xFFBBC863,

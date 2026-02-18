@@ -46,7 +46,7 @@ class RankingProfileBuilder {
     if (attendedEvents != null && attendedEvents.isNotEmpty) {
       final categoryFrequency = <String, int>{};
       for (final event in attendedEvents) {
-        final categoryName = event.category.name ?? 'other';
+        final categoryName = event.category.name;
         categoryFrequency[categoryName] = (categoryFrequency[categoryName] ?? 0) + 1;
       }
 

@@ -46,7 +46,7 @@ dependencies:
   go_router: ^14.2.0
   cached_network_image: ^3.3.1
   flutter_cache_manager: ^3.3.1
-  google_fonts: ^6.2.1
+  google_fonts: ^6.1.0
   table_calendar: ^3.0.9
   fl_chart: ^0.69.0
   lucide_icons: ^0.257.0
@@ -79,8 +79,8 @@ dependencies:
 
   # HTTP & API
   dio: ^5.4.0
-  retrofit: ^4.0.3
-  json_annotation: ^4.8.1
+  retrofit: ^4.1.0
+  json_annotation: ^4.9.0
   connectivity_plus: ^6.0.5
   logger: ^2.0.2+1
   flutter_dotenv: ^6.0.0
@@ -97,7 +97,7 @@ dev_dependencies:
 
   # Code generation
   build_runner: ^2.4.7
-  retrofit_generator: ^8.0.6
+  retrofit_generator: ^10.0.2
   json_serializable: ^6.7.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -154,3 +154,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Dependency overrides to fix compatibility issues
+dependency_overrides:
+  google_fonts: 6.1.0

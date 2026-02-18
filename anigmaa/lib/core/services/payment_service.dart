@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:midtrans_sdk/midtrans_sdk.dart';
 import '../../domain/entities/ticket_transaction.dart';
-
-/// Payment service for Midtrans integration
 import '../../injection_container.dart';
 import '../../presentation/bloc/payment/payment_bloc.dart';
+import '../utils/app_logger.dart';
+
+/// Payment service for Midtrans integration
 
 class PaymentService {
   MidtransSDK? _midtrans;
@@ -30,7 +31,7 @@ class PaymentService {
 
       _midtrans?.setTransactionFinishedCallback((TransactionResult result) {
         // Dispatch transaction result to PaymentBloc
-        print('Transaction Result: $result');
+        AppLogger().info('Transaction Result: $result');
         final status = result.status.toString().toLowerCase();
         if (status == 'success' || status == 'settlement') {
           sl<PaymentBloc>().add(
@@ -46,9 +47,9 @@ class PaymentService {
       });
 
       _isInitialized = true;
-      print('PaymentService initialized successfully');
+      AppLogger().info('PaymentService initialized successfully');
     } catch (e) {
-      print('Failed to initialize payment service: $e');
+      AppLogger().error('Failed to initialize payment service: $e');
       // Non-fatal, as we might already be initialized or it might retry
     }
   }
@@ -58,18 +59,18 @@ class PaymentService {
 
   /// Initiate payment UI Flow using Snap Token
   Future<void> startPayment(String snapToken) async {
-    print('PaymentService.startPayment called with token: $snapToken');
+    AppLogger().info('PaymentService.startPayment called with token: $snapToken');
     if (!_isInitialized || _midtrans == null) {
-      print('PaymentService not initialized or _midtrans is null');
+      AppLogger().error('PaymentService not initialized or _midtrans is null');
       throw Exception('PaymentService not initialized');
     }
 
     try {
-      print('Invoking _midtrans.startPaymentUiFlow...');
+      AppLogger().info('Invoking _midtrans.startPaymentUiFlow...');
       await _midtrans!.startPaymentUiFlow(token: snapToken);
-      print('_midtrans.startPaymentUiFlow invoked successfully');
+      AppLogger().info('_midtrans.startPaymentUiFlow invoked successfully');
     } catch (e) {
-      print('Exception in startPaymentUiFlow: $e');
+      AppLogger().error('Exception in startPaymentUiFlow: $e');
       throw Exception('Failed to start payment UI: $e');
     }
   }

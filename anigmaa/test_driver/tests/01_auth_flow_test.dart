@@ -30,40 +30,38 @@ void main() {
     });
 
     tearDownAll(() async {
-      if (driver != null) {
-        await driver.close();
-      }
+      await driver.close();
     });
 
     test('test_fresh_install_shows_onboarding', () async {
-      print('\n📱 Test: Fresh install shows onboarding screen');
+      // Test: Fresh install shows onboarding screen
 
       // After splash, we should see onboarding screen (for fresh install)
       final onboardingFinder = find.byValueKey('onboarding_screen');
 
       try {
         await driver.waitFor(onboardingFinder, timeout: const Duration(seconds: 15));
-        print('✓ Onboarding screen displayed for fresh user');
+        // Onboarding screen displayed for fresh user
 
         // Verify we can see the "Gas Mulai!" button exists
         final startButtonFinder = find.byValueKey('start_button');
         await driver.waitFor(startButtonFinder, timeout: const Duration(seconds: 2));
-        print('✓ "Gas Mulai!" button is present');
+        // "Gas Mulai!" button is present
 
         // Verify the button text by finding the text widget
         final buttonTextFinder = find.text('Gas Mulai!');
         await driver.waitFor(buttonTextFinder, timeout: const Duration(seconds: 2));
-        print('✓ "Gas Mulai!" button text verified');
+        // "Gas Mulai!" button text verified
 
       } catch (e) {
-        print('⚠ Onboarding test failed: $e');
-        print('   For a true fresh install test, clear app data: adb shell pm clear com.example.anigmaa');
+        // Onboarding test failed: $e
+        // For a true fresh install test, clear app data: adb shell pm clear com.example.anigmaa
         rethrow;
       }
     });
 
     test('test_onboarding_to_login', () async {
-      print('\n📱 Test: Onboarding to login navigation');
+      // Test: Onboarding to login navigation
 
       final startButtonFinder = find.byValueKey('start_button');
       final loginScreenFinder = find.byValueKey('login_screen');
@@ -74,67 +72,67 @@ void main() {
 
         // Tap start button
         await driver.tap(startButtonFinder);
-        print('✓ Tapped "Gas Mulai!" button');
+        // Tapped "Gas Mulai!" button
 
         // Wait for navigation to complete
         await Future.delayed(const Duration(seconds: 3));
 
         // Verify we're now on login screen
         await driver.waitFor(loginScreenFinder, timeout: const Duration(seconds: 10));
-        print('✓ Navigated to login screen');
+        // Navigated to login screen
 
         // Verify Google Sign In button is present
         final googleButtonFinder = find.byValueKey('google_sign_in_button');
         await driver.waitFor(googleButtonFinder, timeout: const Duration(seconds: 2));
-        print('✓ Google Sign In button is present');
+        // Google Sign In button is present
 
         // Verify button text
         final buttonTextFinder = find.text('Lanjut pake Google');
         await driver.waitFor(buttonTextFinder, timeout: const Duration(seconds: 2));
-        print('✓ Google Sign In button text verified');
+        // Google Sign In button text verified
 
       } catch (e) {
-        print('⚠ Navigation test failed: $e');
+        // Navigation test failed: $e
         rethrow;
       }
     });
 
     test('test_login_screen_elements', () async {
-      print('\n📱 Test: Login screen elements verification');
+      // Test: Login screen elements verification
 
       try {
         // Verify app name
         final appNameFinder = find.text('flyerr');
         await driver.waitFor(appNameFinder, timeout: const Duration(seconds: 2));
-        print('✓ App name "flyerr" is displayed');
+        // App name "flyerr" is displayed
 
         // Verify tagline
         final taglineFinder = find.text('Temuin acara seru, bikin kenangan baru 🚀');
         await driver.waitFor(taglineFinder, timeout: const Duration(seconds: 2));
-        print('✓ Tagline is displayed');
+        // Tagline is displayed
 
         // Verify Google Sign In button text
         final googleButtonTextFinder = find.text('Lanjut pake Google');
         await driver.waitFor(googleButtonTextFinder, timeout: const Duration(seconds: 2));
-        print('✓ Google Sign In button text is correct');
+        // Google Sign In button text is correct
 
-        print('✓ All login screen elements verified');
+        // All login screen elements verified
 
       } catch (e) {
-        print('⚠ Login screen verification failed: $e');
+        // Login screen verification failed: $e
         rethrow;
       }
     });
 
     test('test_take_screenshot', () async {
-      print('\n📱 Test: Take screenshot for debugging');
+      // Test: Take screenshot for debugging
 
       try {
-        final bytes = await driver.screenshot();
-        print('✓ Screenshot taken (${bytes.length} bytes)');
-        print('ℹ Screenshots can be saved to file for debugging');
+        await driver.screenshot();
+        // Screenshot taken
+        // Screenshots can be saved to file for debugging
       } catch (e) {
-        print('⚠ Screenshot failed: $e');
+        // Screenshot failed: $e
       }
     });
   });

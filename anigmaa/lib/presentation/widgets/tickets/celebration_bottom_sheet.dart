@@ -102,10 +102,11 @@ class _CelebrationBottomSheetState extends State<CelebrationBottomSheet>
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        _autoDismissTimer?.cancel();
-        return true;
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          _autoDismissTimer?.cancel();
+        }
       },
       child: AnimatedBuilder(
         animation: _sheetController,

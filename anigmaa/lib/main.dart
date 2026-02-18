@@ -173,8 +173,9 @@ class NotionSocialApp extends StatelessWidget {
             if (args == null) {
               // Fallback to my events if no event ID provided
               return const MyEventsScreen();
+            } else {
+              return EventManagementDashboard(eventId: args);
             }
-            return EventManagementDashboard(eventId: args);
           },
         },
       ),
@@ -218,27 +219,14 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
     });
   }
 
-  String _getTabName(int index) {
-    switch (index) {
-      case 0:
-        return 'Home';
-      case 1:
-        return 'Discover';
-      case 2:
-        return 'Communities';
-      case 3:
-        return 'Profile';
-      default:
-        return 'Unknown';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (bool didPop, dynamic result) async {
-        if (didPop) return;
+        if (didPop) {
+          return;
+        }
 
         // Close speed dial if open
         if (_isSpeedDialOpen) {
@@ -464,7 +452,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       key: key,
       onTap: () {
         AppLogger().info(
-          'Tab changed: ${_getTabName(_currentIndex)} -> ${_getTabName(index)}',
+          'Tab changed: $_currentIndex -> $index',
         );
 
         // Reload feed posts when returning to Home tab (index 0)
@@ -484,6 +472,8 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
           if (currentUserId != null) {
             context.read<UserBloc>().add(LoadUserPostsEvent(currentUserId));
           }
+        } else {
+          // Do nothing
         }
 
         setState(() {

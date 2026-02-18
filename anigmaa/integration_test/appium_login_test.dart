@@ -67,7 +67,7 @@ void main() {
         // In real tests, you would handle the webview or mock the auth
       } else {
         // Skip if button not found
-        print('Google sign-in button not found - skipping test');
+        // Google sign-in button not found - skipping test
       }
     });
 

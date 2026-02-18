@@ -20,8 +20,8 @@ class _SearchScreenState extends State<SearchScreen>
   final FocusNode _searchFocusNode = FocusNode();
   SearchFilterType _selectedFilter = SearchFilterType.all;
   late TabController _tabController;
-  List<String> _recentSearches = ['Konser Musik Jakarta', 'Workshop Design', 'Tech Meetup'];
-  List<String> _trendingSearches = ['Fashion Week 2025', 'Startup Pitching', 'Art Exhibition'];
+  final List<String> _recentSearches = ['Konser Musik Jakarta', 'Workshop Design', 'Tech Meetup'];
+  final List<String> _trendingSearches = ['Fashion Week 2025', 'Startup Pitching', 'Art Exhibition'];
 
   @override
   void initState() {

@@ -243,15 +243,30 @@ class UserBloc extends Bloc<UserEvent, UserState> with NetworkResilienceBloc {
     try {
       // Prepare update data - only include fields that are provided
       final Map<String, dynamic> updateData = {};
-      if (event.name != null) updateData['name'] = event.name;
-      if (event.bio != null) updateData['bio'] = event.bio;
-      if (event.avatar != null) updateData['avatar'] = event.avatar;
-      if (event.interests != null) updateData['interests'] = event.interests;
-      if (event.phone != null) updateData['phone'] = event.phone;
-      if (event.dateOfBirth != null)
+      if (event.name != null) {
+        updateData['name'] = event.name;
+      }
+      if (event.bio != null) {
+        updateData['bio'] = event.bio;
+      }
+      if (event.avatar != null) {
+        updateData['avatar'] = event.avatar;
+      }
+      if (event.interests != null) {
+        updateData['interests'] = event.interests;
+      }
+      if (event.phone != null) {
+        updateData['phone'] = event.phone;
+      }
+      if (event.dateOfBirth != null) {
         updateData['date_of_birth'] = event.dateOfBirth!.toIso8601String();
-      if (event.gender != null) updateData['gender'] = event.gender;
-      if (event.location != null) updateData['location'] = event.location;
+      }
+      if (event.gender != null) {
+        updateData['gender'] = event.gender;
+      }
+      if (event.location != null) {
+        updateData['location'] = event.location;
+      }
 
       _logger.info('Updating user profile');
 

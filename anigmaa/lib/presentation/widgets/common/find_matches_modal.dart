@@ -329,53 +329,6 @@ class FindMatchesModal extends StatelessWidget {
     );
   }
 
-  Future<List<UserMatch>> _getMatchesFromAPI() async {
-    try {
-      final apiService = ApiService();
-      final scanResults = await apiService.getEventMatches(eventId);
-      
-      // Convert ScanResultModel to UserMatch (mock conversion for now)
-      return scanResults.map((scanResult) {
-        return UserMatch(
-          user: User(
-            id: scanResult.userId ?? scanResult.eventId ?? 'unknown',
-            name: scanResult.type == 'profile' ? 'User ${scanResult.userId}' : 'Event User',
-            bio: scanResult.additionalData.toString(),
-            createdAt: DateTime.now(),
-            settings: const UserSettings(
-              pushNotifications: true,
-              emailNotifications: true,
-              darkMode: false,
-              language: 'en',
-              locationEnabled: true,
-              showOnlineStatus: true,
-            ),
-            stats: const UserStats(
-              eventsAttended: 0,
-              eventsCreated: 0,
-              followersCount: 0,
-              followingCount: 0,
-              reviewsGiven: 0,
-              averageRating: 0.0,
-            ),
-            privacy: const UserPrivacy(
-              profileVisible: true,
-              eventsVisible: true,
-              allowFollowers: true,
-              showEmail: false,
-              showLocation: true,
-            ),
-          ),
-          matchScore: 0.8, // Default score
-          reason: 'Connected via event',
-        );
-      }).toList();
-    } catch (e) {
-      // Return empty list on error, handle gracefully
-      return [];
-    }
-  }
-
   List<UserMatch> _getMockedMatches() {
     // Replace with actual API call
     return [

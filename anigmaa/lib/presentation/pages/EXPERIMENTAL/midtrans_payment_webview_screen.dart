@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import '../../../core/utils/app_logger.dart';
 
 /// Midtrans Payment WebView Screen
 ///
@@ -48,20 +49,20 @@ class _MidtransPaymentWebViewScreenState
               _isLoading = true;
               _currentUrl = url;
             });
-            print('WebView started: $url');
+            // WebView started: $url
           },
           onPageFinished: (url) {
             setState(() {
               _isLoading = false;
               _currentUrl = url;
             });
-            print('WebView finished: $url');
+            // WebView finished: $url
 
             // Check for payment completion via URL
             _checkPaymentStatus(url);
           },
           onNavigationRequest: (NavigationRequest request) {
-            print('Navigation request: ${request.url}');
+            // Navigation request: ${request.url}
 
             // Check for finish callback
             if (request.url.contains('finish') ||
@@ -83,7 +84,7 @@ class _MidtransPaymentWebViewScreenState
             return NavigationDecision.navigate;
           },
           onWebResourceError: (WebResourceError error) {
-            print('WebView resource error: ${error.description}');
+            // WebView resource error: ${error.description}
             setState(() => _isLoading = false);
           },
         ),
@@ -299,7 +300,7 @@ class _MidtransPaymentWebViewScreenState
         return window.location.href;
       })();
     ''');
-    print('Status check triggered');
+    // Status check triggered
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Memeriksa status pembayaran...'),

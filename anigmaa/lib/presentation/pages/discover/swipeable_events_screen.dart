@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../../domain/entities/event.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../bloc/events/events_bloc.dart';
 import '../../bloc/events/events_event.dart';
 import '../../bloc/events/events_state.dart';
@@ -203,7 +204,8 @@ class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Transform.scale(
-                        scale: 0.95,
+                        scaleX: 0.95,
+                        scaleY: 0.95,
                         child: _EventCardFace(event: _events[nextIndex]),
                       ),
                     ),
@@ -631,13 +633,13 @@ class _SwipeableCardState extends State<_SwipeableCard>
       onTap: () {
         if (!_isInterestAnimating && !_isSnapAnimating) {
           // Debug log to compare event data
-          print(
+          AppLogger().info(
             '[SwipeableEventsScreen] Navigating to detail with event: ${widget.event.id}',
           );
-          print(
+          AppLogger().info(
             '[SwipeableEventsScreen] interestedCount: ${widget.event.interestedCount}',
           );
-          print(
+          AppLogger().info(
             '[SwipeableEventsScreen] interestedUserIds: ${widget.event.interestedUserIds}',
           );
           Navigator.push(
@@ -728,8 +730,8 @@ class _SwipeableCardState extends State<_SwipeableCard>
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
                     child: Transform.scale(
-                      scale:
-                          1.0 - (_isCardLeaving ? _cardController.value : 0.0),
+                      scaleX: 1.0 - (_isCardLeaving ? _cardController.value : 0.0),
+                      scaleY: 1.0 - (_isCardLeaving ? _cardController.value : 0.0),
                       child: const Text("📌", style: TextStyle(fontSize: 64)),
                     ),
                   ),
@@ -808,19 +810,19 @@ class _EventCardFace extends StatelessWidget {
   Widget build(BuildContext context) {
     // Debug logging for swipeable card time display
     final localTime = event.startTime.toLocal();
-    print('[SwipeableCard] ===== CARD TIME DISPLAY =====');
-    print('[SwipeableCard] Event: ${event.title}');
-    print(
+    AppLogger().info('[SwipeableCard] ===== CARD TIME DISPLAY =====');
+    AppLogger().info('[SwipeableCard] Event: ${event.title}');
+    AppLogger().info(
       '[SwipeableCard] startTime raw: ${event.startTime} (isUtc: ${event.startTime.isUtc})',
     );
-    print('[SwipeableCard] startTime.toLocal(): $localTime');
-    print(
+    AppLogger().info('[SwipeableCard] startTime.toLocal(): $localTime');
+    AppLogger().info(
       '[SwipeableCard] Display time: ${DateFormat('MMM d, HH:mm').format(localTime)}',
     );
-    print(
+    AppLogger().info(
       '[SwipeableCard] Expected: If 12:00 UTC, should show 19:00 in WIB (UTC+7)',
     );
-    print('[SwipeableCard] ===== END CARD DIAGNOSTICS =====');
+    AppLogger().info('[SwipeableCard] ===== END CARD DIAGNOSTICS =====');
 
     return Container(
       decoration: BoxDecoration(

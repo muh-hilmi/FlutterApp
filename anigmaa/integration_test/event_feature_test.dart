@@ -85,33 +85,8 @@ void main() {
     testWidgets('Payment Flow - WebView Integration', (
       WidgetTester tester,
     ) async {
-      // Create a paid event
-      final paidEvent = Event(
-        id: 'paid-event-1',
-        title: 'Paid Event',
-        description: 'Paid Event Description',
-        category: EventCategory.workshop,
-        startTime: DateTime.now().add(const Duration(days: 1)),
-        endTime: DateTime.now().add(const Duration(days: 1, hours: 3)),
-        location: const EventLocation(
-          name: 'Workshop Venue',
-          address: 'Jakarta',
-          latitude: -6.2088,
-          longitude: 106.8456,
-        ),
-        host: const EventHost(
-          id: 'host-1',
-          name: 'Workshop Host',
-          avatar: '',
-          bio: 'Test Bio',
-        ),
-        maxAttendees: 30,
-        price: 250000,
-        isFree: false,
-      );
-
-      // Test: Navigate to payment screen
-      // Note: This requires authentication setup first
+      // TODO: Create a paid event and test payment flow
+      // This requires authentication setup first
       // For now, we test the payment screen rendering
 
       // TODO: Add full payment flow test with auth

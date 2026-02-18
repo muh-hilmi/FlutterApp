@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 /// Provides utilities for running Appium E2E tests with Flutter
 class AppiumTestHelper {
   /// Initialize the app for testing
-  static WidgetTester? _tester;
+  // static WidgetTester? _tester; // Reserved for future use
   static bool _initialized = false;
 
   /// Setup test environment
@@ -20,7 +20,7 @@ class AppiumTestHelper {
 
   /// Launch app
   static Future<void> launchApp(WidgetTester tester) async {
-    _tester = tester;
+    // _tester = tester; // Reserved for future use
     app.main();
     await tester.pumpAndSettle(const Duration(seconds: 3));
   }

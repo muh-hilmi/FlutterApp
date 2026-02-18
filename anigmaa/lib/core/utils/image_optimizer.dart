@@ -286,7 +286,7 @@ class OptimizedCachedImage extends StatelessWidget {
   final bool enableDiskCache;
 
   const OptimizedCachedImage({
-    Key? key,
+    super.key,
     required this.imageUrl,
     this.width,
     this.height,
@@ -296,7 +296,7 @@ class OptimizedCachedImage extends StatelessWidget {
     this.fadeInDuration,
     this.enableMemoryCache = true,
     this.enableDiskCache = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

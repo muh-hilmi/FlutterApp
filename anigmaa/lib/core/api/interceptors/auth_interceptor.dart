@@ -43,7 +43,7 @@ class AuthInterceptor extends Interceptor {
   static int _consecutive401Count = 0;
   static DateTime? _last401Time;
   static const _maxConsecutive401 = 3;
-  static const _401ResetDuration = Duration(minutes: 1);
+  static final _resetDurationAfter401Error = Duration(minutes: 1);
 
   @override
   void onRequest(
@@ -85,7 +85,7 @@ class AuthInterceptor extends Interceptor {
     // Rate limiting: check for too many consecutive 401s
     final now = DateTime.now();
     if (_last401Time != null &&
-        now.difference(_last401Time!) > _401ResetDuration) {
+        now.difference(_last401Time!) > _resetDurationAfter401Error) {
       _consecutive401Count = 0; // Reset counter after time window
     }
     _last401Time = now;

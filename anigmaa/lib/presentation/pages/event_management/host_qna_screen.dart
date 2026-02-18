@@ -39,6 +39,7 @@ class _HostQnAScreenState extends State<HostQnAScreen>
     _tabController = TabController(length: 2, vsync: this);
     // Load Q&A when screen is opened
     Future.microtask(() {
+      if (!context.mounted) return;
       context.read<QnABloc>().add(LoadEventQnA(widget.eventId));
     });
   }
@@ -461,6 +462,7 @@ class _HostQnAScreenState extends State<HostQnAScreen>
             onPressed: () {
               final answer = controller.text.trim();
               if (answer.isEmpty) {
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Jawaban ga boleh kosong!'),
@@ -479,6 +481,7 @@ class _HostQnAScreenState extends State<HostQnAScreen>
 
               Navigator.pop(dialogContext);
 
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Row(
@@ -561,6 +564,7 @@ class _HostQnAScreenState extends State<HostQnAScreen>
             onPressed: () {
               final answer = controller.text.trim();
               if (answer.isEmpty) {
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Jawaban ga boleh kosong!'),
@@ -579,6 +583,7 @@ class _HostQnAScreenState extends State<HostQnAScreen>
 
               Navigator.pop(dialogContext);
 
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Row(
@@ -653,6 +658,7 @@ class _HostQnAScreenState extends State<HostQnAScreen>
               context.read<QnABloc>().add(DeleteQuestionRequested(questionId));
               Navigator.pop(dialogContext);
 
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Row(

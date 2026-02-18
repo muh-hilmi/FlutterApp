@@ -6,9 +6,10 @@ import 'package:flutter/material.dart';
 /// - H-1: 24 hours before event
 /// - H-0: 3-4 hours before event
 class EventNotificationScheduler {
-  static const String _notificationChannelId = 'event_reminders';
-  static const String _notificationChannelName = 'Event Reminders';
-  static const String _notificationChannelDescription = 'Notifications for upcoming events';
+  // Channel constants for future notification implementation
+  // static const String _notificationChannelId = 'event_reminders';
+  // static const String _notificationChannelName = 'Event Reminders';
+  // static const String _notificationChannelDescription = 'Notifications for upcoming events';
 
   /// Schedule all reminders for an event
   static Future<void> scheduleEventReminders({
