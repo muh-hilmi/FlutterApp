@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../domain/entities/ticket.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class TicketDetailScreen extends StatelessWidget {
   final Ticket ticket;
@@ -20,22 +22,18 @@ class TicketDetailScreen extends StatelessWidget {
     final isCancelled = ticket.status == TicketStatus.cancelled;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFCFCFC),
+      backgroundColor: AppColors.cardSurface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Detail Tiket',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF1A1A1A),
-          ),
+          style: AppTextStyles.h3,
         ),
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_rounded,
-            color: Color(0xFF1A1A1A),
+            color: AppColors.textPrimary,
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -48,11 +46,11 @@ class TicketDetailScreen extends StatelessWidget {
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
+                    color: AppColors.primary.withValues(alpha: 0.08),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -68,10 +66,10 @@ class TicketDetailScreen extends StatelessWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: isCancelled
-                            ? [Colors.grey[300]!, Colors.grey[400]!]
+                            ? [AppColors.border, AppColors.textTertiary]
                             : isCheckedIn
-                                ? [Colors.green[400]!, Colors.green[600]!]
-                                : [const Color(0xFFBBC863), const Color(0xFF6B7F3F)],
+                                ? [AppColors.success, AppColors.success.withValues(alpha: 0.7)]
+                                : [AppColors.secondary, const Color(0xFF6B7F3F)],
                       ),
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(24),
@@ -86,7 +84,7 @@ class TicketDetailScreen extends StatelessWidget {
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.3),
+                            color: AppColors.white.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
@@ -99,7 +97,7 @@ class TicketDetailScreen extends StatelessWidget {
                                         ? Icons.check_circle
                                         : Icons.confirmation_number,
                                 size: 18,
-                                color: Colors.white,
+                                color: AppColors.white,
                               ),
                               const SizedBox(width: 6),
                               Text(
@@ -108,10 +106,10 @@ class TicketDetailScreen extends StatelessWidget {
                                     : isCheckedIn
                                         ? 'UDAH CHECK-IN'
                                         : 'TIKET VALID',
-                                style: const TextStyle(
+                                style: AppTextStyles.label.copyWith(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w800,
-                                  color: Colors.white,
+                                  color: AppColors.white,
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -120,12 +118,10 @@ class TicketDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 24),
                         // Attendance Code - BIG!
-                        const Text(
+                        Text(
                           'Kode Kehadiran',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                          style: AppTextStyles.bodyMediumBold.copyWith(
+                            color: AppColors.white,
                             letterSpacing: 1,
                           ),
                         ),
@@ -136,11 +132,11 @@ class TicketDetailScreen extends StatelessWidget {
                             vertical: 20,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.white,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
+                                color: AppColors.primary.withValues(alpha: 0.1),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -148,10 +144,10 @@ class TicketDetailScreen extends StatelessWidget {
                           ),
                           child: Text(
                             ticket.attendanceCode,
-                            style: const TextStyle(
+                            style: AppTextStyles.display.copyWith(
                               fontSize: 56,
                               fontWeight: FontWeight.w900,
-                              color: Color(0xFFBBC863),
+                              color: AppColors.secondary,
                               letterSpacing: 8,
                               fontFamily: 'monospace',
                             ),
@@ -166,14 +162,14 @@ class TicketDetailScreen extends StatelessWidget {
                             );
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: const Row(
+                                content: Row(
                                   children: [
-                                    Icon(Icons.check, color: Colors.white, size: 18),
-                                    SizedBox(width: 8),
-                                    Text('Kode udah disalin!'),
+                                    Icon(Icons.check, color: AppColors.white, size: 18),
+                                    const SizedBox(width: 8),
+                                    const Text('Kode udah disalin!'),
                                   ],
                                 ),
-                                backgroundColor: Colors.green[600],
+                                backgroundColor: AppColors.success,
                                 behavior: SnackBarBehavior.floating,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
@@ -184,13 +180,12 @@ class TicketDetailScreen extends StatelessWidget {
                           icon: const Icon(
                             Icons.copy,
                             size: 16,
-                            color: Colors.white,
+                            color: AppColors.white,
                           ),
-                          label: const Text(
+                          label: Text(
                             'Salin Kode',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
+                            style: AppTextStyles.bodyMediumBold.copyWith(
+                              color: AppColors.white,
                             ),
                           ),
                         ),
@@ -208,12 +203,11 @@ class TicketDetailScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Info Tiket',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyLargeBold.copyWith(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF1A1A1A),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -259,7 +253,7 @@ class TicketDetailScreen extends StatelessWidget {
                           Icons.check_circle_outline,
                           'Status Bayar',
                           'Lunas',
-                          iconColor: Colors.green[600],
+                          iconColor: AppColors.success,
                         ),
                         if (isCheckedIn && ticket.checkedInAt != null) ...[
                           const SizedBox(height: 12),
@@ -267,7 +261,7 @@ class TicketDetailScreen extends StatelessWidget {
                             Icons.check_circle_outline,
                             'Check-In',
                             _formatDate(ticket.checkedInAt!),
-                            iconColor: Colors.green[600],
+                            iconColor: AppColors.success,
                           ),
                         ],
                       ],
@@ -287,17 +281,17 @@ class TicketDetailScreen extends StatelessWidget {
                       child: OutlinedButton.icon(
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Download struk bentar lagi ya!'),
-                              backgroundColor: Color(0xFFBBC863),
+                            SnackBar(
+                              content: const Text('Download struk bentar lagi ya!'),
+                              backgroundColor: AppColors.secondary,
                             ),
                           );
                         },
                         icon: const Icon(Icons.download, size: 18),
                         label: const Text('Download Struk'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFBBC863),
-                          side: const BorderSide(color: Color(0xFFBBC863),),
+                          foregroundColor: AppColors.secondary,
+                          side: const BorderSide(color: AppColors.secondary),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -312,15 +306,15 @@ class TicketDetailScreen extends StatelessWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Bagiin struk bentar lagi ya!'),
-                              backgroundColor: Color(0xFFBBC863),
+                              backgroundColor: AppColors.secondary,
                             ),
                           );
                         },
                         icon: const Icon(Icons.share, size: 18),
                         label: const Text('Bagiin Struk'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFBBC863),
-                          side: const BorderSide(color: Color(0xFFBBC863),),
+                          foregroundColor: AppColors.secondary,
+                          side: const BorderSide(color: AppColors.secondary),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -339,10 +333,10 @@ class TicketDetailScreen extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
+                  color: AppColors.info.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: Colors.blue[200]!,
+                    color: AppColors.info.withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),
@@ -353,16 +347,14 @@ class TicketDetailScreen extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.info_outline,
-                          color: Colors.blue[700],
+                          color: AppColors.info,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           'Cara Check-In',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.blue[900],
+                          style: AppTextStyles.bodyLargeBold.copyWith(
+                            color: AppColors.info,
                           ),
                         ),
                       ],
@@ -372,9 +364,8 @@ class TicketDetailScreen extends StatelessWidget {
                       '1. Tunjukin kode kehadiran ini ke host event\n'
                       '2. Host bakal masukin kode buat verifikasi tiket lo\n'
                       '3. Setelah diverifikasi, lo siap menikmati acaranya!',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.blue[800],
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.info,
                         height: 1.5,
                       ),
                     ),
@@ -401,13 +392,12 @@ class TicketDetailScreen extends StatelessWidget {
                 },
                 icon: Icon(
                   Icons.help_outline,
-                  color: Colors.grey[600],
+                  color: AppColors.textSecondary,
                 ),
                 label: Text(
                   'Butuh bantuan? Hubungi Support',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w600,
+                  style: AppTextStyles.bodyMediumBold.copyWith(
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -431,7 +421,7 @@ class TicketDetailScreen extends StatelessWidget {
         Icon(
           icon,
           size: 20,
-          color: iconColor ?? Colors.grey[600],
+          color: iconColor ?? AppColors.textSecondary,
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -440,18 +430,15 @@ class TicketDetailScreen extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w500,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: Color(0xFF1A1A1A),
+                style: AppTextStyles.button.copyWith(
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -486,7 +473,7 @@ class DashedLinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.grey[300]!
+      ..color = AppColors.border
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
 

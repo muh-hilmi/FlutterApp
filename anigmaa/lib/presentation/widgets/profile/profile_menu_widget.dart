@@ -3,7 +3,8 @@ import '../../../injection_container.dart' as di;
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/google_auth_service.dart';
 import '../../../main.dart' show navigatorKey;
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class ProfileMenuWidget {
   static void showMenuBottomSheet(
@@ -22,7 +23,7 @@ class ProfileMenuWidget {
   }) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -37,7 +38,7 @@ class ProfileMenuWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: AppColors.border,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -73,34 +74,11 @@ class ProfileMenuWidget {
                 title: 'Pengaturan',
                 onTap: onSettings,
               ),
-              const Divider(),
-              _buildMenuSheetItem(
-                icon: Icons.bug_report,
-                title: '🔧 Hapus Data Auth (Debug)',
-                iconColor: Colors.orange,
-                textColor: Colors.orange,
-                onTap: () async {
-                  Navigator.pop(context);
-                  final authService = di.sl<AuthService>();
-                  await authService.clearAuthData();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          '✅ Auth data cleared! Reload app to test 401 handler',
-                        ),
-                        backgroundColor: Colors.orange,
-                        duration: Duration(seconds: 3),
-                      ),
-                    );
-                  }
-                },
-              ),
               _buildMenuSheetItem(
                 icon: Icons.logout,
                 title: 'Keluar',
-                iconColor: Colors.red,
-                textColor: Colors.red,
+                iconColor: AppColors.error,
+                textColor: AppColors.error,
                 onTap: onLogout,
               ),
             ] else ...[
@@ -112,15 +90,15 @@ class ProfileMenuWidget {
               _buildMenuSheetItem(
                 icon: Icons.block,
                 title: 'Blokir Pengguna',
-                iconColor: Colors.red,
-                textColor: Colors.red,
+                iconColor: AppColors.error,
+                textColor: AppColors.error,
                 onTap: onBlockUser,
               ),
               _buildMenuSheetItem(
                 icon: Icons.report,
                 title: 'Laporkan',
-                iconColor: Colors.red,
-                textColor: Colors.red,
+                iconColor: AppColors.error,
+                textColor: AppColors.error,
                 onTap: onReportUser,
               ),
             ],
@@ -140,13 +118,13 @@ class ProfileMenuWidget {
     Color? textColor,
   }) {
     return ListTile(
-      leading: Icon(icon, color: iconColor ?? Colors.grey[800], size: 24),
+      leading: Icon(icon, color: iconColor ?? AppColors.textEmphasis, size: 24),
       title: Text(
         title,
-        style: GoogleFonts.plusJakartaSans(
+        style: AppTextStyles.button.copyWith(
           fontSize: 15,
           fontWeight: FontWeight.w500,
-          color: textColor ?? Colors.black,
+          color: textColor ?? AppColors.textPrimary,
         ),
       ),
       onTap: onTap,
@@ -159,11 +137,11 @@ class ProfileMenuWidget {
       builder: (dialogContext) => AlertDialog(
         title: Text(
           'Keluar',
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+          style: AppTextStyles.bodyLargeBold.copyWith(fontWeight: FontWeight.bold),
         ),
         content: Text(
           'Yakin mau keluar?',
-          style: GoogleFonts.plusJakartaSans(),
+          style: AppTextStyles.bodyMedium,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
@@ -171,7 +149,7 @@ class ProfileMenuWidget {
             onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Batal',
-              style: GoogleFonts.plusJakartaSans(color: Colors.grey[600]),
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
             ),
           ),
           TextButton(
@@ -181,7 +159,7 @@ class ProfileMenuWidget {
             },
             child: Text(
               'Keluar',
-              style: GoogleFonts.plusJakartaSans(color: Colors.red),
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.error),
             ),
           ),
         ],
@@ -210,7 +188,7 @@ class ProfileMenuWidget {
         ScaffoldMessenger.of(globalContext).showSnackBar(
           SnackBar(
             content: Text('Logout gagal. Coba lagi ya! 😅'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }

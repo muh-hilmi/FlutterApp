@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../domain/entities/event.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 import '../components/event_terms_section.dart';
 import '../components/event_similar_list.dart';
@@ -39,9 +40,8 @@ class EventContent extends StatelessWidget {
           // 4. Description
           Text(
             event.description,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 16,
-              color: Colors.grey[800],
+            style: AppTextStyles.bodyLarge.copyWith(
+              color: AppColors.textEmphasis,
               height: 1.6,
             ),
           ),
@@ -78,10 +78,8 @@ class EventContent extends StatelessWidget {
         // Title
         Text(
           event.title,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 28, // Large Geometric
-            fontWeight: FontWeight.w800,
-            color: const Color(0xFF1A1A1A),
+          style: AppTextStyles.h1.copyWith(
+            fontSize: 28,
             height: 1.1,
             letterSpacing: -0.5,
           ),
@@ -106,10 +104,10 @@ class EventContent extends StatelessWidget {
                 height: 48,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey[200]!, width: 1),
+                  border: Border.all(color: AppColors.border, width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
+                      color: AppColors.primary.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -138,11 +136,7 @@ class EventContent extends StatelessWidget {
                         Flexible(
                           child: Text(
                             event.host.name,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black,
-                            ),
+                            style: AppTextStyles.bodyLargeBold,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -152,17 +146,15 @@ class EventContent extends StatelessWidget {
                           const Icon(
                             Icons.verified,
                             size: 16,
-                            color: Color(0xFFBBC863),
+                            color: AppColors.secondary,
                           ),
                         ],
                       ],
                     ),
                     Text(
                       'Penyelenggara',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        color: Colors.grey[500],
-                        fontWeight: FontWeight.w500,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textTertiary,
                       ),
                     ),
                   ],
@@ -176,15 +168,14 @@ class EventContent extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: AppColors.surfaceAlt,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   'Lihat',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
+                  style: AppTextStyles.bodySmall.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: Colors.black,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -197,14 +188,12 @@ class EventContent extends StatelessWidget {
 
   Widget _buildDefaultAvatar() {
     return Container(
-      color: Colors.grey[100],
+      color: AppColors.surfaceAlt,
       child: Center(
         child: Text(
           event.host.name.isNotEmpty ? event.host.name[0].toUpperCase() : '?',
-          style: GoogleFonts.plusJakartaSans(
-            color: Colors.grey[400],
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
+          style: AppTextStyles.h3.copyWith(
+            color: AppColors.textTertiary,
           ),
         ),
       ),
@@ -214,9 +203,9 @@ class EventContent extends StatelessWidget {
   Widget _buildSpecsSection(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.surfaceAlt,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         children: [
@@ -228,14 +217,14 @@ class EventContent extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey[100]!),
+                    border: Border.all(color: AppColors.divider),
                   ),
                   child: const Icon(
                     Icons.calendar_today_rounded,
                     size: 20,
-                    color: Color(0xFF1A1A1A),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -245,19 +234,15 @@ class EventContent extends StatelessWidget {
                     children: [
                       Text(
                         _formatFullDate(event.startTime),
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1A1A1A),
+                        style: AppTextStyles.button.copyWith(
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '${_formatEventTime(event.startTime)} • ${_getRelativeTime(event.startTime)}',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.w500,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -267,7 +252,7 @@ class EventContent extends StatelessWidget {
             ),
           ),
 
-          Divider(height: 1, color: Colors.grey[200]),
+          Divider(height: 1, color: AppColors.border),
 
           // Location Row
           Padding(
@@ -277,14 +262,14 @@ class EventContent extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey[100]!),
+                    border: Border.all(color: AppColors.divider),
                   ),
                   child: const Icon(
                     Icons.location_on_rounded,
                     size: 20,
-                    color: Color(0xFF1A1A1A),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -294,10 +279,8 @@ class EventContent extends StatelessWidget {
                     children: [
                       Text(
                         event.location.name,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1A1A1A),
+                        style: AppTextStyles.button.copyWith(
+                          color: AppColors.textPrimary,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -305,10 +288,8 @@ class EventContent extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         'Ketuk peta untuk detail',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.w500,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -330,22 +311,20 @@ class EventContent extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: AppColors.surfaceAlt,
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.people_outline,
               size: 16,
-              color: Colors.grey[600],
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(width: 12),
           Text(
             'Belum ada yang join. Jadilah yang pertama!',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -366,15 +345,15 @@ class EventContent extends StatelessWidget {
               // Right-most (bottom-most in stack)
               Positioned(
                 left: 40,
-                child: _buildMiniAvatarPlaceholder(Colors.blue[100]!),
+                child: _buildMiniAvatarPlaceholder(AppColors.info.withValues(alpha: 0.2)),
               ),
               Positioned(
                 left: 20,
-                child: _buildMiniAvatarPlaceholder(Colors.purple[100]!),
+                child: _buildMiniAvatarPlaceholder(AppColors.secondary.withValues(alpha: 0.2)),
               ),
               Positioned(
                 left: 0,
-                child: _buildMiniAvatarPlaceholder(Colors.orange[100]!),
+                child: _buildMiniAvatarPlaceholder(AppColors.warning.withValues(alpha: 0.3)),
               ),
             ],
           ),
@@ -382,17 +361,13 @@ class EventContent extends StatelessWidget {
         const SizedBox(width: 12),
         RichText(
           text: TextSpan(
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
-              color: Colors.grey[600],
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
             ),
             children: [
               TextSpan(
                 text: '${event.currentAttendees} orang',
-                style: GoogleFonts.plusJakartaSans(
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black,
-                ),
+                style: AppTextStyles.bodyMediumBold,
               ),
               const TextSpan(text: ' akan hadir'),
             ],
@@ -409,9 +384,9 @@ class EventContent extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 2),
+        border: Border.all(color: AppColors.white, width: 2),
       ),
-      child: const Icon(Icons.person, size: 16, color: Colors.black26),
+      child: const Icon(Icons.person, size: 16, color: AppColors.textTertiary),
     );
   }
 
@@ -433,12 +408,11 @@ class EventContent extends StatelessWidget {
             size: 20,
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
               'Datang 15 menit lebih awal. Hati-hati penipuan.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFF8c6b1d),
+              style: AppTextStyles.caption.copyWith(
+                color: const Color(0xFF8c6b1d),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -466,13 +440,9 @@ class EventContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Peta Lokasi',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF1A1A1A),
-          ),
+          style: AppTextStyles.h3,
         ),
         const SizedBox(height: 16),
         InkWell(
@@ -486,9 +456,9 @@ class EventContent extends StatelessWidget {
             height: 180,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: AppColors.surfaceAlt,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: AppColors.border),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
@@ -529,7 +499,7 @@ class EventContent extends StatelessWidget {
                             end: Alignment.bottomCenter,
                             colors: [
                               Colors.transparent,
-                              Colors.black.withValues(alpha: 0.4),
+                              AppColors.primary.withValues(alpha: 0.4),
                             ],
                           ),
                         ),
@@ -547,12 +517,12 @@ class EventContent extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: const BoxDecoration(
-                              color: Colors.white,
+                              color: AppColors.white,
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
                               Icons.location_on,
-                              color: Color(0xFFBBC863),
+                              color: AppColors.secondary,
                               size: 20,
                             ),
                           ),
@@ -560,14 +530,12 @@ class EventContent extends StatelessWidget {
                           Expanded(
                             child: Text(
                               event.location.name,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
+                              style: AppTextStyles.bodyMediumBold.copyWith(
+                                color: AppColors.white,
                                 shadows: [
                                   Shadow(
-                                    color: Colors.black45,
-                                    offset: Offset(0, 1),
+                                    color: AppColors.primary.withValues(alpha: 0.45),
+                                    offset: const Offset(0, 1),
                                     blurRadius: 2,
                                   ),
                                 ],

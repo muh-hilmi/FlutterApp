@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class SwipeableEmptyState extends StatelessWidget {
   const SwipeableEmptyState({super.key});
@@ -13,30 +15,25 @@ class SwipeableEmptyState extends StatelessWidget {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: const Color(0xFFBBC863).withValues(alpha: 0.15),
+              color: AppColors.secondary.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.check_circle,
               size: 60,
-              color: Color(0xFFBBC863),
+              color: AppColors.secondary,
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'No More Events',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF1A1A1A),
-            ),
+            style: AppTextStyles.h2,
           ),
           const SizedBox(height: 8),
           Text(
             'You\'ve seen all available events',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
+            style: AppTextStyles.bodyLarge.copyWith(
+              color: AppColors.textSecondary,
             ),
           ),
         ],

@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import 'package:google_fonts/google_fonts.dart';
 import '../../../domain/entities/post.dart';
 import '../../pages/profile/profile_screen.dart';
 import '../../bloc/posts/posts_bloc.dart';
 import '../../bloc/posts/posts_event.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class PostHeader extends StatelessWidget {
   final Post post;
@@ -30,7 +31,7 @@ class PostHeader extends StatelessWidget {
           },
           child: CircleAvatar(
             radius: 20,
-            backgroundColor: const Color(0xFFBBC863),
+            backgroundColor: AppColors.secondary,
             backgroundImage:
                 post.author.avatar != null && post.author.avatar!.isNotEmpty
                 ? CachedNetworkImageProvider(post.author.avatar!)
@@ -38,10 +39,8 @@ class PostHeader extends StatelessWidget {
             child: post.author.avatar == null || post.author.avatar!.isEmpty
                 ? Text(
                     post.author.name[0].toUpperCase(),
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF000000),
+                    style: AppTextStyles.button.copyWith(
+                      color: AppColors.primary,
                     ),
                   )
                 : null,
@@ -56,10 +55,7 @@ class PostHeader extends StatelessWidget {
             children: [
               Text(
                 post.author.name,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF000000),
+                style: AppTextStyles.bodyLargeBold.copyWith(
                   letterSpacing: -0.4,
                 ),
               ),
@@ -74,15 +70,13 @@ class PostHeader extends StatelessWidget {
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF3F4F6),
+                        color: AppColors.surfaceAlt,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         interest,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          color: const Color(0xFF6B7280),
-                          fontWeight: FontWeight.w500,
+                        style: AppTextStyles.captionSmall.copyWith(
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     );
@@ -92,10 +86,8 @@ class PostHeader extends StatelessWidget {
               // Time
               Text(
                 timeago.format(post.createdAt, locale: 'en_short'),
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  color: Colors.grey[500],
-                  fontWeight: FontWeight.w400,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textTertiary,
                   letterSpacing: -0.1,
                 ),
               ),
@@ -106,14 +98,14 @@ class PostHeader extends StatelessWidget {
         // More Menu - rounded button
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFFCFCFC),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(10),
           ),
           child: IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.more_horiz_rounded,
               size: 22,
-              color: Color(0xFF262626),
+              color: AppColors.textEmphasis,
             ),
             onPressed: onMenuTap ?? () => _showPostMenu(context),
             padding: const EdgeInsets.all(6),
@@ -129,9 +121,9 @@ class PostHeader extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SafeArea(
           child: Column(
@@ -143,7 +135,7 @@ class PostHeader extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE8E4DD),
+                  color: AppColors.border,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -153,8 +145,8 @@ class PostHeader extends StatelessWidget {
                 icon: post.isBookmarked
                     ? Icons.bookmark_rounded
                     : Icons.bookmark_border_rounded,
-                iconColor: const Color(0xFFBBC863),
-                backgroundColor: const Color(0xFFE8EDDA),
+                iconColor: AppColors.secondary,
+                backgroundColor: AppColors.secondary.withValues(alpha: 0.15),
                 title: post.isBookmarked
                     ? 'Hapus dari Simpanan'
                     : 'Simpan Post',
@@ -168,16 +160,16 @@ class PostHeader extends StatelessWidget {
               _buildMenuItem(
                 context,
                 icon: Icons.link_rounded,
-                iconColor: const Color(0xFF6B6B6B),
-                backgroundColor: const Color(0xFFFCFCFC),
+                iconColor: AppColors.textSecondary,
+                backgroundColor: AppColors.surface,
                 title: 'Salin Link',
                 onTap: () => Navigator.pop(context),
               ),
               _buildMenuItem(
                 context,
                 icon: Icons.flag_outlined,
-                iconColor: const Color(0xFFFF6B6B),
-                backgroundColor: const Color(0xFFFFEBEE),
+                iconColor: AppColors.error,
+                backgroundColor: AppColors.error.withValues(alpha: 0.1),
                 title: 'Laporin',
                 onTap: () => Navigator.pop(context),
               ),
@@ -214,10 +206,8 @@ class PostHeader extends StatelessWidget {
             const SizedBox(width: 16),
             Text(
               title,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF000000),
+              style: AppTextStyles.button.copyWith(
+                color: AppColors.primary,
                 letterSpacing: -0.3,
               ),
             ),

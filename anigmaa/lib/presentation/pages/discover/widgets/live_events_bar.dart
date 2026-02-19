@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../domain/entities/event.dart';
 
 import '../../event_detail/event_detail_screen.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class LiveEventsBar extends StatelessWidget {
   final List<Event> events;
@@ -37,17 +39,15 @@ class LiveEventsBar extends StatelessWidget {
                   width: 8,
                   height: 24,
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: AppColors.error,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Text(
+                Text(
                   'Live Events',
-                  style: TextStyle(
+                  style: AppTextStyles.h3.copyWith(
                     fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF1A1A1A),
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -58,15 +58,13 @@ class LiveEventsBar extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
+                    color: AppColors.error.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Text(
+                  child: Text(
                     'LIVE',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.red,
+                    style: AppTextStyles.label.copyWith(
+                      color: AppColors.error,
                       letterSpacing: 1.0,
                     ),
                   ),
@@ -78,10 +76,9 @@ class LiveEventsBar extends StatelessWidget {
                   },
                   child: Text(
                     'Lihat Semua',
-                    style: TextStyle(
-                      fontSize: 14,
+                    style: AppTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade600,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ),
@@ -124,7 +121,7 @@ class LiveEventsBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -145,8 +142,8 @@ class LiveEventsBar extends StatelessWidget {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withValues(alpha: 0.3),
-                      Colors.black.withValues(alpha: 0.7),
+                      AppColors.primary.withValues(alpha: 0.3),
+                      AppColors.primary.withValues(alpha: 0.7),
                     ],
                   ),
                 ),
@@ -161,24 +158,23 @@ class LiveEventsBar extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: AppColors.error,
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.fiber_manual_record,
                         size: 8,
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Text(
                         'LIVE',
-                        style: TextStyle(
-                          fontSize: 10,
+                        style: AppTextStyles.captionSmall.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: AppColors.white,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -198,10 +194,8 @@ class LiveEventsBar extends StatelessWidget {
                     children: [
                       Text(
                         event.title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                        style: AppTextStyles.bodyLargeBold.copyWith(
+                          color: AppColors.white,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -212,7 +206,7 @@ class LiveEventsBar extends StatelessWidget {
                           Icon(
                             Icons.location_on_outlined,
                             size: 14,
-                            color: Colors.white.withValues(alpha: 0.9),
+                            color: AppColors.white.withValues(alpha: 0.9),
                           ),
                           const SizedBox(width: 4),
                           Expanded(
@@ -221,7 +215,7 @@ class LiveEventsBar extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.white.withValues(alpha: 0.9),
+                                color: AppColors.white.withValues(alpha: 0.9),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),

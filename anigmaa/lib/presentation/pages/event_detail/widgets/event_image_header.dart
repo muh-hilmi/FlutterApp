@@ -4,6 +4,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../domain/entities/event.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class EventImageHeader extends StatelessWidget {
   final Event event;
@@ -95,12 +97,12 @@ class EventImageHeader extends StatelessWidget {
 
   Widget _buildImagePlaceholder() {
     return Container(
-      color: const Color(0xFFFCFCFC),
+      color: AppColors.cardSurface,
       child: Center(
         child: Icon(
           Icons.event_rounded,
           size: 140,
-          color: const Color(0xFFBBC863).withValues(alpha: 0.08),
+          color: AppColors.secondary.withValues(alpha: 0.08),
         ),
       ),
     );
@@ -108,10 +110,10 @@ class EventImageHeader extends StatelessWidget {
 
   Widget _buildLoadingPlaceholder() {
     return Container(
-      color: const Color(0xFFFCFCFC),
+      color: AppColors.cardSurface,
       child: const Center(
         child: CircularProgressIndicator(
-          color: Color(0xFFBBC863),
+          color: AppColors.secondary,
         ),
       ),
     );
@@ -126,10 +128,10 @@ class EventImageHeader extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withValues(alpha: 0.3),
+                AppColors.primary.withValues(alpha: 0.3),
                 Colors.transparent,
                 Colors.transparent,
-                Colors.black.withValues(alpha: 0.6),
+                AppColors.primary.withValues(alpha: 0.6),
               ],
               stops: const [0.0, 0.2, 0.6, 1.0],
             ),
@@ -149,19 +151,18 @@ class EventImageHeader extends StatelessWidget {
               vertical: 12,
             ),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.7),
+              color: AppColors.primary.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(30),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.5),
+                color: AppColors.white.withValues(alpha: 0.5),
               ),
             ),
-            child: const Text(
+            child: Text(
               'SELESAI',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
+              style: AppTextStyles.h3.copyWith(
+                color: AppColors.white,
                 letterSpacing: 2,
+                fontWeight: FontWeight.w900,
               ),
             ),
           ),
@@ -184,10 +185,10 @@ class EventImageHeader extends StatelessWidget {
               vertical: 10,
             ),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.4),
+              color: AppColors.primary.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: AppColors.white.withValues(alpha: 0.2),
               ),
             ),
             child: Column(
@@ -195,20 +196,16 @@ class EventImageHeader extends StatelessWidget {
               children: [
                 Text(
                   'Mulai dari',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
+                  style: AppTextStyles.captionSmall.copyWith(
+                    color: AppColors.white.withValues(alpha: 0.8),
                   ),
                 ),
                 Text(
                   event.isFree
                       ? 'GRATIS'
                       : CurrencyFormatter.formatToCompactNoPrefix(event.price!),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
+                  style: AppTextStyles.h3.copyWith(
+                    color: AppColors.white,
                   ),
                 ),
               ],
@@ -234,8 +231,8 @@ class EventImageHeader extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(4),
               color: currentImageIndex == index
-                  ? const Color(0xFFBBC863)
-                  : Colors.white.withValues(alpha: 0.5),
+                  ? AppColors.secondary
+                  : AppColors.white.withValues(alpha: 0.5),
             ),
           ),
         ),
@@ -266,11 +263,11 @@ class EventImageHeader extends StatelessWidget {
   Widget _buildBackButton() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.5),
+        color: AppColors.primary.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: AppColors.primary.withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -280,7 +277,7 @@ class EventImageHeader extends StatelessWidget {
         onPressed: onBackPressed,
         icon: const Icon(
           Icons.arrow_back_rounded,
-          color: Colors.white,
+          color: AppColors.white,
           size: 22,
         ),
       ),
@@ -290,11 +287,11 @@ class EventImageHeader extends StatelessWidget {
   Widget _buildMoreButton() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.5),
+        color: AppColors.primary.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: AppColors.primary.withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -303,7 +300,7 @@ class EventImageHeader extends StatelessWidget {
       child: PopupMenuButton<String>(
         icon: const Icon(
           Icons.more_vert_rounded,
-          color: Colors.white,
+          color: AppColors.white,
           size: 22,
         ),
         shape: RoundedRectangleBorder(
@@ -327,19 +324,19 @@ class EventImageHeader extends StatelessWidget {
               ],
             ),
           ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'report',
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.flag_rounded,
-                  color: Colors.red,
+                  color: AppColors.error,
                   size: 18,
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Text(
                   'Laporkan Event',
-                  style: TextStyle(color: Colors.red),
+                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.error),
                 ),
               ],
             ),

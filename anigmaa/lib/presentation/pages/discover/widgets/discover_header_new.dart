@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class DiscoverHeader extends StatelessWidget {
   final String location;
@@ -28,22 +30,20 @@ class DiscoverHeader extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFBBC863),
+                  color: AppColors.secondary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.explore_rounded,
-                  color: Colors.black,
+                  color: AppColors.primary,
                   size: 22,
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
+              Text(
                 'Discover',
-                style: TextStyle(
+                style: AppTextStyles.h2.copyWith(
                   fontSize: 26,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.black,
                   letterSpacing: -0.5,
                 ),
               ),
@@ -51,13 +51,13 @@ class DiscoverHeader extends StatelessWidget {
               // Map/List Toggle (Glassmorphism look)
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFBBC863),
+                  color: AppColors.secondary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: IconButton(
                   icon: Icon(
                     isMapView ? Icons.list_rounded : Icons.map_outlined,
-                    color: Colors.black,
+                    color: AppColors.primary,
                     size: 22,
                   ),
                   onPressed: onToggleView,
@@ -76,7 +76,7 @@ class DiscoverHeader extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFBBC863).withValues(alpha: 0.15),
+                  color: AppColors.secondary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -85,16 +85,15 @@ class DiscoverHeader extends StatelessWidget {
                     const Icon(
                       Icons.location_on_rounded,
                       size: 14,
-                      color: Color(0xFFBBC863),
+                      color: AppColors.secondary,
                     ),
                     const SizedBox(width: 6),
                     Flexible(
                       child: Text(
                         location,
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: AppTextStyles.bodySmall.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: Colors.black,
+                          color: AppColors.textPrimary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -104,7 +103,7 @@ class DiscoverHeader extends StatelessWidget {
                     const Icon(
                       Icons.refresh_rounded,
                       size: 14,
-                      color: Color(0xFFBBC863),
+                      color: AppColors.secondary,
                     ),
                   ],
                 ),

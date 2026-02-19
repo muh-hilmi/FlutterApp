@@ -9,6 +9,8 @@ import '../../bloc/communities/communities_state.dart';
 import '../../bloc/communities/communities_event.dart';
 import '../../widgets/common/error_state_widget.dart';
 import 'community_detail_screen.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 /// X-style Discover Communities Screen
 /// Shows communities with recent post previews
@@ -135,7 +137,7 @@ class _DiscoverCommunitiesScreenState extends State<DiscoverCommunitiesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: _buildAppBar(),
       body: Column(
         children: [
@@ -145,7 +147,7 @@ class _DiscoverCommunitiesScreenState extends State<DiscoverCommunitiesScreen> {
               builder: (context, state) {
                 if (state is CommunitiesLoading) {
                   return const Center(
-                    child: CircularProgressIndicator(color: Color(0xFFBBC863)),
+                    child: CircularProgressIndicator(color: AppColors.secondary),
                   );
                 }
 
@@ -181,15 +183,13 @@ class _DiscoverCommunitiesScreenState extends State<DiscoverCommunitiesScreen> {
                           Icon(
                             Icons.groups_outlined,
                             size: 64,
-                            color: Colors.grey[300],
+                            color: AppColors.border,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'No communities found',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w600,
+                            style: AppTextStyles.bodyLargeBold.copyWith(
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -198,7 +198,7 @@ class _DiscoverCommunitiesScreenState extends State<DiscoverCommunitiesScreen> {
                   }
 
                   return RefreshIndicator(
-                    color: const Color(0xFFBBC863),
+                    color: AppColors.secondary,
                     onRefresh: () async {
                       context.read<CommunitiesBloc>().add(LoadCommunities());
                     },
@@ -241,18 +241,14 @@ class _DiscoverCommunitiesScreenState extends State<DiscoverCommunitiesScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       elevation: 0,
-      title: const Text(
+      title: Text(
         'Discover Communities',
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-        ),
+        style: AppTextStyles.h3.copyWith(color: AppColors.textPrimary),
       ),
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
         onPressed: () => Navigator.pop(context),
       ),
     );
@@ -262,9 +258,9 @@ class _DiscoverCommunitiesScreenState extends State<DiscoverCommunitiesScreen> {
     return Container(
       height: 50,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         border: Border(
-          bottom: BorderSide(color: Colors.grey.shade200, width: 1),
+          bottom: BorderSide(color: AppColors.surfaceAlt, width: 1),
         ),
       ),
       child: ListView(
@@ -292,15 +288,14 @@ class _DiscoverCommunitiesScreenState extends State<DiscoverCommunitiesScreen> {
             _selectedCategory = selected ? category : null;
           });
         },
-        backgroundColor: Colors.white,
-        selectedColor: const Color(0xFFBBC863).withValues(alpha: 0.15),
-        labelStyle: TextStyle(
-          color: isSelected ? const Color(0xFFBBC863) : Color(0xFF000000),
+        backgroundColor: AppColors.white,
+        selectedColor: AppColors.secondary.withValues(alpha: 0.15),
+        labelStyle: AppTextStyles.bodyMedium.copyWith(
+          color: isSelected ? AppColors.secondary : AppColors.textPrimary,
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-          fontSize: 14,
         ),
         side: BorderSide(
-          color: isSelected ? const Color(0xFFBBC863) : Colors.grey.shade300,
+          color: isSelected ? AppColors.secondary : AppColors.border,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
@@ -328,9 +323,9 @@ class _CommunityCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: AppColors.surfaceAlt),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,10 +346,8 @@ class _CommunityCard extends StatelessWidget {
                           Flexible(
                             child: Text(
                               community.name,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black,
+                              style: AppTextStyles.bodyLargeBold.copyWith(
+                                color: AppColors.textPrimary,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -364,7 +357,7 @@ class _CommunityCard extends StatelessWidget {
                             const Icon(
                               Icons.verified,
                               size: 16,
-                              color: Color(0xFFBBC863),
+                              color: AppColors.secondary,
                             ),
                           ],
                         ],
@@ -374,21 +367,21 @@ class _CommunityCard extends StatelessWidget {
                         children: [
                           Text(
                             community.category.emoji,
-                            style: const TextStyle(fontSize: 12),
+                            style: AppTextStyles.bodySmall,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             community.category.displayName,
-                            style: TextStyle(
+                            style: AppTextStyles.bodySmall.copyWith(
                               fontSize: 13,
-                              color: Colors.grey[600],
+                              color: AppColors.textSecondary,
                             ),
                           ),
                           Text(
                             ' • ${_formatMemberCount(community.memberCount)} members',
-                            style: TextStyle(
+                            style: AppTextStyles.bodySmall.copyWith(
                               fontSize: 13,
-                              color: Colors.grey[600],
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -404,9 +397,8 @@ class _CommunityCard extends StatelessWidget {
             // Description
             Text(
               community.description,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[800],
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textEmphasis,
                 height: 1.4,
               ),
               maxLines: 2,
@@ -435,7 +427,7 @@ class _CommunityCard extends StatelessWidget {
           memCacheWidth: 112,
           memCacheHeight: 112,
           placeholder: (context, url) =>
-              Container(width: 56, height: 56, color: Colors.grey.shade200),
+              Container(width: 56, height: 56, color: AppColors.surfaceAlt),
           errorWidget: (context, url, error) => _buildDefaultAvatar(),
         ),
       );
@@ -448,17 +440,13 @@ class _CommunityCard extends StatelessWidget {
       width: 56,
       height: 56,
       decoration: BoxDecoration(
-        color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+        color: AppColors.secondary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Center(
         child: Text(
           community.name[0].toUpperCase(),
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFFBBC863),
-          ),
+          style: AppTextStyles.h2.copyWith(color: AppColors.secondary),
         ),
       ),
     );
@@ -468,17 +456,16 @@ class _CommunityCard extends StatelessWidget {
     return FilledButton(
       onPressed: onJoin,
       style: FilledButton.styleFrom(
-        backgroundColor: const Color(0xFFBBC863),
-        foregroundColor: const Color(0xFF000000),
+        backgroundColor: AppColors.secondary,
+        foregroundColor: AppColors.primary,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         minimumSize: const Size(80, 36),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
-      child: const Text(
+      child: Text(
         'Join',
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
+        style: AppTextStyles.bodyMediumBold.copyWith(
+          color: AppColors.primary,
           letterSpacing: -0.1,
         ),
       ),
@@ -493,16 +480,19 @@ class _CommunityCard extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.grey.shade50,
+          color: AppColors.surfaceAlt,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           children: [
-            Icon(Icons.article_outlined, size: 16, color: Colors.grey[400]),
+            Icon(Icons.article_outlined, size: 16, color: AppColors.textTertiary),
             const SizedBox(width: 8),
             Text(
               'No posts yet',
-              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+              style: AppTextStyles.bodySmall.copyWith(
+                fontSize: 13,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
@@ -512,23 +502,22 @@ class _CommunityCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: AppColors.surfaceAlt,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.surfaceAlt),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.article_outlined, size: 14, color: Colors.grey[600]),
+              Icon(Icons.article_outlined, size: 14, color: AppColors.textSecondary),
               const SizedBox(width: 6),
               Text(
                 'Recent posts',
-                style: TextStyle(
-                  fontSize: 12,
+                style: AppTextStyles.caption.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[700],
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
@@ -549,13 +538,12 @@ class _CommunityCard extends StatelessWidget {
           // Author avatar
           CircleAvatar(
             radius: 10,
-            backgroundColor: Colors.grey.shade300,
+            backgroundColor: AppColors.border,
             child: Text(
               post['author'][0].toUpperCase(),
-              style: TextStyle(
+              style: AppTextStyles.label.copyWith(
                 fontSize: 8,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[600],
+                color: AppColors.textSecondary,
               ),
             ),
           ),
@@ -567,18 +555,16 @@ class _CommunityCard extends StatelessWidget {
               children: [
                 Text(
                   post['author'],
-                  style: TextStyle(
-                    fontSize: 12,
+                  style: AppTextStyles.caption.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey[800],
+                    color: AppColors.textEmphasis,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   post['content'],
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[700],
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textSecondary,
                     height: 1.3,
                   ),
                   maxLines: 2,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class PriceSelector extends StatelessWidget {
   final Function(bool isFree) onOptionSelected;
@@ -18,22 +20,20 @@ class PriceSelector extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Tipe Tiket',
-                style: TextStyle(
+                style: AppTextStyles.h3.copyWith(
                   fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1A1A1A),
                   letterSpacing: -0.5,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 'Pilih apakah event ini gratis atau berbayar',
-                style: TextStyle(
+                style: AppTextStyles.bodySmall.copyWith(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey[600],
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
@@ -72,18 +72,18 @@ class PriceSelector extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: isFree
                 ? [
-                    const Color(0xFFBBC863),
-                    const Color(0xFFA8B657),
+                    AppColors.secondary,
+                    AppColors.secondary,
                   ]
                 : [
-                    const Color(0xFFBBC863),
-                    const Color(0xFFA8B657),
+                    AppColors.secondary,
+                    AppColors.secondary,
                   ],
           ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFBBC863).withValues(alpha: 0.3),
+              color: AppColors.secondary.withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -94,12 +94,12 @@ class PriceSelector extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: AppColors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 icon,
-                color: Colors.white,
+                color: AppColors.white,
                 size: 24,
               ),
             ),
@@ -110,20 +110,17 @@ class PriceSelector extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
+                    style: AppTextStyles.bodyLargeBold.copyWith(
+                      color: AppColors.white,
                       letterSpacing: -0.3,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     description,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.85),
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.white.withValues(alpha: 0.85),
                       fontWeight: FontWeight.w500,
-                      fontSize: 12,
                     ),
                   ),
                 ],
@@ -131,7 +128,7 @@ class PriceSelector extends StatelessWidget {
             ),
             const Icon(
               Icons.arrow_forward_ios,
-              color: Colors.white,
+              color: AppColors.white,
               size: 18,
             ),
           ],

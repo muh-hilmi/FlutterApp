@@ -8,6 +8,8 @@ import '../../../core/utils/app_logger.dart';
 import '../../../data/datasources/auth_remote_datasource.dart';
 import '../../../injection_container.dart' as di;
 import '../server_unavailable/server_unavailable_screen.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -195,7 +197,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: const Key('splash_screen'),
-      backgroundColor: const Color(0xFFFCFCFC),
+      backgroundColor: AppColors.surface,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -205,45 +207,42 @@ class _SplashScreenState extends State<SplashScreen> {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: const Color(0xFFBBC863),
+                color: AppColors.secondary,
                 borderRadius: BorderRadius.circular(30),
               ),
               child: const Icon(
                 Icons.event,
-                color: Color(0xff000000),
+                color: AppColors.primary,
                 size: 60,
               ),
             ),
             const SizedBox(height: 32),
             // App Name
-            const Text(
+            Text(
               'flyerr',
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF000000),
+              style: AppTextStyles.h1.copyWith(
                 letterSpacing: -1.0,
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 12),
             Text(
               'Cari acara seru di sekitar lo 🎉',
-              style: TextStyle(
-                fontSize: 18,
+              style: AppTextStyles.h3.copyWith(
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF000000),
+                color: AppColors.textPrimary,
                 letterSpacing: -0.3,
               ),
             ),
             const SizedBox(height: 48),
             // Loading Indicator
-            SizedBox(
+            const SizedBox(
               width: 30,
               height: 30,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                  Color(0xFFBBC863),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  AppColors.secondary,
                 ),
               ),
             ),
@@ -251,10 +250,9 @@ class _SplashScreenState extends State<SplashScreen> {
             // Status Text
             Text(
               _statusText,
-              style: TextStyle(
-                fontSize: 14,
+              style: AppTextStyles.bodyMedium.copyWith(
                 fontWeight: FontWeight.w500,
-                color: Colors.grey[500],
+                color: AppColors.textTertiary,
               ),
             ),
           ],

@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/auth/auth_bloc.dart';
 import '../../../core/auth/auth_state.dart';
 import '../../../injection_container.dart' as di;
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 /// Screen shown when server is unreachable but user has a valid token
 ///
@@ -59,7 +61,7 @@ class ServerUnavailableScreen extends StatelessWidget {
         bloc: authBloc,
         builder: (context, state) {
           return Scaffold(
-            backgroundColor: const Color(0xFFFCFCFC),
+            backgroundColor: AppColors.surface,
             body: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -84,12 +86,11 @@ class ServerUnavailableScreen extends StatelessWidget {
                     const SizedBox(height: 24),
 
                     // Title
-                    const Text(
+                    Text(
                       'Server Tidak Dapat Dihubungi',
-                      style: TextStyle(
-                        fontSize: 20,
+                      style: AppTextStyles.h3.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF000000),
+                        color: AppColors.textPrimary,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -101,9 +102,8 @@ class ServerUnavailableScreen extends StatelessWidget {
                       state.errorMessage ??
                           errorMessage ??
                           'Tidak dapat terhubung ke server. Periksa koneksi internet kamu.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.textSecondary,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -119,16 +119,15 @@ class ServerUnavailableScreen extends StatelessWidget {
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0xFFBBC863),
+                            AppColors.secondary,
                           ),
                         ),
                       ),
                       const SizedBox(height: 12),
                       Text(
                         state.state.description,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[500],
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textTertiary,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -147,9 +146,9 @@ class ServerUnavailableScreen extends StatelessWidget {
                         icon: const Icon(Icons.refresh, size: 20),
                         label: const Text('Coba Lagi'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFBBC863),
-                          foregroundColor: Colors.white,
-                          disabledBackgroundColor: Colors.grey[300],
+                          backgroundColor: AppColors.secondary,
+                          foregroundColor: AppColors.white,
+                          disabledBackgroundColor: AppColors.border,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -173,9 +172,9 @@ class ServerUnavailableScreen extends StatelessWidget {
                         icon: const Icon(Icons.wifi_off, size: 20),
                         label: const Text('Lanjut Offline'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF666666),
+                          foregroundColor: AppColors.textSecondary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: BorderSide(color: Colors.grey[300]!),
+                          side: const BorderSide(color: AppColors.border),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -220,12 +219,11 @@ class ServerUnavailableScreen extends StatelessWidget {
                       icon: const Icon(Icons.logout, size: 16),
                       label: Text(
                         'Keluar dari akun',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyMedium.copyWith(
                           color: state.state == AuthState.validating ||
                                   state.state == AuthState.refreshing
-                              ? Colors.grey[300]
-                              : Colors.grey[500],
-                          fontSize: 14,
+                              ? AppColors.border
+                              : AppColors.textTertiary,
                         ),
                       ),
                     ),
@@ -236,9 +234,8 @@ class ServerUnavailableScreen extends StatelessWidget {
                     if (state.retryCount > 0)
                       Text(
                         'Percobaan otomatis akan dilakukan sebentar lagi...',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[400],
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textTertiary,
                         ),
                       ),
                   ],

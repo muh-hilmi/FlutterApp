@@ -3,6 +3,8 @@
 // DATE_CLASSIFIED: 2025-12-29
 
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -40,17 +42,13 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Pengaturan Notifikasi 🔔',
-          style: TextStyle(
-            color: Colors.black87,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
+          style: AppTextStyles.h3.copyWith(color: AppColors.textPrimary),
         ),
       ),
       body: SingleChildScrollView(
@@ -257,15 +255,11 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
           child: Text(
             title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
-            ),
+            style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.textSecondary),
           ),
         ),
         Container(
-          color: Colors.white,
+          color: AppColors.white,
           child: Column(children: children),
         ),
       ],
@@ -281,23 +275,19 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     return ListTile(
       title: Text(
         title,
-        style: TextStyle(
-          fontSize: 16,
+        style: AppTextStyles.bodyLarge.copyWith(
           fontWeight: FontWeight.w500,
-          color: onChanged != null ? Colors.black87 : Colors.grey[400],
+          color: onChanged != null ? AppColors.textEmphasis : AppColors.textTertiary,
         ),
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(
-          fontSize: 14,
-          color: Colors.grey[600],
-        ),
+        style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
       ),
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeTrackColor: Colors.black,
+        activeTrackColor: AppColors.primary,
       ),
     );
   }
@@ -306,22 +296,18 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     return ListTile(
       title: Text(
         'Waktu Pengingat',
-        style: TextStyle(
-          fontSize: 16,
+        style: AppTextStyles.bodyLarge.copyWith(
           fontWeight: FontWeight.w500,
-          color: (_allNotifications && _eventReminders) ? Colors.black87 : Colors.grey[400],
+          color: (_allNotifications && _eventReminders) ? AppColors.textEmphasis : AppColors.textTertiary,
         ),
       ),
       subtitle: Text(
         _reminderTiming,
-        style: TextStyle(
-          fontSize: 14,
-          color: Colors.grey[600],
-        ),
+        style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
       ),
-      trailing: Icon(
+      trailing: const Icon(
         Icons.chevron_right,
-        color: Colors.grey[400],
+        color: AppColors.textTertiary,
       ),
       onTap: (_allNotifications && _eventReminders) ? _showReminderTimingDialog : null,
     );
@@ -335,22 +321,18 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     return ListTile(
       title: Text(
         title,
-        style: const TextStyle(
-          fontSize: 16,
+        style: AppTextStyles.bodyLarge.copyWith(
           fontWeight: FontWeight.w500,
-          color: Colors.black87,
+          color: AppColors.textEmphasis,
         ),
       ),
       subtitle: Text(
         time,
-        style: TextStyle(
-          fontSize: 14,
-          color: Colors.grey[600],
-        ),
+        style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
       ),
-      trailing: Icon(
+      trailing: const Icon(
         Icons.access_time,
-        color: Colors.grey[400],
+        color: AppColors.textTertiary,
       ),
       onTap: () => _showTimePicker(time, onChanged),
     );
@@ -378,7 +360,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   });
                   Navigator.pop(context);
                 },
-                fillColor: WidgetStateProperty.all(Colors.black),
+                fillColor: WidgetStateProperty.all(AppColors.primary),
               );
             },
           ),
@@ -405,7 +387,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Colors.black,
+              primary: AppColors.primary,
             ),
           ),
           child: child!,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class ErrorStateWidget extends StatelessWidget {
   final String title;
@@ -30,7 +31,7 @@ class ErrorStateWidget extends StatelessWidget {
               height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.red.withValues(alpha: 0.05),
+                color: AppColors.error.withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -42,7 +43,7 @@ class ErrorStateWidget extends StatelessWidget {
               height: 180,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+                color: AppColors.secondary.withValues(alpha: 0.1),
               ),
             ),
           ),
@@ -58,11 +59,11 @@ class ErrorStateWidget extends StatelessWidget {
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
+                        color: AppColors.primary.withValues(alpha: 0.05),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -72,7 +73,7 @@ class ErrorStateWidget extends StatelessWidget {
                     child: Icon(
                       Icons.cloud_off_rounded,
                       size: 50,
-                      color: Colors.red[400],
+                      color: AppColors.error,
                     ),
                   ),
                 ),
@@ -81,10 +82,7 @@ class ErrorStateWidget extends StatelessWidget {
                 // Title
                 Text(
                   title,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF2D3142),
+                  style: AppTextStyles.h3.copyWith(
                     letterSpacing: -0.5,
                   ),
                   textAlign: TextAlign.center,
@@ -94,9 +92,8 @@ class ErrorStateWidget extends StatelessWidget {
                 // Message
                 Text(
                   message,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 15,
-                    color: Colors.grey[600],
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.textSecondary,
                     height: 1.5,
                   ),
                   textAlign: TextAlign.center,
@@ -110,22 +107,17 @@ class ErrorStateWidget extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: onRetry,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFBBC863),
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.secondary,
+                        foregroundColor: AppColors.white,
                         elevation: 4,
-                        shadowColor: const Color(
-                          0xFFBBC863,
-                        ).withValues(alpha: 0.4),
+                        shadowColor: AppColors.secondary.withValues(alpha: 0.4),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
                       child: Text(
                         retryText,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: AppTextStyles.button,
                       ),
                     ),
                   ),

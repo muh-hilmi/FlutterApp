@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class EventShareScreen extends StatefulWidget {
   final String eventId;
@@ -73,8 +75,8 @@ class _EventShareScreenState extends State<EventShareScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+        color: AppColors.white,
+        border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
       child: Row(
         children: [
@@ -82,10 +84,10 @@ class _EventShareScreenState extends State<EventShareScreen> {
             icon: const Icon(LucideIcons.x),
             onPressed: () => Navigator.pop(context),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
               'Bagikan Event',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: AppTextStyles.bodyLargeBold.copyWith(fontSize: 18),
             ),
           ),
         ],
@@ -97,22 +99,20 @@ class _EventShareScreenState extends State<EventShareScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Preview Kartu',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey,
+          style: AppTextStyles.bodyMediumBold.copyWith(
+            color: AppColors.textTertiary,
           ),
         ),
         const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 4),
               ),
@@ -132,8 +132,8 @@ class _EventShareScreenState extends State<EventShareScreen> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        const Color(0xFFBBC863),
-                        const Color(0xFF9DA953),
+                        AppColors.secondary,
+                        AppColors.secondary,
                       ],
                     ),
                   ),
@@ -143,7 +143,7 @@ class _EventShareScreenState extends State<EventShareScreen> {
                         child: Icon(
                           LucideIcons.calendar,
                           size: 48,
-                          color: Colors.white.withValues(alpha: 0.5),
+                          color: AppColors.white.withValues(alpha: 0.5),
                         ),
                       ),
                       // Logo watermark
@@ -156,14 +156,13 @@ class _EventShareScreenState extends State<EventShareScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.5),
+                            color: AppColors.primary.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Flyerr',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.white,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -180,10 +179,7 @@ class _EventShareScreenState extends State<EventShareScreen> {
                   children: [
                     Text(
                       widget.eventName,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: AppTextStyles.bodyLargeBold,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -193,15 +189,14 @@ class _EventShareScreenState extends State<EventShareScreen> {
                         Icon(
                           LucideIcons.calendar,
                           size: 14,
-                          color: Colors.grey[600],
+                          color: AppColors.textSecondary,
                         ),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
                             widget.eventDate,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[700],
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ),
@@ -214,15 +209,14 @@ class _EventShareScreenState extends State<EventShareScreen> {
                           Icon(
                             LucideIcons.mapPin,
                             size: 14,
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
                           ),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
                               widget.eventLocation!,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[700],
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.textSecondary,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -238,30 +232,28 @@ class _EventShareScreenState extends State<EventShareScreen> {
                         if (widget.price != null && widget.price! > 0)
                           Text(
                             'Rp ${_formatAmount(widget.price!)}',
-                            style: const TextStyle(
+                            style: AppTextStyles.h3.copyWith(
                               fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFFBBC863),
+                              color: AppColors.secondary,
                             ),
                           )
                         else
-                          const Text(
+                          Text(
                             'Gratis',
-                            style: TextStyle(
+                            style: AppTextStyles.h3.copyWith(
                               fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFFBBC863),
+                              color: AppColors.secondary,
                             ),
                           ),
                         ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFBBC863),
+                            backgroundColor: AppColors.secondary,
                             minimumSize: const Size(80, 32),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Join',
-                            style: TextStyle(fontSize: 12),
+                            style: AppTextStyles.bodySmall,
                           ),
                         ),
                       ],
@@ -280,18 +272,16 @@ class _EventShareScreenState extends State<EventShareScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Link Event',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey,
+          style: AppTextStyles.bodyMediumBold.copyWith(
+            color: AppColors.textTertiary,
           ),
         ),
         const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
-            color: Colors.grey[100],
+            color: AppColors.surfaceAlt,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -304,7 +294,7 @@ class _EventShareScreenState extends State<EventShareScreen> {
                   ),
                   child: Text(
                     _shareLink,
-                    style: const TextStyle(fontSize: 13),
+                    style: AppTextStyles.bodySmall.copyWith(fontSize: 13),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -314,8 +304,8 @@ class _EventShareScreenState extends State<EventShareScreen> {
                 icon: const Icon(LucideIcons.copy, size: 18),
                 onPressed: _copyLink,
                 style: IconButton.styleFrom(
-                  backgroundColor: const Color(0xFFBBC863),
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.secondary,
+                  foregroundColor: AppColors.white,
                 ),
               ),
             ],
@@ -324,11 +314,11 @@ class _EventShareScreenState extends State<EventShareScreen> {
         const SizedBox(height: 8),
         Row(
           children: [
-            Icon(LucideIcons.shield, size: 14, color: Colors.grey[500]),
+            Icon(LucideIcons.shield, size: 14, color: AppColors.textTertiary),
             const SizedBox(width: 6),
             Text(
               'Link akan aktif selama event tersedia',
-              style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+              style: AppTextStyles.label.copyWith(color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -340,12 +330,10 @@ class _EventShareScreenState extends State<EventShareScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Bagikan ke',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey,
+          style: AppTextStyles.bodyMediumBold.copyWith(
+            color: AppColors.textTertiary,
           ),
         ),
         const SizedBox(height: 12),
@@ -373,7 +361,7 @@ class _EventShareScreenState extends State<EventShareScreen> {
             _buildSocialButton(
               LucideIcons.moreHorizontal,
               'Lainnya',
-              Colors.grey[600]!,
+              AppColors.textSecondary,
               _shareMore,
             ),
           ],
@@ -403,7 +391,7 @@ class _EventShareScreenState extends State<EventShareScreen> {
             child: Icon(icon, color: color, size: 24),
           ),
           const SizedBox(height: 6),
-          Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[700])),
+          Text(label, style: AppTextStyles.label.copyWith(color: AppColors.textSecondary)),
         ],
       ),
     );
@@ -413,7 +401,7 @@ class _EventShareScreenState extends State<EventShareScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.surfaceAlt,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -421,11 +409,11 @@ class _EventShareScreenState extends State<EventShareScreen> {
         children: [
           Row(
             children: [
-              Icon(LucideIcons.barChart2, size: 18, color: Colors.grey[700]),
+              Icon(LucideIcons.barChart2, size: 18, color: AppColors.textSecondary),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Statistik Bagikan',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                style: AppTextStyles.bodyMediumBold,
               ),
             ],
           ),
@@ -448,13 +436,12 @@ class _EventShareScreenState extends State<EventShareScreen> {
       children: [
         Text(
           value,
-          style: const TextStyle(
+          style: AppTextStyles.h3.copyWith(
             fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFFBBC863),
+            color: AppColors.secondary,
           ),
         ),
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+        Text(label, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
       ],
     );
   }
@@ -465,12 +452,12 @@ class _EventShareScreenState extends State<EventShareScreen> {
       SnackBar(
         content: const Row(
           children: [
-            Icon(LucideIcons.checkCircle, color: Colors.white),
+            Icon(LucideIcons.checkCircle, color: AppColors.white),
             SizedBox(width: 12),
             Text('Link berhasil disalin!'),
           ],
         ),
-        backgroundColor: const Color(0xFFBBC863),
+        backgroundColor: AppColors.secondary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),

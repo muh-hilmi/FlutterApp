@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../domain/entities/event.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../bloc/qna/qna_bloc.dart';
 import '../../../bloc/qna/qna_event.dart';
 import '../../../bloc/qna/qna_state.dart';
@@ -25,7 +27,7 @@ class EventQnACard extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFFFCFCFC),
+            color: AppColors.cardSurface,
             borderRadius: BorderRadius.circular(14),
           ),
           child: Column(
@@ -34,12 +36,12 @@ class EventQnACard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Q&A',
-                    style: TextStyle(
+                    style: AppTextStyles.button.copyWith(
+                      color: AppColors.textPrimary,
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF1A1A1A),
                       letterSpacing: -0.3,
                     ),
                   ),
@@ -51,12 +53,11 @@ class EventQnACard extends StatelessWidget {
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: const Text(
+                      child: Text(
                         'Liat semua',
-                        style: TextStyle(
-                          fontSize: 13,
+                        style: AppTextStyles.caption.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFFBBC863),
+                          color: AppColors.secondary,
                         ),
                       ),
                     ),
@@ -68,30 +69,29 @@ class EventQnACard extends StatelessWidget {
                 const Center(
                   child: Padding(
                     padding: EdgeInsets.all(20),
-                    child: CircularProgressIndicator(color: Color(0xFFBBC863)),
+                    child: CircularProgressIndicator(color: AppColors.secondary),
                   ),
                 )
               else if (state is QnAError)
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.question_answer_outlined,
                         size: 24,
-                        color: Colors.grey[400],
+                        color: AppColors.textTertiary,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'Belum ada pertanyaan nih.\nJadi yang pertama nanya yuk!',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[600],
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textSecondary,
                             height: 1.4,
                           ),
                         ),
@@ -117,23 +117,22 @@ class EventQnACard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.question_answer_outlined,
                         size: 24,
-                        color: Colors.grey[400],
+                        color: AppColors.textTertiary,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'Belum ada pertanyaan nih.\nJadi yang pertama nanya yuk!',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[600],
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textSecondary,
                             height: 1.4,
                           ),
                         ),
@@ -150,7 +149,7 @@ class EventQnACard extends StatelessWidget {
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     side: const BorderSide(
-                      color: Color(0xFFBBC863),
+                      color: AppColors.secondary,
                       width: 1.5,
                     ),
                     shape: RoundedRectangleBorder(
@@ -160,15 +159,11 @@ class EventQnACard extends StatelessWidget {
                   icon: const Icon(
                     Icons.help_outline,
                     size: 14,
-                    color: Colors.black,
+                    color: AppColors.textPrimary,
                   ),
-                  label: const Text(
+                  label: Text(
                     'Tanya dong 💬',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
+                    style: AppTextStyles.bodyMediumBold,
                   ),
                 ),
               ),
@@ -190,7 +185,7 @@ class EventQnACard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -203,15 +198,14 @@ class EventQnACard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFBBC863).withValues(alpha: 0.15),
+                  color: AppColors.secondary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: const Text(
+                child: Text(
                   'Q',
-                  style: TextStyle(
-                    fontSize: 10,
+                  style: AppTextStyles.captionSmall.copyWith(
                     fontWeight: FontWeight.w900,
-                    color: Color(0xFFBBC863),
+                    color: AppColors.secondary,
                   ),
                 ),
               ),
@@ -222,10 +216,9 @@ class EventQnACard extends StatelessWidget {
                   children: [
                     Text(
                       question,
-                      style: const TextStyle(
-                        fontSize: 13,
+                      style: AppTextStyles.caption.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF1A1A1A),
+                        color: AppColors.textPrimary,
                         height: 1.3,
                       ),
                     ),
@@ -242,10 +235,9 @@ class EventQnACard extends StatelessWidget {
                       },
                       child: Text(
                         'by $askedBy',
-                        style: TextStyle(
-                          fontSize: 10,
+                        style: AppTextStyles.captionSmall.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFFBBC863),
+                          color: AppColors.secondary,
                         ),
                       ),
                     ),
@@ -263,15 +255,14 @@ class EventQnACard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFBBC863).withValues(alpha: 0.15),
+                    color: AppColors.secondary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Text(
+                  child: Text(
                     'A',
-                    style: TextStyle(
-                      fontSize: 10,
+                    style: AppTextStyles.captionSmall.copyWith(
                       fontWeight: FontWeight.w900,
-                      color: Color(0xFFBBC863),
+                      color: AppColors.secondary,
                     ),
                   ),
                 ),
@@ -279,10 +270,8 @@ class EventQnACard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     answer,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey[700],
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
                       height: 1.4,
                     ),
                   ),
@@ -293,19 +282,18 @@ class EventQnACard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.1),
+                color: AppColors.warning.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.schedule, size: 12, color: Colors.orange[700]),
+                  Icon(Icons.schedule, size: 12, color: AppColors.warning),
                   const SizedBox(width: 6),
                   Text(
                     'Menunggu jawaban',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.orange[700],
+                    style: AppTextStyles.captionSmall.copyWith(
+                      color: AppColors.warning,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -340,7 +328,7 @@ class EventQnACard extends StatelessWidget {
         ),
         child: Container(
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: SafeArea(
@@ -357,24 +345,22 @@ class EventQnACard extends StatelessWidget {
                       height: 4,
                       margin: const EdgeInsets.only(bottom: 20),
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: AppColors.border,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                   ),
                   // Title
-                  const Text(
+                  Text(
                     'Mau Tanya Apa Nih? 🤔',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF1A1A1A),
-                    ),
+                    style: AppTextStyles.h3,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Host bakal jawab pertanyaan lo tentang "${event.title}"',
-                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   // Question input
@@ -384,12 +370,11 @@ class EventQnACard extends StatelessWidget {
                     maxLines: 4,
                     decoration: InputDecoration(
                       hintText: 'Tulis pertanyaan lo di sini...',
-                      hintStyle: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[400],
+                      hintStyle: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.textTertiary,
                       ),
                       filled: true,
-                      fillColor: const Color(0xFFFCFCFC),
+                      fillColor: AppColors.cardSurface,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -410,7 +395,7 @@ class EventQnACard extends StatelessWidget {
                               content: const Text(
                                 'Pertanyaan ga boleh kosong!',
                               ),
-                              backgroundColor: Colors.red,
+                              backgroundColor: AppColors.error,
                               behavior: SnackBarBehavior.floating,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
@@ -432,14 +417,14 @@ class EventQnACard extends StatelessWidget {
                               children: [
                                 Icon(
                                   Icons.check_circle,
-                                  color: Colors.white,
+                                  color: AppColors.white,
                                   size: 20,
                                 ),
                                 SizedBox(width: 8),
                                 Text('Pertanyaan terkirim! ✅'),
                               ],
                             ),
-                            backgroundColor: const Color(0xFFBBC863),
+                            backgroundColor: AppColors.secondary,
                             behavior: SnackBarBehavior.floating,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -448,19 +433,18 @@ class EventQnACard extends StatelessWidget {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFBBC863),
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.secondary,
+                        foregroundColor: AppColors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                         elevation: 0,
                       ),
-                      child: const Text(
+                      child: Text(
                         'Kirim Pertanyaan 🚀',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
+                        style: AppTextStyles.button.copyWith(
+                          color: AppColors.white,
                         ),
                       ),
                     ),

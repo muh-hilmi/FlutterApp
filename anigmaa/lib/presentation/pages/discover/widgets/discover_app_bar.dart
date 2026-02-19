@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class DiscoverAppBar extends StatelessWidget {
   final String location;
@@ -8,8 +10,8 @@ class DiscoverAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
-      backgroundColor: Colors.white,
-      surfaceTintColor: Colors.white,
+      backgroundColor: AppColors.white,
+      surfaceTintColor: AppColors.white,
       elevation: 0,
       scrolledUnderElevation: 0,
       pinned: true,
@@ -24,12 +26,9 @@ class DiscoverAppBar extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Temukan',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF1A1A1A),
+              style: AppTextStyles.h2.copyWith(
                 letterSpacing: -0.5,
                 height: 1.2,
               ),
@@ -40,16 +39,15 @@ class DiscoverAppBar extends StatelessWidget {
                 Icon(
                   Icons.location_on_outlined,
                   size: 16,
-                  color: Colors.grey.shade600,
+                  color: AppColors.textSecondary,
                 ),
                 const SizedBox(width: 4),
                 Flexible(
                   child: Text(
                     location,
-                    style: TextStyle(
-                      fontSize: 14,
+                    style: AppTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.w500,
-                      color: Colors.grey.shade600,
+                      color: AppColors.textSecondary,
                       height: 1.2,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -58,7 +56,7 @@ class DiscoverAppBar extends StatelessWidget {
                 Icon(
                   Icons.keyboard_arrow_down,
                   size: 16,
-                  color: Colors.grey.shade600,
+                  color: AppColors.textSecondary,
                 ),
               ],
             ),
@@ -76,7 +74,7 @@ class DiscoverAppBar extends StatelessWidget {
                 },
                 icon: Icon(
                   Icons.notifications_outlined,
-                  color: Colors.grey.shade700,
+                  color: AppColors.textSecondary,
                   size: 24,
                 ),
               ),
@@ -87,7 +85,7 @@ class DiscoverAppBar extends StatelessWidget {
                   width: 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: AppColors.error,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),

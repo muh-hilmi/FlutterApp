@@ -4,6 +4,8 @@ import '../../../domain/entities/community_post.dart';
 import '../../../domain/entities/event.dart';
 import '../../../domain/entities/user.dart';
 import 'community_utils.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class CommunityPostCard extends StatelessWidget {
   final CommunityPost post;
@@ -41,16 +43,12 @@ class CommunityPostCard extends StatelessWidget {
                     children: [
                       Text(
                         post.author.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                        ),
+                        style: AppTextStyles.bodyLargeBold,
                       ),
                       Text(
                         timeago.format(post.createdAt),
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -58,7 +56,7 @@ class CommunityPostCard extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: () {},
-                  icon: Icon(Icons.more_horiz, color: Colors.grey[600]),
+                  icon: Icon(Icons.more_horiz, color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -97,7 +95,7 @@ class CommunityPostCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.surfaceAlt,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -106,10 +104,10 @@ class CommunityPostCard extends StatelessWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: AppColors.border,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.event, color: Colors.white),
+            child: const Icon(Icons.event, color: AppColors.white),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -118,24 +116,19 @@ class CommunityPostCard extends StatelessWidget {
               children: [
                 Text(
                   event.title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
+                  style: AppTextStyles.bodyMediumBold,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   CommunityUtils.formatEventTime(event.startTime),
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
                   ),
                 ),
                 Text(
                   event.location.name,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -159,12 +152,14 @@ class CommunityPostCard extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 20, color: Colors.grey[600]),
+            Icon(icon, size: 20, color: AppColors.textSecondary),
             if (count != null) ...[
               const SizedBox(width: 4),
               Text(
                 count.toString(),
-                style: TextStyle(color: Colors.grey[600]),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ],
@@ -199,10 +194,10 @@ class CommunityEventCard extends StatelessWidget {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: AppColors.border,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.event, color: Colors.white, size: 32),
+                child: const Icon(Icons.event, color: AppColors.white, size: 32),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -211,10 +206,7 @@ class CommunityEventCard extends StatelessWidget {
                   children: [
                     Text(
                       event.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
+                      style: AppTextStyles.bodyLargeBold,
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -222,14 +214,13 @@ class CommunityEventCard extends StatelessWidget {
                         Icon(
                           Icons.access_time,
                           size: 16,
-                          color: Colors.grey[600],
+                          color: AppColors.textSecondary,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           CommunityUtils.formatEventTime(event.startTime),
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -240,15 +231,14 @@ class CommunityEventCard extends StatelessWidget {
                         Icon(
                           Icons.location_on,
                           size: 16,
-                          color: Colors.grey[600],
+                          color: AppColors.textSecondary,
                         ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             event.location.name,
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.textSecondary,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),

@@ -8,6 +8,8 @@ import '../../../data/models/analytics_model.dart';
 import '../../../data/services/analytics_service.dart';
 import '../../../injection_container.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class HostDashboardScreen extends StatefulWidget {
   const HostDashboardScreen({super.key});
@@ -89,11 +91,11 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Icon(Icons.error_outline,
-                          size: 48, color: Colors.red),
+                          size: 48, color: AppColors.error),
                       const SizedBox(height: 16),
                       Text(_errorMessage!,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.red)),
+                          style: const TextStyle(color: AppColors.error)),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: _loadData,
@@ -147,25 +149,25 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
           'Total Revenue',
           formatter.format(_summary!.totalRevenue),
           Icons.monetization_on,
-          Colors.green,
+          AppColors.success,
         ),
         _buildStatCard(
           'Net Revenue',
           formatter.format(_summary!.netRevenue),
           Icons.account_balance_wallet,
-          Colors.blue,
+          AppColors.info,
         ),
         _buildStatCard(
           'Total Event',
           '${_summary!.totalEvents}',
           Icons.event,
-          Colors.orange,
+          AppColors.warning,
         ),
         _buildStatCard(
           'Tiket Terjual',
           '${_summary!.totalTicketsSold}',
           Icons.confirmation_number,
-          Colors.purple,
+          AppColors.secondary,
         ),
       ],
     );
@@ -191,9 +193,8 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
                 Expanded(
                   child: Text(
                     title,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -205,9 +206,9 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
             const SizedBox(height: 8),
             Text(
               value,
-              style: const TextStyle(
-                fontSize: 18,
+              style: AppTextStyles.h3.copyWith(
                 fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -229,12 +230,9 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Revenue Bulanan 📈',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -250,7 +248,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
                         getTitlesWidget: (value, meta) {
                           return Text(
                             '${(value / 1000).toInt()}K',
-                            style: const TextStyle(fontSize: 10),
+                            style: AppTextStyles.label.copyWith(color: AppColors.textSecondary),
                           );
                         },
                       ),
@@ -265,7 +263,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
                             final month = _summary!.revenueByMonth[index].month;
                             return Text(
                               DateFormat('MMM').format(DateTime(2024, month)),
-                              style: const TextStyle(fontSize: 10),
+                              style: AppTextStyles.label.copyWith(color: AppColors.textSecondary),
                             );
                           }
                           return const Text('');
@@ -287,12 +285,12 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
                         );
                       }).toList(),
                       isCurved: true,
-                      color: Colors.blue,
+                      color: AppColors.info,
                       barWidth: 3,
                       dotData: FlDotData(show: true),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: Colors.blue.withValues(alpha: 0.1),
+                        color: AppColors.info.withValues(alpha: 0.1),
                       ),
                     ),
                   ],
@@ -323,26 +321,23 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Event Terlaris 🔥',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(
                 event.title,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: AppTextStyles.bodyMediumBold,
               ),
               subtitle: Text(
                 '${event.ticketsSold} tiket terjual • ${formatter.format(event.netRevenue)}',
               ),
               trailing: Chip(
                 label: Text('${event.fillRate.toStringAsFixed(1)}% terisi'),
-                backgroundColor: Colors.green.withValues(alpha: 0.2),
+                backgroundColor: AppColors.success.withValues(alpha: 0.2),
               ),
               onTap: () {
                 Navigator.pushNamed(
@@ -375,12 +370,9 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Revenue Per Kategori 💰',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             ..._summary!.revenueByCategory.map((category) {
@@ -391,17 +383,17 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
                       category.category.hashCode % Colors.primaries.length],
                   child: Text(
                     category.eventsCount.toString(),
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: AppColors.white),
                   ),
                 ),
                 title: Text(
                   category.category.toUpperCase(),
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text('${category.ticketsSold} tiket'),
                 trailing: Text(
                   formatter.format(category.revenue),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
                 ),
               );
             }),

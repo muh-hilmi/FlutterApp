@@ -13,6 +13,8 @@ import '../../bloc/midtrans_payment/midtrans_payment_bloc.dart';
 import '../../../domain/entities/event.dart';
 import '../tickets/post_payment_ticket_screen.dart';
 import '../../widgets/tickets/celebration_bottom_sheet.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 /// Midtrans In-App Payment Screen
 ///
@@ -191,21 +193,19 @@ class _PaymentContentState extends State<_PaymentContent> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(color: Color(0xFFBBC863)),
+          const CircularProgressIndicator(color: AppColors.secondary),
           const SizedBox(height: 16),
           Text(
             'Memproses pembayaran...',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Jangan tutup aplikasi',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[500],
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textTertiary,
             ),
           ),
         ],
@@ -223,20 +223,22 @@ class _PaymentContentState extends State<_PaymentContent> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.red[50],
+                color: AppColors.error.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(LucideIcons.alertCircle, size: 40, color: Colors.red[400]),
+              child: Icon(LucideIcons.alertCircle, size: 40, color: AppColors.error),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Terjadi Kesalahan',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: AppTextStyles.bodyLargeBold.copyWith(fontSize: 18),
             ),
             const SizedBox(height: 8),
             Text(
               message,
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -245,7 +247,7 @@ class _PaymentContentState extends State<_PaymentContent> {
               icon: const Icon(LucideIcons.refreshCw, size: 18),
               label: const Text('Coba Lagi'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFBBC863),
+                backgroundColor: AppColors.secondary,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
             ),
@@ -278,7 +280,7 @@ class _PaymentContentState extends State<_PaymentContent> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.surfaceAlt,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -286,11 +288,11 @@ class _PaymentContentState extends State<_PaymentContent> {
         children: [
           Row(
             children: [
-              Icon(LucideIcons.receipt, size: 20, color: Colors.grey[700]),
+              Icon(LucideIcons.receipt, size: 20, color: AppColors.textSecondary),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Ringkasan Pesanan',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                style: AppTextStyles.bodyMediumBold,
               ),
             ],
           ),
@@ -314,17 +316,17 @@ class _PaymentContentState extends State<_PaymentContent> {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyMedium.copyWith(
             fontSize: 13,
-            color: Colors.grey[700],
+            color: AppColors.textSecondary,
             fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
         Text(
           value,
-          style: TextStyle(
+          style: AppTextStyles.bodyMedium.copyWith(
             fontSize: 13,
-            color: isBold ? const Color(0xFFBBC863) : Colors.grey[800],
+            color: isBold ? AppColors.secondary : AppColors.textEmphasis,
             fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
           ),
         ),
@@ -336,9 +338,9 @@ class _PaymentContentState extends State<_PaymentContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Metode Pembayaran Tersedia',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          style: AppTextStyles.bodyMediumBold,
         ),
         const SizedBox(height: 12),
         Wrap(
@@ -360,15 +362,18 @@ class _PaymentContentState extends State<_PaymentContent> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: Colors.grey[700]),
+          Icon(icon, size: 14, color: AppColors.textSecondary),
           const SizedBox(width: 6),
-          Text(label, style: const TextStyle(fontSize: 12)),
+          Text(
+            label,
+            style: AppTextStyles.bodySmall,
+          ),
         ],
       ),
     );
@@ -378,17 +383,19 @@ class _PaymentContentState extends State<_PaymentContent> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFE3F2FD),
+        color: AppColors.info.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
-          Icon(LucideIcons.shieldCheck, size: 18, color: Colors.blue[700]),
+          Icon(LucideIcons.shieldCheck, size: 18, color: AppColors.info),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               'Pembayaran aman dengan enkripsi SSL',
-              style: TextStyle(fontSize: 12, color: Colors.blue[700]),
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.info,
+              ),
             ),
           ),
         ],
@@ -430,25 +437,29 @@ class _PaymentContentState extends State<_PaymentContent> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFD4EDDA),
+                color: AppColors.success.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(LucideIcons.check, size: 32, color: Color(0xFF155724)),
+              child: Icon(LucideIcons.check, size: 32, color: AppColors.success),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Pembayaran Berhasil!',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: AppTextStyles.bodyLargeBold.copyWith(fontSize: 18),
             ),
             const SizedBox(height: 8),
             Text(
               'Order ID: ${state.orderId}',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
             if (state.transactionId != null)
               Text(
                 'Transaction ID: ${state.transactionId}',
-                style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                style: AppTextStyles.captionSmall.copyWith(
+                  color: AppColors.textTertiary,
+                ),
               ),
             const SizedBox(height: 20),
             SizedBox(
@@ -459,7 +470,7 @@ class _PaymentContentState extends State<_PaymentContent> {
                   Navigator.pop(context, true); // Return success
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFBBC863),
+                  backgroundColor: AppColors.secondary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: const Text('Selesai'),
@@ -528,20 +539,23 @@ class _PaymentContentState extends State<_PaymentContent> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.red[50],
+                color: AppColors.error.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(LucideIcons.xCircle, size: 32, color: Colors.red[400]),
+              child: Icon(LucideIcons.xCircle, size: 32, color: AppColors.error),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Pembayaran Gagal',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: AppTextStyles.bodyLargeBold.copyWith(fontSize: 18),
             ),
             const SizedBox(height: 8),
             Text(
               state.message,
-              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontSize: 13,
+                color: AppColors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
@@ -551,7 +565,7 @@ class _PaymentContentState extends State<_PaymentContent> {
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.grey[300]!),
+                      side: const BorderSide(color: AppColors.border),
                     ),
                     child: const Text('Tutup'),
                   ),
@@ -564,7 +578,7 @@ class _PaymentContentState extends State<_PaymentContent> {
                       _initiatePayment();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFBBC863),
+                      backgroundColor: AppColors.secondary,
                     ),
                     child: const Text('Coba Lagi'),
                   ),
@@ -588,20 +602,22 @@ class _PaymentContentState extends State<_PaymentContent> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFF3CD),
+                color: AppColors.warning.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: Icon(LucideIcons.clock, size: 32, color: Colors.orange[700]),
+              child: Icon(LucideIcons.clock, size: 32, color: AppColors.warning),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Pembayaran Pending',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: AppTextStyles.bodyLargeBold.copyWith(fontSize: 18),
             ),
             const SizedBox(height: 8),
             Text(
               'Selesaikan pembayaran Anda. Order ID: ${state.orderId}',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -613,7 +629,7 @@ class _PaymentContentState extends State<_PaymentContent> {
                   Navigator.pop(context, false); // Return pending
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFBBC863),
+                  backgroundColor: AppColors.secondary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: const Text('Cek Status'),
@@ -688,7 +704,7 @@ class _PaymentWebViewState extends State<_PaymentWebView> {
             // Payment progress header
             Container(
               padding: const EdgeInsets.all(16),
-              color: Colors.grey[100],
+              color: AppColors.surfaceAlt,
               child: Row(
                 children: [
                   const CircularProgressIndicator(strokeWidth: 2),
@@ -697,18 +713,14 @@ class _PaymentWebViewState extends State<_PaymentWebView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Menunggu Pembayaran',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: AppTextStyles.bodyMediumBold,
                         ),
                         Text(
                           'Order ID: ${widget.orderId}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -731,7 +743,7 @@ class _PaymentWebViewState extends State<_PaymentWebView> {
         ),
         if (_isLoading)
           const Center(
-            child: CircularProgressIndicator(color: Color(0xFFBBC863)),
+            child: CircularProgressIndicator(color: AppColors.secondary),
           ),
       ],
     );

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class EmptyStateWidget extends StatelessWidget {
   final IconData icon;
@@ -27,11 +29,11 @@ class EmptyStateWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: AppColors.primary.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -40,16 +42,15 @@ class EmptyStateWidget extends StatelessWidget {
             child: Icon(
               icon,
               size: iconSize,
-              color: iconColor ?? Colors.grey[400],
+              color: iconColor ?? AppColors.textTertiary,
             ),
           ),
           const SizedBox(height: 20),
           Text(
             title,
-            style: TextStyle(
+            style: AppTextStyles.bodyLargeBold.copyWith(
               fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
+              color: AppColors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -57,7 +58,9 @@ class EmptyStateWidget extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               subtitle!,
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
           ],

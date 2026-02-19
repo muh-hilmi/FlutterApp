@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../domain/entities/event.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_colors.dart' as legacyColors;
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/event_category_utils.dart';
 import '../../../bloc/events/events_bloc.dart';
 import '../../../bloc/events/events_state.dart';
@@ -22,15 +24,11 @@ class EventSimilarList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'Similar Events',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: Colors.black87,
-            ),
+            style: AppTextStyles.bodyLargeBold,
           ),
         ),
         const SizedBox(height: 12),
@@ -94,11 +92,11 @@ class EventSimilarList extends StatelessWidget {
         width: 240,
         margin: const EdgeInsets.only(right: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: AppColors.primary.withValues(alpha: 0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -134,16 +132,13 @@ class EventSimilarList extends StatelessWidget {
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.getCategoryColor(event.category),
+                        color: legacyColors.AppColors.getCategoryColor(event.category),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         EventCategoryUtils.getCategoryName(event.category),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
+                        style: AppTextStyles.label.copyWith(
+                          color: AppColors.white,
                         ),
                       ),
                     ),
@@ -159,10 +154,8 @@ class EventSimilarList extends StatelessWidget {
                 children: [
                   Text(
                     event.title,
-                    style: const TextStyle(
-                      fontSize: 14,
+                    style: AppTextStyles.bodyMediumBold.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -170,18 +163,17 @@ class EventSimilarList extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.location_on_outlined,
                         size: 12,
-                        color: Colors.grey[500],
+                        color: AppColors.textTertiary,
                       ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           event.location.name,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[600],
+                          style: AppTextStyles.captionSmall.copyWith(
+                            color: AppColors.textSecondary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -189,11 +181,7 @@ class EventSimilarList extends StatelessWidget {
                       ),
                       Text(
                         '${event.currentAttendees}/${event.maxAttendees}',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey[500],
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.captionSmall,
                       ),
                     ],
                   ),

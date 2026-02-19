@@ -11,6 +11,8 @@ import '../../../data/datasources/user_remote_datasource.dart';
 import '../../../injection_container.dart' as di;
 import '../../../main.dart' show navigatorKey;
 import 'notification_settings_screen.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -29,17 +31,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Pengaturan ⚙️',
-          style: TextStyle(
-            color: Colors.black87,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
+          style: AppTextStyles.h3.copyWith(color: AppColors.textPrimary),
         ),
       ),
       body: SingleChildScrollView(
@@ -253,15 +251,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
           child: Text(
             title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
-            ),
+            style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.textSecondary),
           ),
         ),
         Container(
-          color: Colors.white,
+          color: AppColors.white,
           child: Column(children: children),
         ),
       ],
@@ -276,26 +270,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required ValueChanged<bool> onChanged,
   }) {
     return ListTile(
-      leading: Icon(icon, color: Colors.black87),
+      leading: Icon(icon, color: AppColors.textEmphasis),
       title: Text(
         title,
-        style: const TextStyle(
-          fontSize: 16,
+        style: AppTextStyles.bodyLarge.copyWith(
           fontWeight: FontWeight.w500,
-          color: Colors.black87,
+          color: AppColors.textEmphasis,
         ),
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(
-          fontSize: 14,
-          color: Colors.grey[600],
-        ),
+        style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
       ),
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeTrackColor: Colors.black,
+        activeTrackColor: AppColors.primary,
       ),
     );
   }
@@ -310,26 +300,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return ListTile(
       leading: Icon(
         icon,
-        color: isDestructive ? Colors.red : Colors.black87,
+        color: isDestructive ? AppColors.error : AppColors.textEmphasis,
       ),
       title: Text(
         title,
-        style: TextStyle(
-          fontSize: 16,
+        style: AppTextStyles.bodyLarge.copyWith(
           fontWeight: FontWeight.w500,
-          color: isDestructive ? Colors.red : Colors.black87,
+          color: isDestructive ? AppColors.error : AppColors.textEmphasis,
         ),
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(
-          fontSize: 14,
-          color: Colors.grey[600],
-        ),
+        style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
       ),
       trailing: Icon(
         Icons.chevron_right,
-        color: Colors.grey[400],
+        color: AppColors.textTertiary,
       ),
       onTap: onTap,
     );
@@ -348,7 +334,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _showMessage('Kelola user yang diblokir segera hadir! 🔜');
   }
 
-  
+
   void _showAbout() {
     showDialog(
       context: context,
@@ -379,7 +365,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  
+
   void _showLocationPermissionDialog() {
     showDialog(
       context: context,
@@ -418,7 +404,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
             child: const Text('Keluar'),
           ),
         ],
@@ -448,7 +434,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Logout gagal: ${e.toString()}'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.error,
             ),
           );
         }
@@ -474,7 +460,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.pop(context);
               _performDeleteAccount();
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
             child: const Text('Hapus'),
           ),
         ],
@@ -548,7 +534,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Gagal menghapus akun: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }

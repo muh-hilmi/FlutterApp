@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../domain/entities/event.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class EventAttendeesCard extends StatelessWidget {
   final Event event;
@@ -13,7 +15,7 @@ class EventAttendeesCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFFCFCFC),
+        color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -21,10 +23,10 @@ class EventAttendeesCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: const Color(0xFFBBC863).withValues(alpha: 0.15),
+              color: AppColors.secondary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.people, color: Color(0xFFBBC863), size: 18),
+            child: const Icon(Icons.people, color: AppColors.secondary, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -33,19 +35,13 @@ class EventAttendeesCard extends StatelessWidget {
               children: [
                 Text(
                   '${event.currentAttendees} orang bakal dateng',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1A1A1A),
-                  ),
+                  style: AppTextStyles.bodyMediumBold,
                 ),
                 if (event.spotsLeft > 0)
                   Text(
                     '${event.spotsLeft} slot tersisa',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey[600],
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
                     ),
                   ),
               ],

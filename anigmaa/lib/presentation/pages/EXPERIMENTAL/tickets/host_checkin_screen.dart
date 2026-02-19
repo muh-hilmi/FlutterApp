@@ -1,13 +1,11 @@
-// FILE STATUS: EXPERIMENTAL
-// REASON: Unreachable from main routing - secondary feature screen
-// DATE_CLASSIFIED: 2025-12-29
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../bloc/tickets/tickets_bloc.dart';
-import '../../bloc/tickets/tickets_event.dart';
-import '../../bloc/tickets/tickets_state.dart';
-import '../../../injection_container.dart' as di;
+import '../../../bloc/tickets/tickets_bloc.dart';
+import '../../../bloc/tickets/tickets_event.dart';
+import '../../../bloc/tickets/tickets_state.dart';
+import '../../../../injection_container.dart' as di;
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class HostCheckInScreen extends StatefulWidget {
   final String eventId;
@@ -24,13 +22,16 @@ class HostCheckInScreen extends StatefulWidget {
 class _HostCheckInScreenState extends State<HostCheckInScreen> {
   final TextEditingController _codeController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  int _checkedInCount = 0;
+  int _totalCount = 0;
 
   @override
   void initState() {
     super.initState();
-    // Auto-focus on code input
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
+      // Load initial stats
+      context.read<TicketsBloc>().add(LoadEventTickets(widget.eventId));
     });
   }
 
@@ -46,22 +47,18 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
     return BlocProvider(
       create: (_) => di.sl<TicketsBloc>(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFFCFCFC),
+        backgroundColor: AppColors.cardSurface,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.white,
           elevation: 0,
-          title: const Text(
+          title: Text(
             'Check-In Peserta',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF1A1A1A),
-            ),
+            style: AppTextStyles.h3,
           ),
           leading: IconButton(
             icon: const Icon(
               Icons.arrow_back_rounded,
-              color: Color(0xFF1A1A1A),
+              color: AppColors.textPrimary,
             ),
             onPressed: () => Navigator.pop(context),
           ),
@@ -72,6 +69,13 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
               _showCheckInSuccess(context, state.ticket.attendanceCode);
               _codeController.clear();
               _focusNode.requestFocus();
+              // Refresh stats after successful check-in
+              context.read<TicketsBloc>().add(LoadEventTickets(widget.eventId));
+            } else if (state is EventTicketsLoaded) {
+              setState(() {
+                _checkedInCount = state.checkedInCount;
+                _totalCount = state.totalCount;
+              });
             } else if (state is TicketsError) {
               _showError(context, state.message);
               _codeController.clear();
@@ -87,10 +91,10 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.blue[50],
+                    color: AppColors.info.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: Colors.blue[200]!,
+                      color: AppColors.info.withValues(alpha: 0.2),
                       width: 1,
                     ),
                   ),
@@ -101,16 +105,15 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
                         children: [
                           Icon(
                             Icons.info_outline,
-                            color: Colors.blue[700],
+                            color: AppColors.info,
                             size: 22,
                           ),
                           const SizedBox(width: 10),
                           Text(
                             'Cara Check-In',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyLargeBold.copyWith(
                               fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.blue[900],
+                              color: AppColors.info,
                             ),
                           ),
                         ],
@@ -120,9 +123,8 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
                         '1. Minta peserta tunjukin kode kehadiran\n'
                         '2. Masukin kode 4 karakter di bawah\n'
                         '3. Klik "Check-In" buat verifikasi',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.blue[800],
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.info,
                           height: 1.6,
                         ),
                       ),
@@ -131,23 +133,22 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
                 ),
                 const SizedBox(height: 32),
                 // Code input section
-                const Text(
+                Text(
                   'Masukin Kode Kehadiran',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyLargeBold.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF1A1A1A),
                   ),
                 ),
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
+                        color: AppColors.primary.withValues(alpha: 0.06),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -161,55 +162,55 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
                         focusNode: _focusNode,
                         textAlign: TextAlign.center,
                         textCapitalization: TextCapitalization.characters,
-                        maxLength: 4,
+                        maxLength: 8,
                         style: const TextStyle(
                           fontSize: 48,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 12,
-                          color: Color(0xFFBBC863),
+                          color: AppColors.secondary,
                           fontFamily: 'monospace',
                         ),
                         decoration: InputDecoration(
-                          hintText: 'XXXX',
-                          hintStyle: TextStyle(
+                          hintText: 'XXXXXXXX',
+                          hintStyle: const TextStyle(
                             fontSize: 48,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 12,
-                            color: Colors.grey[300],
+                            color: AppColors.border,
                             fontFamily: 'monospace',
                           ),
                           counterText: '',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(
-                              color: Colors.grey[300]!,
+                            borderSide: const BorderSide(
+                              color: AppColors.border,
                               width: 2,
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(
-                              color: Colors.grey[300]!,
+                            borderSide: const BorderSide(
+                              color: AppColors.border,
                               width: 2,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: const BorderSide(
-                              color: Color(0xFFBBC863),
+                              color: AppColors.secondary,
                               width: 3,
                             ),
                           ),
                           filled: true,
-                          fillColor: const Color(0xFFFCFCFC),
+                          fillColor: AppColors.cardSurface,
                           contentPadding: const EdgeInsets.symmetric(
                             vertical: 24,
                             horizontal: 20,
                           ),
                         ),
                         onChanged: (value) {
-                          if (value.length == 4) {
-                            // Auto check-in when 4 characters entered
+                          if (value.length == 8) {
+                            // Auto check-in when 8 characters entered
                             _handleCheckIn(context);
                           }
                         },
@@ -223,14 +224,14 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
                           return SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: (_codeController.text.length == 4 && !isLoading)
+                              onPressed: (_codeController.text.length == 8 && !isLoading)
                                   ? () => _handleCheckIn(context)
                                   : null,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFBBC863),
-                                foregroundColor: Colors.white,
-                                disabledBackgroundColor: Colors.grey[300],
-                                disabledForegroundColor: Colors.grey[500],
+                                backgroundColor: AppColors.secondary,
+                                foregroundColor: AppColors.white,
+                                disabledBackgroundColor: AppColors.border,
+                                disabledForegroundColor: AppColors.textTertiary,
                                 padding: const EdgeInsets.symmetric(vertical: 18),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14),
@@ -244,15 +245,14 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
                                         valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white,
+                                          AppColors.white,
                                         ),
                                       ),
                                     )
-                                  : const Text(
+                                  : Text(
                                       'Check-In Peserta',
-                                      style: TextStyle(
+                                      style: AppTextStyles.button.copyWith(
                                         fontSize: 17,
-                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                             ),
@@ -267,19 +267,15 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Statistik Check-In',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1A1A1A),
-                        ),
+                        style: AppTextStyles.bodyLargeBold,
                       ),
                       const SizedBox(height: 16),
                       Row(
@@ -288,8 +284,8 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
                             child: _buildStatCard(
                               icon: Icons.check_circle,
                               label: 'Udah Check-In',
-                              value: '0', // TODO: Get from event data
-                              color: Colors.green,
+                              value: '$_checkedInCount',
+                              color: AppColors.success,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -297,8 +293,8 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
                             child: _buildStatCard(
                               icon: Icons.people,
                               label: 'Total Tiket',
-                              value: '0', // TODO: Get from event data
-                              color: const Color(0xFFBBC863),
+                              value: '$_totalCount',
+                              color: AppColors.secondary,
                             ),
                           ),
                         ],
@@ -336,7 +332,7 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
           const SizedBox(height: 8),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.h2.copyWith(
               fontSize: 24,
               fontWeight: FontWeight.w900,
               color: color,
@@ -345,8 +341,7 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
           const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
+            style: AppTextStyles.caption.copyWith(
               fontWeight: FontWeight.w600,
               color: color,
             ),
@@ -360,14 +355,17 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
   void _handleCheckIn(BuildContext context) {
     final code = _codeController.text.trim().toUpperCase();
 
-    if (code.length != 4) {
-      _showError(context, 'Masukin kode 4 karakter yang bener ya');
+    if (code.length != 8) {
+      _showError(context, 'Masukin kode 8 karakter yang bener ya');
       return;
     }
 
-    // Dispatch check-in event
+    // Dispatch check-in event with eventId for host flow
     context.read<TicketsBloc>().add(
-          CheckInTicketRequested.byCode(code),
+          CheckInTicketRequested(
+            attendanceCode: code,
+            eventId: widget.eventId,
+          ),
         );
   }
 
@@ -388,31 +386,27 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: Colors.green[50],
+                  color: AppColors.success.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.check_circle,
-                  color: Colors.green[600],
+                  color: AppColors.success,
                   size: 50,
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Check-In Berhasil!',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1A1A1A),
-                ),
+                style: AppTextStyles.h2.copyWith(fontSize: 22),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
                 'Tiket $code udah diverifikasi nih',
-                style: TextStyle(
+                style: AppTextStyles.button.copyWith(
                   fontSize: 15,
-                  color: Colors.grey[600],
+                  color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
@@ -423,19 +417,16 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(dialogContext),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFBBC863),
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: AppColors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Lanjut',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: AppTextStyles.button,
                   ),
                 ),
               ),
@@ -462,31 +453,27 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: Colors.red[50],
+                  color: AppColors.error.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.error_outline,
-                  color: Colors.red[600],
+                  color: AppColors.error,
                   size: 50,
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Waduh, Check-In Gagal',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1A1A1A),
-                ),
+                style: AppTextStyles.h2.copyWith(fontSize: 22),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
                 message,
-                style: TextStyle(
+                style: AppTextStyles.button.copyWith(
                   fontSize: 15,
-                  color: Colors.grey[600],
+                  color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
@@ -497,19 +484,16 @@ class _HostCheckInScreenState extends State<HostCheckInScreen> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(dialogContext),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red[600],
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.error,
+                    foregroundColor: AppColors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Coba Lagi',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: AppTextStyles.button,
                   ),
                 ),
               ),

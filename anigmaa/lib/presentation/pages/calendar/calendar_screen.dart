@@ -6,7 +6,9 @@ import '../../../domain/entities/event_category.dart';
 import '../../../domain/entities/event_host.dart';
 import '../../../domain/entities/event_location.dart';
 import '../../../domain/entities/ticket.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_colors.dart' as legacyColors;
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/event_category_utils.dart';
 import '../../../core/services/auth_service.dart';
@@ -81,7 +83,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: AppColors.surface,
       body: BlocConsumer<TicketsBloc, TicketsState>(
         listener: (context, state) {
           if (state is TicketsError) {
@@ -118,7 +120,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Widget _buildAppBar() {
     return SliverAppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       elevation: 0,
       floating: true,
       snap: true,
@@ -128,33 +130,29 @@ class _CalendarScreenState extends State<CalendarScreen> {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: Colors.black,
+              color: AppColors.primary,
               borderRadius: BorderRadius.circular(6),
             ),
             child: const Icon(
               Icons.calendar_today,
-              color: Colors.white,
+              color: AppColors.white,
               size: 16,
             ),
           ),
           const SizedBox(width: 12),
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Calendar',
-                style: TextStyle(
-                  color: Colors.black87,
+                style: AppTextStyles.bodyLargeBold.copyWith(
                   fontSize: 18,
-                  fontWeight: FontWeight.w600,
                 ),
               ),
               Text(
                 'Event Schedule',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textTertiary,
                 ),
               ),
             ],
@@ -171,7 +169,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           },
           icon: const Icon(
             Icons.today,
-            color: Colors.black87,
+            color: AppColors.textEmphasis,
             size: 22,
           ),
         ),
@@ -184,11 +182,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.primary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -203,14 +201,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
         startingDayOfWeek: StartingDayOfWeek.monday,
         calendarStyle: const CalendarStyle(
           outsideDaysVisible: false,
-          weekendTextStyle: TextStyle(color: Colors.red),
-          holidayTextStyle: TextStyle(color: Colors.red),
+          weekendTextStyle: TextStyle(color: AppColors.error),
+          holidayTextStyle: TextStyle(color: AppColors.error),
           selectedDecoration: BoxDecoration(
-            color: Colors.black,
+            color: AppColors.primary,
             shape: BoxShape.circle,
           ),
           todayDecoration: BoxDecoration(
-            color: Colors.grey,
+            color: AppColors.textTertiary,
             shape: BoxShape.circle,
           ),
           markerDecoration: BoxDecoration(
@@ -224,14 +222,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
           titleCentered: true,
           leftChevronIcon: Icon(
             Icons.chevron_left,
-            color: Colors.black87,
+            color: AppColors.textEmphasis,
           ),
           rightChevronIcon: Icon(
             Icons.chevron_right,
-            color: Colors.black87,
+            color: AppColors.textEmphasis,
           ),
           titleTextStyle: TextStyle(
-            color: Colors.black87,
+            color: AppColors.textEmphasis,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -257,11 +255,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(32),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: AppColors.primary.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -272,23 +270,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
             Icon(
               Icons.event_busy,
               size: 48,
-              color: Colors.grey[400],
+              color: AppColors.textTertiary,
             ),
             const SizedBox(height: 16),
             Text(
               'No events scheduled',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[600],
+              style: AppTextStyles.bodyLargeBold.copyWith(
+                color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'No events on ${_formatSelectedDate()}',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textTertiary,
               ),
             ),
           ],
@@ -303,11 +298,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'Events on ${_formatSelectedDate()}',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Colors.black87,
-            ),
+            style: AppTextStyles.h3.copyWith(fontSize: 18),
           ),
         ),
         const SizedBox(height: 12),
@@ -338,11 +329,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: AppColors.primary.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -354,7 +345,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               width: 4,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.getCategoryColor(event.category),
+                color: legacyColors.AppColors.getCategoryColor(event.category),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(12),
                   bottomLeft: Radius.circular(12),
@@ -372,10 +363,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         Expanded(
                           child: Text(
                             event.title,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
+                            style: AppTextStyles.bodyLargeBold.copyWith(
+                              color: AppColors.textEmphasis,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -387,15 +376,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.getCategoryColor(event.category).withValues(alpha: 0.1),
+                            color: legacyColors.AppColors.getCategoryColor(event.category).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             EventCategoryUtils.getCategoryName(event.category),
-                            style: TextStyle(
-                              color: AppColors.getCategoryColor(event.category),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
+                            style: AppTextStyles.label.copyWith(
+                              color: legacyColors.AppColors.getCategoryColor(event.category),
                             ),
                           ),
                         ),
@@ -407,14 +394,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         Icon(
                           Icons.access_time,
                           size: 14,
-                          color: Colors.grey[500],
+                          color: AppColors.textTertiary,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           _formatTime(event.startTime),
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -422,7 +409,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         Icon(
                           Icons.location_on_outlined,
                           size: 14,
-                          color: Colors.grey[500],
+                          color: AppColors.textTertiary,
                         ),
                         const SizedBox(width: 4),
                         Expanded(
@@ -430,7 +417,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             event.location.name,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[600],
+                              color: AppColors.textSecondary,
                               fontWeight: FontWeight.w500,
                             ),
                             maxLines: 1,
@@ -445,14 +432,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         Icon(
                           Icons.people_outline,
                           size: 14,
-                          color: Colors.grey[500],
+                          color: AppColors.textTertiary,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           '${event.currentAttendees}/${event.maxAttendees} going',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
                           ),
                         ),
                         const Spacer(),
@@ -463,14 +450,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.green[50],
+                              color: AppColors.success.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               'Free',
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: Colors.green[700],
+                              style: AppTextStyles.captionSmall.copyWith(
+                                color: AppColors.success,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -480,7 +466,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             'Rp ${event.price!.toStringAsFixed(0)}',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[600],
+                              color: AppColors.textSecondary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -497,21 +483,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Widget _buildEmptyState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.calendar_today,
             size: 64,
-            color: Colors.grey,
+            color: AppColors.textTertiary,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             'No calendar data available',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
+            style: AppTextStyles.bodyLarge.copyWith(
+              color: AppColors.textTertiary,
             ),
           ),
         ],

@@ -4,6 +4,8 @@ import 'dart:io';
 import '../../../../domain/entities/event_category.dart';
 import '../../../../core/utils/event_category_utils.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class EventPreviewCard extends StatelessWidget {
   final String title;
@@ -47,12 +49,12 @@ class EventPreviewCard extends StatelessWidget {
         margin: const EdgeInsets.only(top: 8),
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFBBC863), width: 2),
+          border: Border.all(color: AppColors.secondary, width: 2),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFBBC863).withValues(alpha: 0.15),
+              color: AppColors.secondary.withValues(alpha: 0.15),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -79,8 +81,8 @@ class EventPreviewCard extends StatelessWidget {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                            const Color(0xFFBBC863).withValues(alpha: 0.3),
-                            const Color(0xFFBBC863).withValues(alpha: 0.1),
+                            AppColors.secondary.withValues(alpha: 0.3),
+                            AppColors.secondary.withValues(alpha: 0.1),
                           ],
                         ),
                       ),
@@ -88,7 +90,7 @@ class EventPreviewCard extends StatelessWidget {
                         child: Icon(
                           Icons.event,
                           size: 64,
-                          color: Color(0xFFBBC863),
+                          color: AppColors.secondary,
                         ),
                       ),
                     );
@@ -104,7 +106,7 @@ class EventPreviewCard extends StatelessWidget {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withValues(alpha: 0.7),
+                          AppColors.primary.withValues(alpha: 0.7),
                         ],
                       ),
                     ),
@@ -119,11 +121,11 @@ class EventPreviewCard extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: AppColors.white.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
+                            color: AppColors.primary.withValues(alpha: 0.1),
                             blurRadius: 8,
                           ),
                         ],
@@ -134,15 +136,13 @@ class EventPreviewCard extends StatelessWidget {
                           const Icon(
                             Icons.preview,
                             size: 14,
-                            color: Color(0xFFBBC863),
+                            color: AppColors.secondary,
                           ),
                           const SizedBox(width: 4),
-                          const Text(
+                          Text(
                             'PREVIEW',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFFBBC863),
+                            style: AppTextStyles.label.copyWith(
+                              color: AppColors.secondary,
                               letterSpacing: 1,
                             ),
                           ),
@@ -162,8 +162,8 @@ class EventPreviewCard extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      const Color(0xFFBBC863).withValues(alpha: 0.3),
-                      const Color(0xFFBBC863).withValues(alpha: 0.1),
+                      AppColors.secondary.withValues(alpha: 0.3),
+                      AppColors.secondary.withValues(alpha: 0.1),
                     ],
                   ),
                 ),
@@ -171,7 +171,7 @@ class EventPreviewCard extends StatelessWidget {
                   child: Icon(
                     Icons.event,
                     size: 64,
-                    color: Color(0xFFBBC863),
+                    color: AppColors.secondary,
                   ),
                 ),
               ),
@@ -185,10 +185,7 @@ class EventPreviewCard extends StatelessWidget {
                   // Event title
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF1A1A1A),
+                    style: AppTextStyles.h3.copyWith(
                       letterSpacing: -0.5,
                     ),
                   ),
@@ -201,15 +198,13 @@ class EventPreviewCard extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+                      color: AppColors.secondary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       EventCategoryUtils.getCategoryDisplayName(category),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFFBBC863),
+                      style: AppTextStyles.label.copyWith(
+                        color: AppColors.secondary,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -219,9 +214,8 @@ class EventPreviewCard extends StatelessWidget {
                   // Description
                   Text(
                     description,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[700],
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textSecondary,
                       height: 1.5,
                       letterSpacing: -0.2,
                     ),
@@ -275,23 +269,22 @@ class EventPreviewCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+            color: AppColors.secondary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             icon,
             size: 16,
-            color: const Color(0xFFBBC863),
+            color: AppColors.secondary,
           ),
         ),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(
-              fontSize: 14,
+            style: AppTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.w500,
-              color: Color(0xFF333333),
+              color: AppColors.textEmphasis,
               letterSpacing: -0.2,
             ),
           ),

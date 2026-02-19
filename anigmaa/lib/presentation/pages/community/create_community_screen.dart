@@ -4,6 +4,8 @@ import '../../../domain/entities/community.dart';
 import '../../../domain/entities/community_category.dart';
 import '../../bloc/communities/communities_bloc.dart';
 import '../../bloc/communities/communities_event.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class CreateCommunityScreen extends StatefulWidget {
   const CreateCommunityScreen({super.key});
@@ -76,7 +78,7 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Community "${community.name}" berhasil dibuat!'),
-          backgroundColor: const Color(0xFFBBC863),
+          backgroundColor: AppColors.secondary,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -88,31 +90,25 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.black87),
+          icon: Icon(Icons.close, color: AppColors.textEmphasis),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Bikin Community',
-          style: TextStyle(
-            color: Colors.black87,
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
+          style: AppTextStyles.h3.copyWith(color: AppColors.textEmphasis),
         ),
         actions: [
           TextButton(
             onPressed: _createCommunity,
-            child: const Text(
+            child: Text(
               'Buat',
-              style: TextStyle(
-                color: Color(0xFFBBC863),
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+              style: AppTextStyles.bodyLargeBold.copyWith(
+                color: AppColors.secondary,
               ),
             ),
           ),
@@ -124,19 +120,17 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
           padding: const EdgeInsets.all(20),
           children: [
             // Icon selector
-            const Text(
+            Text(
               'Icon Community',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
+              style: AppTextStyles.bodyLargeBold.copyWith(
+                color: AppColors.textEmphasis,
               ),
             ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: AppColors.surfaceAlt,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Wrap(
@@ -155,12 +149,12 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                       height: 48,
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? const Color(0xFFBBC863).withValues(alpha: 0.2)
-                            : Colors.white,
+                            ? AppColors.secondary.withValues(alpha: 0.2)
+                            : AppColors.white,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isSelected
-                              ? const Color(0xFFBBC863)
+                              ? AppColors.secondary
                               : Colors.transparent,
                           width: 2,
                         ),
@@ -176,12 +170,10 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
             const SizedBox(height: 24),
 
             // Name field
-            const Text(
+            Text(
               'Nama Community',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
+              style: AppTextStyles.bodyLargeBold.copyWith(
+                color: AppColors.textEmphasis,
               ),
             ),
             const SizedBox(height: 12),
@@ -190,7 +182,7 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
               decoration: InputDecoration(
                 hintText: 'Contoh: Jakarta Developers',
                 filled: true,
-                fillColor: Colors.grey[100],
+                fillColor: AppColors.surfaceAlt,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -213,12 +205,10 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
             const SizedBox(height: 24),
 
             // Description field
-            const Text(
+            Text(
               'Deskripsi',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
+              style: AppTextStyles.bodyLargeBold.copyWith(
+                color: AppColors.textEmphasis,
               ),
             ),
             const SizedBox(height: 12),
@@ -228,7 +218,7 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
               decoration: InputDecoration(
                 hintText: 'Ceritain tentang community kamu...',
                 filled: true,
-                fillColor: Colors.grey[100],
+                fillColor: AppColors.surfaceAlt,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -251,19 +241,17 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
             const SizedBox(height: 24),
 
             // Category selector
-            const Text(
+            Text(
               'Kategori',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
+              style: AppTextStyles.bodyLargeBold.copyWith(
+                color: AppColors.textEmphasis,
               ),
             ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: AppColors.surfaceAlt,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: DropdownButtonHideUnderline(
@@ -290,19 +278,17 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
             const SizedBox(height: 24),
 
             // Location selector
-            const Text(
+            Text(
               'Lokasi',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
+              style: AppTextStyles.bodyLargeBold.copyWith(
+                color: AppColors.textEmphasis,
               ),
             ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: AppColors.surfaceAlt,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: DropdownButtonHideUnderline(
@@ -334,17 +320,15 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
               child: ElevatedButton(
                 onPressed: _createCommunity,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFBBC863),
+                  backgroundColor: AppColors.secondary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   'Buat Community',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                  style: AppTextStyles.bodyLargeBold.copyWith(
+                    color: AppColors.white,
                   ),
                 ),
               ),
@@ -355,9 +339,9 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
             Text(
               'Dengan membuat community, kamu setuju untuk mematuhi aturan dan pedoman komunitas kami.',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: AppTextStyles.bodySmall.copyWith(
                 fontSize: 13,
-                color: Colors.grey[600],
+                color: AppColors.textSecondary,
                 height: 1.4,
               ),
             ),

@@ -50,22 +50,36 @@ class PurchaseTicketRequested extends TicketsEvent {
 class CheckInTicketRequested extends TicketsEvent {
   final String? ticketId;
   final String? attendanceCode;
+  final String? eventId; // required for host check-in flow
 
   const CheckInTicketRequested({
     this.ticketId,
     this.attendanceCode,
+    this.eventId,
   });
 
   const CheckInTicketRequested.byId(String id)
       : ticketId = id,
-        attendanceCode = null;
+        attendanceCode = null,
+        eventId = null;
 
   const CheckInTicketRequested.byCode(String code)
       : ticketId = null,
-        attendanceCode = code;
+        attendanceCode = code,
+        eventId = null;
 
   @override
-  List<Object?> get props => [ticketId, attendanceCode];
+  List<Object?> get props => [ticketId, attendanceCode, eventId];
+}
+
+/// Load all tickets for a specific event (host stats)
+class LoadEventTickets extends TicketsEvent {
+  final String eventId;
+
+  const LoadEventTickets(this.eventId);
+
+  @override
+  List<Object> get props => [eventId];
 }
 
 /// Load ticket by ID
@@ -86,4 +100,15 @@ class LoadTicketByCode extends TicketsEvent {
 
   @override
   List<Object> get props => [attendanceCode];
+}
+
+/// Find a user's ticket for a specific event
+class LoadTicketForEvent extends TicketsEvent {
+  final String userId;
+  final String eventId;
+
+  const LoadTicketForEvent({required this.userId, required this.eventId});
+
+  @override
+  List<Object> get props => [userId, eventId];
 }

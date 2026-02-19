@@ -5,6 +5,8 @@ import 'package:geocoding/geocoding.dart';
 import '../../../data/datasources/user_remote_datasource.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../injection_container.dart' as di;
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class CompleteProfileScreen extends StatefulWidget {
   const CompleteProfileScreen({super.key});
@@ -35,7 +37,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: const Key('complete_profile_screen'),
-      backgroundColor: const Color(0xFFFCFCFC),
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -69,22 +71,19 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Lengkapin Profil Lo 📝',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF000000),
+          style: AppTextStyles.h1.copyWith(
+            color: AppColors.textPrimary,
             letterSpacing: -0.8,
           ),
         ),
         const SizedBox(height: 12),
         Text(
           'Biar kita bisa rekomendasiin event yang cocok sama lo!',
-          style: TextStyle(
-            fontSize: 16,
+          style: AppTextStyles.bodyLarge.copyWith(
             fontWeight: FontWeight.w500,
-            color: Colors.grey[600],
+            color: AppColors.textSecondary,
             letterSpacing: -0.3,
           ),
         ),
@@ -98,13 +97,9 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
       children: [
         Row(
           children: [
-            const Text(
+            Text(
               'Tanggal Lahir',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF000000),
-              ),
+              style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.textPrimary),
             ),
             const SizedBox(width: 4),
             Container(
@@ -113,13 +108,9 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                 color: const Color(0xFFFF8C00),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: const Text(
+              child: Text(
                 'Wajib',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
+                style: AppTextStyles.label.copyWith(color: AppColors.white),
               ),
             ),
           ],
@@ -131,12 +122,12 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: _selectedDate == null
-                    ? Colors.grey[300]!
-                    : const Color(0xFFBBC863),
+                    ? AppColors.border
+                    : AppColors.secondary,
                 width: 1,
               ),
             ),
@@ -145,19 +136,18 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                 Icon(
                   Icons.cake_outlined,
                   color: _selectedDate == null
-                      ? Colors.grey[400]
-                      : const Color(0xFFBBC863),
+                      ? AppColors.textTertiary
+                      : AppColors.secondary,
                 ),
                 const SizedBox(width: 12),
                 Text(
                   _selectedDate == null
                       ? 'Pilih tanggal lahir lo'
                       : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
-                  style: TextStyle(
-                    fontSize: 16,
+                  style: AppTextStyles.bodyLarge.copyWith(
                     color: _selectedDate == null
-                        ? Colors.grey[600]
-                        : Colors.black87,
+                        ? AppColors.textSecondary
+                        : AppColors.textEmphasis,
                     fontWeight: _selectedDate == null
                         ? FontWeight.w400
                         : FontWeight.w600,
@@ -175,24 +165,20 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Gender',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF000000),
-          ),
+          style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.textPrimary),
         ),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: _selectedGender == null
-                  ? Colors.grey[300]!
-                  : const Color(0xFFBBC863),
+                  ? AppColors.border
+                  : AppColors.secondary,
               width: 1,
             ),
           ),
@@ -220,13 +206,9 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Nomor HP',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF000000),
-          ),
+          style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.textPrimary),
         ),
         const SizedBox(height: 8),
         TextField(
@@ -237,18 +219,18 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
             hintText: '08123456789',
             prefixIcon: const Icon(Icons.phone_outlined),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: AppColors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFBBC863), width: 2),
+              borderSide: const BorderSide(color: AppColors.secondary, width: 2),
             ),
           ),
         ),
@@ -262,13 +244,9 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
       children: [
         Row(
           children: [
-            const Text(
+            Text(
               'Lokasi',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF000000),
-              ),
+              style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.textPrimary),
             ),
             const SizedBox(width: 4),
             Container(
@@ -277,13 +255,9 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                 color: const Color(0xFFFF8C00),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: const Text(
+              child: Text(
                 'Wajib',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
+                style: AppTextStyles.label.copyWith(color: AppColors.white),
               ),
             ),
           ],
@@ -295,12 +269,12 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: _location == null
-                    ? Colors.grey[300]!
-                    : const Color(0xFFBBC863),
+                    ? AppColors.border
+                    : AppColors.secondary,
                 width: 1,
               ),
             ),
@@ -315,18 +289,17 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                     : Icon(
                         Icons.location_on_outlined,
                         color: _location == null
-                            ? Colors.grey[400]
-                            : const Color(0xFFBBC863),
+                            ? AppColors.textTertiary
+                            : AppColors.secondary,
                       ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     _location ?? 'Izinkan akses lokasi',
-                    style: TextStyle(
-                      fontSize: 16,
+                    style: AppTextStyles.bodyLarge.copyWith(
                       color: _location == null
-                          ? Colors.grey[600]
-                          : Colors.black87,
+                          ? AppColors.textSecondary
+                          : AppColors.textEmphasis,
                       fontWeight: _location == null
                           ? FontWeight.w400
                           : FontWeight.w600,
@@ -340,7 +313,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
         const SizedBox(height: 8),
         Text(
           'Buat rekomendasiin event yang deket sama lo',
-          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
         ),
       ],
     );
@@ -355,13 +328,13 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
         key: const Key('submit_button'),
         onPressed: isValid && !_isSubmitting ? _handleSubmit : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFBBC863),
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.secondary,
+          foregroundColor: AppColors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          disabledBackgroundColor: Colors.grey[300],
+          disabledBackgroundColor: AppColors.border,
         ),
         child: _isSubmitting
             ? const SizedBox(
@@ -369,12 +342,12 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                 width: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
                 ),
               )
-            : const Text(
+            : Text(
                 'Lanjut',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                style: AppTextStyles.bodyLargeBold,
               ),
       ),
     );
@@ -389,7 +362,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: Color(0xFFBBC863)),
+            colorScheme: const ColorScheme.light(primary: AppColors.secondary),
           ),
           child: child!,
         );
@@ -454,7 +427,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Gagal mendapatkan lokasi: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -507,7 +480,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Gagal menyimpan profil: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }

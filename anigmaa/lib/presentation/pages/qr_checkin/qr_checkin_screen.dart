@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../../../injection_container.dart' as di;
 import '../../bloc/event_participants/event_participants_bloc.dart';
 import '../../bloc/event_participants/event_participants_state.dart';
@@ -45,24 +47,20 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
       create: (_) => di.sl<EventParticipantsBloc>(),
       child: Scaffold(
         key: const Key('qr_checkin_screen'),
-        backgroundColor: const Color(0xFFFCFCFC),
+        backgroundColor: AppColors.cardSurface,
         appBar: AppBar(
           key: const Key('qr_checkin_app_bar'),
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.white,
           elevation: 0,
-          title: const Text(
+          title: Text(
             'Scan QR Check-In',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF1A1A1A),
-            ),
+            style: AppTextStyles.h3,
           ),
           leading: IconButton(
             key: const Key('qr_checkin_back_button'),
             icon: const Icon(
               Icons.arrow_back_rounded,
-              color: Color(0xFF1A1A1A),
+              color: AppColors.textPrimary,
             ),
             onPressed: () => Navigator.pop(context),
           ),
@@ -108,10 +106,10 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
       key: const Key('checkin_instructions_card'),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+        color: AppColors.secondary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFBBC863).withValues(alpha: 0.3),
+          color: AppColors.secondary.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -123,22 +121,20 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFBBC863),
+                  color: AppColors.secondary,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
                   Icons.info_outline,
-                  color: Colors.white,
+                  color: AppColors.white,
                   size: 20,
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
+              Text(
                 'Cara Check-In',
-                style: TextStyle(
+                style: AppTextStyles.bodyLargeBold.copyWith(
                   fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF1A1A1A),
                 ),
               ),
             ],
@@ -172,17 +168,16 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
           Container(
             width: 24,
             height: 24,
-            decoration: BoxDecoration(
-              color: const Color(0xFFBBC863),
+            decoration: const BoxDecoration(
+              color: AppColors.secondary,
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
                 number,
-                style: const TextStyle(
-                  fontSize: 12,
+                style: AppTextStyles.captionSmall.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: AppColors.white,
                 ),
               ),
             ),
@@ -191,9 +186,8 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[700],
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
                 height: 1.5,
               ),
             ),
@@ -207,12 +201,11 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Scan QR Code',
-          style: TextStyle(
+          style: AppTextStyles.bodyLargeBold.copyWith(
             fontSize: 18,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF1A1A1A),
           ),
         ),
         const SizedBox(height: 16),
@@ -228,10 +221,10 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
             key: const Key('qr_scanner_placeholder'),
             height: 200,
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: AppColors.surfaceAlt,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.grey[300]!,
+                color: AppColors.border,
                 width: 2,
               ),
             ),
@@ -241,23 +234,21 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
                 Icon(
                   Icons.qr_code_scanner,
                   size: 64,
-                  color: Colors.grey[400],
+                  color: AppColors.textTertiary,
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'Tap untuk memulai scanner',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[600],
+                  style: AppTextStyles.bodyLargeBold.copyWith(
+                    color: AppColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Kamera akan digunakan untuk scan QR',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyMedium.copyWith(
                     fontSize: 13,
-                    color: Colors.grey[500],
+                    color: AppColors.textTertiary,
                   ),
                 ),
               ],
@@ -274,20 +265,19 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
       children: [
         Row(
           children: [
-            const Text(
+            Text(
               'Input Manual',
-              style: TextStyle(
+              style: AppTextStyles.bodyLargeBold.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF1A1A1A),
               ),
             ),
             const Spacer(),
             Text(
               'Atau gunakan scan QR',
-              style: TextStyle(
+              style: AppTextStyles.bodyMedium.copyWith(
                 fontSize: 13,
-                color: Colors.grey[600],
+                color: AppColors.textSecondary,
               ),
             ),
           ],
@@ -296,11 +286,11 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
         Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
+                color: AppColors.primary.withValues(alpha: 0.06),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -315,55 +305,55 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
                 focusNode: _focusNode,
                 textAlign: TextAlign.center,
                 textCapitalization: TextCapitalization.characters,
-                maxLength: 4,
+                maxLength: 8,
                 style: const TextStyle(
                   fontSize: 48,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 12,
-                  color: Color(0xFFBBC863),
+                  color: AppColors.secondary,
                   fontFamily: 'monospace',
                 ),
                 decoration: InputDecoration(
-                  hintText: 'XXXX',
-                  hintStyle: TextStyle(
+                  hintText: 'XXXXXXXX',
+                  hintStyle: const TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 12,
-                    color: Colors.grey[300],
+                    color: AppColors.border,
                     fontFamily: 'monospace',
                   ),
                   counterText: '',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(
-                      color: Colors.grey[300]!,
+                    borderSide: const BorderSide(
+                      color: AppColors.border,
                       width: 2,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(
-                      color: Colors.grey[300]!,
+                    borderSide: const BorderSide(
+                      color: AppColors.border,
                       width: 2,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: const BorderSide(
-                      color: Color(0xFFBBC863),
+                      color: AppColors.secondary,
                       width: 3,
                     ),
                   ),
                   filled: true,
-                  fillColor: const Color(0xFFFCFCFC),
+                  fillColor: AppColors.cardSurface,
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 24,
                     horizontal: 20,
                   ),
                 ),
                 onChanged: (value) {
-                  if (value.length == 4) {
-                    // Auto check-in when 4 characters entered
+                  if (value.length == 8) {
+                    // Auto check-in when 8 characters entered
                     _handleCheckIn(context);
                   }
                 },
@@ -378,14 +368,14 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       key: const Key('manual_checkin_button'),
-                      onPressed: (_codeController.text.length == 4 && !isLoading)
+                      onPressed: (_codeController.text.length == 8 && !isLoading)
                           ? () => _handleCheckIn(context)
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFBBC863),
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: Colors.grey[300],
-                        disabledForegroundColor: Colors.grey[500],
+                        backgroundColor: AppColors.secondary,
+                        foregroundColor: AppColors.white,
+                        disabledBackgroundColor: AppColors.border,
+                        disabledForegroundColor: AppColors.textTertiary,
                         padding: const EdgeInsets.symmetric(vertical: 18),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
@@ -399,19 +389,18 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
+                                  AppColors.white,
                                 ),
                               ),
                             )
-                          : const Text(
+                          : Text(
                               'Check-In Peserta',
-                              style: TextStyle(
+                              style: AppTextStyles.button.copyWith(
                                 fontSize: 17,
-                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                  ),
-                );
+                    ),
+                  );
                 },
               ),
             ],
@@ -435,19 +424,15 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
           key: const Key('checkin_stats_section'),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Statistik Check-In',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF1A1A1A),
-                ),
+                style: AppTextStyles.bodyLargeBold,
               ),
               const SizedBox(height: 16),
               Row(
@@ -457,7 +442,7 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
                       icon: Icons.check_circle,
                       label: 'Sudah Check-In',
                       value: '$checkedInCount',
-                      color: Colors.green,
+                      color: AppColors.success,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -466,7 +451,7 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
                       icon: Icons.people,
                       label: 'Total Tiket',
                       value: '$totalCount',
-                      color: const Color(0xFFBBC863),
+                      color: AppColors.secondary,
                     ),
                   ),
                 ],
@@ -500,7 +485,7 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
           const SizedBox(height: 8),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.h2.copyWith(
               fontSize: 24,
               fontWeight: FontWeight.w900,
               color: color,
@@ -509,8 +494,7 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
           const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
+            style: AppTextStyles.caption.copyWith(
               fontWeight: FontWeight.w600,
               color: color,
             ),
@@ -524,8 +508,8 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
   void _handleCheckIn(BuildContext context) {
     final code = _codeController.text.trim().toUpperCase();
 
-    if (code.length != 4) {
-      _showError(context, 'Masukin kode 4 karakter yang bener ya');
+    if (code.length != 8) {
+      _showError(context, 'Masukin kode 8 karakter yang bener ya');
       return;
     }
 
@@ -550,32 +534,28 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+                  color: AppColors.secondary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.qr_code_scanner,
-                  color: Color(0xFFBBC863),
+                  color: AppColors.secondary,
                   size: 50,
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Scanner QR',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1A1A1A),
-                ),
+                style: AppTextStyles.h2.copyWith(fontSize: 22),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
                 'Fitur scanner akan segera hadir.\n'
                 'Untuk sekarang, gunakan input manual.',
-                style: TextStyle(
+                style: AppTextStyles.button.copyWith(
                   fontSize: 15,
-                  color: Colors.grey[600],
+                  color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
@@ -586,19 +566,16 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(dialogContext),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFBBC863),
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: AppColors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Mengerti',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: AppTextStyles.button,
                   ),
                 ),
               ),
@@ -625,31 +602,27 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: Colors.orange[50],
+                  color: AppColors.warning.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.info_outline,
-                  color: Colors.orange[600],
+                  color: AppColors.warning,
                   size: 50,
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Check-In Manual',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1A1A1A),
-                ),
+                style: AppTextStyles.h2.copyWith(fontSize: 22),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
                 'Kode kehadiran: $code',
-                style: TextStyle(
+                style: AppTextStyles.button.copyWith(
                   fontSize: 15,
-                  color: Colors.grey[600],
+                  color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
@@ -660,19 +633,16 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(dialogContext),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFBBC863),
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: AppColors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'OK',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: AppTextStyles.button,
                   ),
                 ),
               ),
@@ -700,31 +670,27 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: Colors.green[50],
+                  color: AppColors.success.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.check_circle,
-                  color: Colors.green[600],
+                  color: AppColors.success,
                   size: 50,
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Check-In Berhasil!',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1A1A1A),
-                ),
+                style: AppTextStyles.h2.copyWith(fontSize: 22),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
                 '$name berhasil check-in',
-                style: TextStyle(
+                style: AppTextStyles.button.copyWith(
                   fontSize: 15,
-                  color: Colors.grey[600],
+                  color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
@@ -736,19 +702,16 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
                   key: const Key('checkin_success_button'),
                   onPressed: () => Navigator.pop(dialogContext),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFBBC863),
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: AppColors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Lanjut',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: AppTextStyles.button,
                   ),
                 ),
               ),
@@ -775,31 +738,27 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: Colors.red[50],
+                  color: AppColors.error.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.error_outline,
-                  color: Colors.red[600],
+                  color: AppColors.error,
                   size: 50,
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Waduh, Check-In Gagal',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1A1A1A),
-                ),
+                style: AppTextStyles.h2.copyWith(fontSize: 22),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
                 message,
-                style: TextStyle(
+                style: AppTextStyles.button.copyWith(
                   fontSize: 15,
-                  color: Colors.grey[600],
+                  color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
@@ -811,19 +770,16 @@ class _QRCheckinScreenState extends State<QRCheckinScreen> {
                   key: const Key('checkin_error_button'),
                   onPressed: () => Navigator.pop(dialogContext),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red[600],
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.error,
+                    foregroundColor: AppColors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Coba Lagi',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: AppTextStyles.button,
                   ),
                 ),
               ),

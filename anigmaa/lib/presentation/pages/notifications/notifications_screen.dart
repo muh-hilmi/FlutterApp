@@ -4,6 +4,8 @@ import 'package:timeago/timeago.dart' as timeago;
 import '../../../domain/entities/notification.dart' as domain;
 import '../../bloc/notifications/notifications_bloc.dart';
 import '../../../injection_container.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -27,19 +29,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return BlocProvider(
       create: (context) => sl<NotificationsBloc>(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFFCFCFC),
+        backgroundColor: AppColors.cardSurface,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.white,
           elevation: 0,
           title: Row(
             children: [
-              const Text(
+              Text(
                 'Notifikasi',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF000000),
-                ),
+                style: AppTextStyles.h3.copyWith(fontSize: 20),
               ),
               const SizedBox(width: 8),
               BlocBuilder<NotificationsBloc, NotificationsState>(
@@ -48,15 +46,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFBBC863),
+                        color: AppColors.secondary,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         state.unreadCount > 99 ? '99+' : '${state.unreadCount}',
-                        style: const TextStyle(
-                          fontSize: 11,
+                        style: AppTextStyles.label.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: AppColors.white,
                         ),
                       ),
                     );
@@ -67,7 +64,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             ],
           ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF000000)),
+            icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
             onPressed: () => Navigator.pop(context),
           ),
           actions: [
@@ -78,12 +75,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     onPressed: () {
                       context.read<NotificationsBloc>().add(MarkAllAsRead());
                     },
-                    child: const Text(
+                    child: Text(
                       'Tandai semua dibaca',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFFBBC863),
+                      style: AppTextStyles.bodyMediumBold.copyWith(
+                        color: AppColors.secondary,
                       ),
                     ),
                   );
@@ -98,7 +93,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             if (state.status == NotificationsStatus.loading) {
               return const Center(
                 child: CircularProgressIndicator(
-                  color: Color(0xFFBBC863),
+                  color: AppColors.secondary,
                   strokeWidth: 3,
                 ),
               );
@@ -116,7 +111,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               onRefresh: () async {
                 context.read<NotificationsBloc>().add(RefreshNotifications());
               },
-              color: const Color(0xFFBBC863),
+              color: AppColors.secondary,
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 itemCount: state.notifications.length,
@@ -134,7 +129,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Widget _buildNotificationItem(domain.Notification notification) {
     return Container(
-      color: notification.isRead ? Colors.white : const Color(0xFFFCFCFC),
+      color: notification.isRead ? AppColors.white : AppColors.cardSurface,
       child: InkWell(
         onTap: () {
           // Mark notification as read via API
@@ -172,9 +167,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   children: [
                     RichText(
                       text: TextSpan(
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF1A1A1A),
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textPrimary,
                           height: 1.4,
                         ),
                         children: [
@@ -196,9 +190,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     const SizedBox(height: 4),
                     Text(
                       timeago.format(notification.timestamp, locale: 'en_short'),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -212,7 +205,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   height: 8,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Color(0xFFBBC863),
+                    color: AppColors.secondary,
                   ),
                 ),
             ],
@@ -227,11 +220,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 64, color: Color(0xFFBBC863)),
+          const Icon(Icons.error_outline, size: 64, color: AppColors.secondary),
           const SizedBox(height: 16),
           Text(
             message,
-            style: const TextStyle(fontSize: 16, color: Color(0xFF2D3142)),
+            style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textEmphasis),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -240,16 +233,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               context.read<NotificationsBloc>().add(LoadNotifications());
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFBBC863),
-              foregroundColor: Colors.black,
+              backgroundColor: AppColors.secondary,
+              foregroundColor: AppColors.primary,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
+            child: Text(
               'Coba Lagi',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              style: AppTextStyles.button,
             ),
           ),
         ],
@@ -269,10 +262,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           const SizedBox(height: 16),
           Text(
             'Belum ada notifikasi nih',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+            style: AppTextStyles.bodyLargeBold.copyWith(
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -292,7 +283,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Membuka postingan...'),
-              backgroundColor: const Color(0xFFBBC863),
+              backgroundColor: AppColors.secondary,
             ),
           );
         }
@@ -305,7 +296,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Membuka profil pengguna...'),
-              backgroundColor: const Color(0xFFBBC863),
+              backgroundColor: AppColors.secondary,
             ),
           );
         }
@@ -320,7 +311,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Membuka detail event...'),
-              backgroundColor: const Color(0xFFBBC863),
+              backgroundColor: AppColors.secondary,
             ),
           );
         }
@@ -332,7 +323,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Membuka repost...'),
-              backgroundColor: const Color(0xFFBBC863),
+              backgroundColor: AppColors.secondary,
             ),
           );
         }
@@ -364,19 +355,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Color _getNotificationColor(domain.NotificationType type) {
     switch (type) {
       case domain.NotificationType.like:
-        return Colors.red;
+        return AppColors.error;
       case domain.NotificationType.comment:
-        return Colors.blue;
+        return AppColors.info;
       case domain.NotificationType.follow:
-        return const Color(0xFFBBC863);
+        return AppColors.secondary;
       case domain.NotificationType.eventReminder:
         return Colors.orange;
       case domain.NotificationType.eventJoined:
-        return const Color(0xFFBBC863);
+        return AppColors.secondary;
       case domain.NotificationType.eventInvite:
         return Colors.purple;
       case domain.NotificationType.repost:
-        return const Color(0xFFBBC863);
+        return AppColors.secondary;
       case domain.NotificationType.mention:
         return Colors.deepPurple;
     }

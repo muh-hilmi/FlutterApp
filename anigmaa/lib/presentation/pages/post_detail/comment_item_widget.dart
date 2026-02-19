@@ -7,6 +7,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../../domain/entities/comment.dart';
 import '../profile/profile_screen.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class CommentItem extends StatelessWidget {
   final Comment comment;
@@ -26,10 +28,10 @@ class CommentItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.grey.withValues(alpha: 0.1),
+          color: AppColors.border.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -52,7 +54,7 @@ class CommentItem extends StatelessWidget {
           onTap: () => _navigateToProfile(context),
           child: CircleAvatar(
             radius: 14,
-            backgroundColor: const Color(0xFFBBC863),
+            backgroundColor: AppColors.secondary,
             backgroundImage: _getAvatarImage(),
             child: _getAvatarPlaceholder(),
           ),
@@ -67,10 +69,10 @@ class CommentItem extends StatelessWidget {
                   Flexible(
                     child: Text(
                       comment.author.name,
-                      style: const TextStyle(
+                      style: AppTextStyles.bodySmall.copyWith(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF000000),
+                        color: AppColors.textPrimary,
                         letterSpacing: -0.2,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -79,19 +81,16 @@ class CommentItem extends StatelessWidget {
                   const SizedBox(width: 6),
                   Text(
                     '• ${_formatTimestamp(comment.createdAt)}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey[500],
-                      fontWeight: FontWeight.w400,
+                    style: AppTextStyles.captionSmall.copyWith(
+                      color: AppColors.textTertiary,
                     ),
                   ),
                   if (isSending) ...[
                     const SizedBox(width: 4),
                     Text(
                       '• Mengirim...',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.grey[400],
+                      style: AppTextStyles.captionSmall.copyWith(
+                        color: AppColors.textTertiary,
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -119,10 +118,9 @@ class CommentItem extends StatelessWidget {
             comment.author.name.isNotEmpty
                 ? comment.author.name[0].toUpperCase()
                 : '?',
-            style: const TextStyle(
-              fontSize: 11,
+            style: AppTextStyles.captionSmall.copyWith(
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: AppColors.white,
             ),
           )
         : null;
@@ -144,7 +142,7 @@ class CommentItem extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: comment.isLikedByCurrentUser
-                ? const Color(0xFFFFE8E8)
+                ? AppColors.error.withValues(alpha: 0.1)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
@@ -157,19 +155,18 @@ class CommentItem extends StatelessWidget {
                     : Icons.favorite_border,
                 size: 14,
                 color: comment.isLikedByCurrentUser
-                    ? const Color(0xFFFF6B6B)
-                    : const Color(0xFF999999),
+                    ? AppColors.error
+                    : AppColors.textTertiary,
               ),
               if (comment.likesCount > 0) ...[
                 const SizedBox(width: 3),
                 Text(
                   '${comment.likesCount}',
-                  style: TextStyle(
-                    fontSize: 11,
+                  style: AppTextStyles.captionSmall.copyWith(
                     fontWeight: FontWeight.w600,
                     color: comment.isLikedByCurrentUser
-                        ? const Color(0xFFFF6B6B)
-                        : const Color(0xFF999999),
+                        ? AppColors.error
+                        : AppColors.textTertiary,
                   ),
                 ),
               ],
@@ -183,11 +180,10 @@ class CommentItem extends StatelessWidget {
   Widget _buildCommentContent() {
     return Text(
       comment.content,
-      style: TextStyle(
+      style: AppTextStyles.bodySmall.copyWith(
         fontSize: 13,
-        color: isSending ? const Color(0xFF9CA3AF) : const Color(0xFF1a1a1a),
+        color: isSending ? AppColors.textTertiary : AppColors.textPrimary,
         height: 1.4,
-        fontWeight: FontWeight.w400,
         letterSpacing: -0.1,
       ),
     );

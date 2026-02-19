@@ -9,6 +9,8 @@ import '../../bloc/communities/communities_event.dart';
 import '../../widgets/common/error_state_widget.dart';
 import 'community_detail_screen.dart';
 import 'create_community_screen.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class NewCommunityScreen extends StatefulWidget {
   const NewCommunityScreen({super.key});
@@ -44,10 +46,10 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
+        backgroundColor: AppColors.white,
+        surfaceTintColor: AppColors.white,
         elevation: 0,
         toolbarHeight: 88,
         titleSpacing: 20,
@@ -60,38 +62,33 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFBBC863),
+                  color: AppColors.secondary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.groups_rounded,
-                  color: Color(0xFF000000),
+                  color: AppColors.primary,
                   size: 22,
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
+              Text(
                 'Communities',
-                style: TextStyle(
-                  color: Color(0xFF000000),
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.8,
-                ),
+                style: AppTextStyles.h2.copyWith(letterSpacing: -0.8),
               ),
               const Spacer(),
               Container(
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFBBC863),
+                  color: AppColors.secondary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   icon: const Icon(
                     Icons.add_rounded,
-                    color: Color(0xFF000000),
+                    color: AppColors.primary,
                     size: 22,
                   ),
                   onPressed: () {
@@ -111,17 +108,12 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
           preferredSize: const Size.fromHeight(57),
           child: TabBar(
             controller: _tabController,
-            labelColor: Colors.black,
-            unselectedLabelColor: Colors.black,
-            indicatorColor: Colors.black,
+            labelColor: AppColors.textPrimary,
+            unselectedLabelColor: AppColors.textPrimary,
+            indicatorColor: AppColors.textPrimary,
             indicatorWeight: 5,
-            labelStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.3,
-            ),
-            unselectedLabelStyle: const TextStyle(
-              fontSize: 16,
+            labelStyle: AppTextStyles.bodyLargeBold.copyWith(letterSpacing: -0.3),
+            unselectedLabelStyle: AppTextStyles.bodyLarge.copyWith(
               fontWeight: FontWeight.w500,
               letterSpacing: -0.3,
             ),
@@ -144,7 +136,7 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
       builder: (context, state) {
         if (state is CommunitiesLoading) {
           return const Center(
-            child: CircularProgressIndicator(color: Color(0xFFBBC863)),
+            child: CircularProgressIndicator(color: AppColors.secondary),
           );
         }
 
@@ -163,7 +155,7 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
           }
 
           return RefreshIndicator(
-            color: const Color(0xFFBBC863),
+            color: AppColors.secondary,
             onRefresh: () async {
               context.read<CommunitiesBloc>().add(LoadCommunities());
             },
@@ -190,7 +182,7 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
       builder: (context, state) {
         if (state is CommunitiesLoading) {
           return const Center(
-            child: CircularProgressIndicator(color: Color(0xFFBBC863)),
+            child: CircularProgressIndicator(color: AppColors.secondary),
           );
         }
 
@@ -234,21 +226,22 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.groups_outlined, size: 80, color: Colors.grey),
+            const Icon(Icons.groups_outlined, size: 80, color: AppColors.textTertiary),
             const SizedBox(height: 20),
             Text(
               'No communities yet',
-              style: TextStyle(
+              style: AppTextStyles.h3.copyWith(
                 fontSize: 18,
-                color: Colors.grey[800],
-                fontWeight: FontWeight.w700,
+                color: AppColors.textEmphasis,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Find communities to join',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
@@ -256,8 +249,8 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
                 _tabController.animateTo(0);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFBBC863),
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.secondary,
+                foregroundColor: AppColors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 28,
                   vertical: 12,
@@ -267,9 +260,13 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
                 ),
                 elevation: 0,
               ),
-              child: const Text(
+              child: Text(
                 'Discover communities',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                style: AppTextStyles.button.copyWith(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.white,
+                ),
               ),
             ),
           ],
@@ -309,7 +306,7 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: AppColors.border,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(
@@ -331,10 +328,9 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
                       Expanded(
                         child: Text(
                           community.name,
-                          style: const TextStyle(
+                          style: AppTextStyles.button.copyWith(
                             fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.black,
+                            color: AppColors.textPrimary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -346,7 +342,7 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
                           child: Icon(
                             Icons.verified,
                             size: 16,
-                            color: Colors.blue[600],
+                            color: AppColors.info,
                           ),
                         ),
                     ],
@@ -355,15 +351,16 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
                   // Stats - inline like X
                   Text(
                     '${_formatNumber(community.memberCount)} members · ${community.location}',
-                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   // Description
                   Text(
                     community.description,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[800],
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textEmphasis,
                       height: 1.3,
                     ),
                     maxLines: 2,
@@ -382,8 +379,8 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
                       );
                     },
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.black,
-                      side: BorderSide(color: Colors.grey[400]!),
+                      foregroundColor: AppColors.textPrimary,
+                      side: BorderSide(color: AppColors.textTertiary),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 6,
@@ -393,12 +390,9 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
                       ),
                       minimumSize: const Size(0, 32),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Joined',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: AppTextStyles.bodyMediumBold,
                     ),
                   )
                 : ElevatedButton(
@@ -408,8 +402,8 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFBBC863),
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.secondary,
+                      foregroundColor: AppColors.white,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 6,
@@ -420,11 +414,10 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
                       elevation: 0,
                       minimumSize: const Size(0, 32),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Join',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                      style: AppTextStyles.bodyMediumBold.copyWith(
+                        color: AppColors.white,
                       ),
                     ),
                   ),
@@ -454,9 +447,9 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: AppColors.surfaceAlt),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -477,10 +470,8 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
                           Flexible(
                             child: Text(
                               community.name,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black,
+                              style: AppTextStyles.bodyLargeBold.copyWith(
+                                color: AppColors.textPrimary,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -490,7 +481,7 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
                             const Icon(
                               Icons.verified,
                               size: 16,
-                              color: Color(0xFFBBC863),
+                              color: AppColors.secondary,
                             ),
                           ],
                         ],
@@ -500,21 +491,21 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
                         children: [
                           Text(
                             community.category.emoji,
-                            style: const TextStyle(fontSize: 12),
+                            style: AppTextStyles.bodySmall,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             community.category.displayName,
-                            style: TextStyle(
+                            style: AppTextStyles.bodySmall.copyWith(
                               fontSize: 13,
-                              color: Colors.grey[600],
+                              color: AppColors.textSecondary,
                             ),
                           ),
                           Text(
                             ' • ${_formatMemberCount(community.memberCount)} members',
-                            style: TextStyle(
+                            style: AppTextStyles.bodySmall.copyWith(
                               fontSize: 13,
-                              color: Colors.grey[600],
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -537,14 +528,14 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
                   },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: isJoined
-                        ? Colors.grey[700]
-                        : const Color(0xFFBBC863),
+                        ? AppColors.textSecondary
+                        : AppColors.secondary,
                     side: BorderSide(
                       color: isJoined
-                          ? Colors.grey.shade300
-                          : const Color(0xFFBBC863),
+                          ? AppColors.border
+                          : AppColors.secondary,
                     ),
-                    backgroundColor: isJoined ? Colors.grey.shade50 : null,
+                    backgroundColor: isJoined ? AppColors.surfaceAlt : null,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 8,
@@ -556,10 +547,7 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
                   ),
                   child: Text(
                     isJoined ? 'Joined' : 'Join',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTextStyles.bodyMediumBold,
                   ),
                 ),
               ],
@@ -568,9 +556,8 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
             // Description
             Text(
               community.description,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[800],
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textEmphasis,
                 height: 1.4,
               ),
               maxLines: 2,
@@ -597,11 +584,11 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
           placeholder: (context, url) => Container(
             width: 56,
             height: 56,
-            color: Colors.grey.shade200,
+            color: AppColors.surfaceAlt,
             child: const Center(
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: Color(0xFFBBC863),
+                color: AppColors.secondary,
               ),
             ),
           ),
@@ -618,17 +605,13 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
       width: 56,
       height: 56,
       decoration: BoxDecoration(
-        color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+        color: AppColors.secondary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Center(
         child: Text(
           community.name[0].toUpperCase(),
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFFBBC863),
-          ),
+          style: AppTextStyles.h2.copyWith(color: AppColors.secondary),
         ),
       ),
     );
@@ -642,16 +625,19 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.grey.shade50,
+          color: AppColors.surfaceAlt,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           children: [
-            Icon(Icons.article_outlined, size: 16, color: Colors.grey[400]),
+            Icon(Icons.article_outlined, size: 16, color: AppColors.textTertiary),
             const SizedBox(width: 8),
             Text(
               'No posts yet',
-              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+              style: AppTextStyles.bodySmall.copyWith(
+                fontSize: 13,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
@@ -661,23 +647,22 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: AppColors.surfaceAlt,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.surfaceAlt),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.article_outlined, size: 14, color: Colors.grey[600]),
+              Icon(Icons.article_outlined, size: 14, color: AppColors.textSecondary),
               const SizedBox(width: 6),
               Text(
                 'Recent posts',
-                style: TextStyle(
-                  fontSize: 12,
+                style: AppTextStyles.caption.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[700],
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
@@ -698,13 +683,12 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
           // Author avatar
           CircleAvatar(
             radius: 10,
-            backgroundColor: Colors.grey.shade300,
+            backgroundColor: AppColors.border,
             child: Text(
               post['author'][0].toUpperCase(),
-              style: TextStyle(
+              style: AppTextStyles.label.copyWith(
                 fontSize: 8,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[600],
+                color: AppColors.textSecondary,
               ),
             ),
           ),
@@ -716,18 +700,16 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
               children: [
                 Text(
                   post['author'],
-                  style: TextStyle(
-                    fontSize: 12,
+                  style: AppTextStyles.caption.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey[800],
+                    color: AppColors.textEmphasis,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   post['content'],
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[700],
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textSecondary,
                     height: 1.3,
                   ),
                   maxLines: 2,
@@ -773,21 +755,22 @@ class _NewCommunityScreenState extends State<NewCommunityScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.search_off, size: 64, color: Colors.grey),
+            const Icon(Icons.search_off, size: 64, color: AppColors.textTertiary),
             const SizedBox(height: 20),
             Text(
               'No results found',
-              style: TextStyle(
+              style: AppTextStyles.h3.copyWith(
                 fontSize: 18,
-                color: Colors.grey[800],
-                fontWeight: FontWeight.w700,
+                color: AppColors.textEmphasis,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Try different filters or keywords',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),

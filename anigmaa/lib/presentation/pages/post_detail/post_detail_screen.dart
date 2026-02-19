@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../domain/entities/post.dart';
@@ -19,6 +18,8 @@ import '../../widgets/modern_post_card_components/event_attachment.dart';
 import '../../widgets/modern_post_card_components/post_poll.dart';
 import '../../widgets/modern_post_card_components/post_action_bar.dart';
 import '../../widgets/common/comment_section.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final Post post;
@@ -74,9 +75,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final userState = context.read<UserBloc>().state;
     if (userState is! UserLoaded) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Silakan login terlebih dahulu'),
-          backgroundColor: Color(0xFF1F2937),
+        SnackBar(
+          content: const Text('Silakan login terlebih dahulu'),
+          backgroundColor: AppColors.textEmphasis,
         ),
       );
       return;
@@ -104,7 +105,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final currentUser = userState is UserLoaded ? userState.user : null;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: BlocBuilder<PostsBloc, PostsState>(
         builder: (context, state) {
           Post currentPost = widget.post;
@@ -158,9 +159,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             : 12,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         border: Border(
-          top: BorderSide(color: Colors.grey[200]!, width: 0.5),
+          top: BorderSide(color: AppColors.border, width: 0.5),
         ),
       ),
       child: Column(
@@ -172,7 +173,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               margin: const EdgeInsets.only(bottom: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
+                color: AppColors.surfaceAlt,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -180,9 +181,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 children: [
                   Text(
                     'Membalas $_replyToAuthorName',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      color: const Color(0xFF6B7280),
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -191,7 +191,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     child: Icon(
                       Icons.close,
                       size: 16,
-                      color: Colors.grey[600],
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -212,15 +212,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   focusNode: _commentFocusNode,
                   maxLines: null,
                   textCapitalization: TextCapitalization.sentences,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
-                    color: const Color(0xFF1F2937),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textEmphasis,
                   ),
                   decoration: InputDecoration(
                     hintText: 'Tambahkan komentar...',
-                    hintStyle: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      color: const Color(0xFF9CA3AF),
+                    hintStyle: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textTertiary,
                     ),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(
@@ -238,12 +236,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   child: Text(
                     'Kirim',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                    style: AppTextStyles.bodyMediumBold.copyWith(
                       color: _commentController.text.trim().isNotEmpty
-                          ? const Color(0xFFBBC863)
-                          : const Color(0xFF9CA3AF),
+                          ? AppColors.secondary
+                          : AppColors.textTertiary,
                     ),
                   ),
                 ),
@@ -266,13 +262,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     if (user != null) {
       return CircleAvatar(
         radius: 18,
-        backgroundColor: const Color(0xFFBBC863),
+        backgroundColor: AppColors.secondary,
         child: Text(
           user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
+          style: AppTextStyles.bodyMediumBold.copyWith(
+            color: AppColors.white,
           ),
         ),
       );
@@ -280,8 +274,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     return CircleAvatar(
       radius: 18,
-      backgroundColor: Colors.grey[300],
-      child: const Icon(Icons.person, size: 18, color: Colors.grey),
+      backgroundColor: AppColors.border,
+      child: Icon(Icons.person, size: 18, color: AppColors.textTertiary),
     );
   }
 
@@ -289,23 +283,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     return SliverAppBar(
       expandedHeight: 0,
       pinned: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
         'Postingan',
-        style: GoogleFonts.plusJakartaSans(
-          color: Colors.black,
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-        ),
+        style: AppTextStyles.h3.copyWith(fontSize: 18),
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.share_outlined, color: Colors.black),
+          icon: Icon(Icons.share_outlined, color: AppColors.textPrimary),
           onPressed: () {
             showModalBottomSheet(
               context: context,
@@ -319,7 +309,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Colors.grey[200], height: 1),
+        child: Container(color: AppColors.border, height: 1),
       ),
     );
   }
@@ -381,7 +371,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           ),
         ),
 
-        Divider(color: Colors.grey[100], height: 1),
+        Divider(color: AppColors.surfaceAlt, height: 1),
       ],
     );
   }

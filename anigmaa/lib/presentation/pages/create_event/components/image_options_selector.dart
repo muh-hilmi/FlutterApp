@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class ImageOptionsSelector extends StatelessWidget {
   final Function(ImageSource?) onOptionSelected;
@@ -26,7 +28,7 @@ class ImageOptionsSelector extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: source == null ? Colors.grey[300] : const Color(0xFFBBC863),
+          color: source == null ? AppColors.border : AppColors.secondary,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -34,16 +36,15 @@ class ImageOptionsSelector extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: TextStyle(
-                  color: source == null ? Colors.black87 : Colors.white,
+                style: AppTextStyles.button.copyWith(
+                  color: source == null ? AppColors.textEmphasis : AppColors.white,
                   fontWeight: FontWeight.w600,
-                  fontSize: 15,
                 ),
               ),
             ),
             Icon(
               Icons.arrow_forward_ios,
-              color: source == null ? Colors.black87 : Colors.white,
+              color: source == null ? AppColors.textEmphasis : AppColors.white,
               size: 16,
             ),
           ],

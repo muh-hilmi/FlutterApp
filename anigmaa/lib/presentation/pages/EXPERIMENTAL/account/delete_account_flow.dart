@@ -7,6 +7,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../data/datasources/user_remote_datasource.dart';
 import '../../../injection_container.dart' as di;
 import '../../../core/services/auth_service.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 enum DeletionReason {
   notUsingAnymore,
@@ -70,9 +72,9 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
       child: Row(
         children: [
@@ -93,7 +95,10 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
           Expanded(
             child: Text(
               'Hapus Akun',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: AppTextStyles.bodyLargeBold.copyWith(
+                fontSize: 18,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
         ],
@@ -121,14 +126,14 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
           width: 28,
           height: 28,
           decoration: BoxDecoration(
-            color: isActive ? Colors.red : Colors.grey[300],
+            color: isActive ? AppColors.error : AppColors.border,
             shape: BoxShape.circle,
           ),
           child: Center(
             child: Text(
               '$step',
-              style: TextStyle(
-                color: isActive ? Colors.white : Colors.grey[600],
+              style: AppTextStyles.bodySmall.copyWith(
+                color: isActive ? AppColors.white : AppColors.textSecondary,
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
               ),
@@ -138,9 +143,8 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
         const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 10,
-            color: isActive ? Colors.red : Colors.grey[600],
+          style: AppTextStyles.bodySmall.copyWith(
+            color: isActive ? AppColors.error : AppColors.textSecondary,
           ),
         ),
       ],
@@ -152,7 +156,7 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
       child: Container(
         height: 2,
         margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
-        color: _currentStep > from ? Colors.red : Colors.grey[300],
+        color: _currentStep > from ? AppColors.error : AppColors.border,
       ),
     );
   }
@@ -161,16 +165,16 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(LucideIcons.alertTriangle, size: 48, color: Colors.red[400]),
+        Icon(LucideIcons.alertTriangle, size: 48, color: AppColors.error),
         const SizedBox(height: 20),
-        const Text(
+        Text(
           'Hapus Akun Anda?',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          style: AppTextStyles.h2.copyWith(color: AppColors.textPrimary),
         ),
         const SizedBox(height: 16),
-        const Text(
+        Text(
           'Tindakan ini tidak dapat dibatalkan. Berikut yang akan terjadi:',
-          style: TextStyle(fontSize: 14, color: Colors.grey),
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
         ),
         const SizedBox(height: 20),
         _buildConsequenceItem(
@@ -202,17 +206,17 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFFE3F2FD),
+            color: AppColors.info.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
             children: [
-              Icon(LucideIcons.info, size: 18, color: Colors.blue[700]),
+              Icon(LucideIcons.info, size: 18, color: AppColors.info),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   'Menurut kebijakan GDPR, Anda berhak meminta penghapusan data pribadi Anda.',
-                  style: TextStyle(fontSize: 12, color: Colors.blue[700]),
+                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.info),
                 ),
               ),
             ],
@@ -226,14 +230,17 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Mengapa Anda ingin pergi?',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          style: AppTextStyles.bodyLargeBold.copyWith(
+            fontSize: 18,
+            color: AppColors.textPrimary,
+          ),
         ),
         const SizedBox(height: 8),
         Text(
           'Bantu kami meningkatkan layanan dengan memberitahu alasan Anda.',
-          style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+          style: AppTextStyles.bodySmall.copyWith(fontSize: 13, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 20),
         ...DeletionReason.values.map((reason) {
@@ -262,32 +269,35 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(LucideIcons.shieldAlert, size: 48, color: Colors.red),
+        Icon(LucideIcons.shieldAlert, size: 48, color: AppColors.error),
         const SizedBox(height: 20),
-        const Text(
+        Text(
           'Konfirmasi Penghapusan',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: AppTextStyles.h3.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
         ),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.red[50],
+            color: AppColors.error.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.red[200]!),
+            border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Icon(LucideIcons.alertCircle, color: Colors.red[700]),
+                  Icon(LucideIcons.alertCircle, color: AppColors.error),
                   const SizedBox(width: 8),
                   Text(
                     'Peringatan Terakhir',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: Colors.red[700],
+                      color: AppColors.error,
                     ),
                   ),
                 ],
@@ -295,7 +305,7 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
               const SizedBox(height: 8),
               Text(
                 'Anda akan kehilangan akses permanen ke akun dan semua data yang terkait. Tindakan ini tidak dapat dibatalkan.',
-                style: TextStyle(fontSize: 13, color: Colors.red[700]),
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
               ),
             ],
           ),
@@ -310,7 +320,7 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.surfaceAlt,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -335,7 +345,7 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
                   },
                   child: Text(
                     'Saya memahami bahwa tindakan ini tidak dapat dibatalkan dan semua data saya akan dihapus permanen.',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                    style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
                   ),
                 ),
               ),
@@ -360,10 +370,10 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Colors.red[50],
+              color: AppColors.error.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, size: 18, color: Colors.red),
+            child: Icon(icon, size: 18, color: AppColors.error),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -372,15 +382,15 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: AppTextStyles.bodyMedium.copyWith(
                     fontWeight: FontWeight.w500,
-                    fontSize: 13,
+                    color: AppColors.textEmphasis,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   description,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -414,10 +424,10 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           border: Border.all(
-            color: isSelected ? Colors.red : Colors.grey[300]!,
+            color: isSelected ? AppColors.error : AppColors.border,
           ),
           borderRadius: BorderRadius.circular(12),
-          color: isSelected ? Colors.red.withValues(alpha: 0.05) : Colors.white,
+          color: isSelected ? AppColors.error.withValues(alpha: 0.05) : AppColors.white,
         ),
         child: Row(
           children: [
@@ -427,15 +437,15 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? Colors.red : Colors.grey[400]!,
+                  color: isSelected ? AppColors.error : AppColors.textTertiary,
                 ),
               ),
               child: isSelected
-                  ? const Center(
+                  ? Center(
                       child: Icon(
                         LucideIcons.check,
                         size: 14,
-                        color: Colors.red,
+                        color: AppColors.error,
                       ),
                     )
                   : null,
@@ -443,9 +453,9 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
             const SizedBox(width: 12),
             Text(
               labels[reason] ?? reason.toString(),
-              style: TextStyle(
+              style: AppTextStyles.bodyMedium.copyWith(
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? Colors.red : Colors.grey[800],
+                color: isSelected ? AppColors.error : AppColors.textEmphasis,
               ),
             ),
           ],
@@ -458,7 +468,7 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFD4EDDA),
+        color: AppColors.success.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -466,13 +476,13 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
         children: [
           Row(
             children: [
-              Icon(LucideIcons.lightbulb, color: Colors.green[700]),
+              Icon(LucideIcons.lightbulb, color: AppColors.success),
               const SizedBox(width: 8),
               Text(
                 'Pertimbangkan Alternatif',
-                style: TextStyle(
+                style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Colors.green[700],
+                  color: AppColors.success,
                 ),
               ),
             ],
@@ -480,7 +490,7 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
           const SizedBox(height: 8),
           Text(
             'Alih-alih menghapus akun, Anda bisa:',
-            style: TextStyle(fontSize: 12, color: Colors.green[700]),
+            style: AppTextStyles.bodySmall.copyWith(color: AppColors.success),
           ),
           const SizedBox(height: 8),
           _buildAlternativeItem('Nonaktifkan notifikasi di pengaturan'),
@@ -493,7 +503,7 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
             },
             icon: const Icon(LucideIcons.settings, size: 16),
             label: const Text('Ke Pengaturan'),
-            style: TextButton.styleFrom(foregroundColor: Colors.green[700]),
+            style: TextButton.styleFrom(foregroundColor: AppColors.success),
           ),
         ],
       ),
@@ -505,9 +515,12 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
       padding: const EdgeInsets.only(left: 8, bottom: 4),
       child: Row(
         children: [
-          Icon(LucideIcons.check, size: 12, color: Colors.green[700]),
+          Icon(LucideIcons.check, size: 12, color: AppColors.success),
           const SizedBox(width: 8),
-          Text(text, style: TextStyle(fontSize: 12, color: Colors.green[700])),
+          Text(
+            text,
+            style: AppTextStyles.bodySmall.copyWith(color: AppColors.success),
+          ),
         ],
       ),
     );
@@ -516,7 +529,7 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
   Widget _buildBottomActions() {
     String buttonText;
     VoidCallback? onPressed;
-    Color buttonColor = Colors.red;
+    const Color buttonColor = AppColors.error;
 
     switch (_currentStep) {
       case 1:
@@ -548,9 +561,9 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey[200]!)),
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        border: Border(top: BorderSide(color: AppColors.border)),
       ),
       child: SafeArea(
         child: SizedBox(
@@ -559,7 +572,7 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
             onPressed: onPressed,
             style: ElevatedButton.styleFrom(
               backgroundColor: buttonColor,
-              disabledBackgroundColor: Colors.grey[300],
+              disabledBackgroundColor: AppColors.border,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -571,15 +584,12 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
                     width: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
                     ),
                   )
                 : Text(
                     buttonText,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTextStyles.bodyLargeBold,
                   ),
           ),
         ),
@@ -615,7 +625,7 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Gagal menghapus akun: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -633,25 +643,28 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
           children: [
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
+              decoration: const BoxDecoration(
+                color: AppColors.border,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 LucideIcons.userX,
                 size: 32,
-                color: Colors.grey,
+                color: AppColors.textTertiary,
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Akun Berhasil Dihapus',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: AppTextStyles.bodyLargeBold.copyWith(
+                fontSize: 18,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Akun Anda telah dihapus secara permanen. Sampai jumpa!',
-              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+              style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
@@ -663,10 +676,10 @@ class _DeleteAccountFlowState extends State<DeleteAccountFlow> {
                   Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFBBC863),
+                  backgroundColor: AppColors.secondary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text('Kembali ke Login'),
+                child: Text('Kembali ke Login', style: AppTextStyles.button),
               ),
             ),
           ],

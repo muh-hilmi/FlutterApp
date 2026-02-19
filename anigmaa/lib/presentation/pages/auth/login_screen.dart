@@ -8,6 +8,8 @@ import '../../../injection_container.dart' as di;
 import '../../../core/auth/auth_bloc.dart'; // Added import
 import '../../bloc/user/user_bloc.dart';
 import '../../bloc/user/user_event.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -30,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: const Key('login_screen'),
-      backgroundColor: const Color(0xFFFCFCFC),
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -61,18 +63,16 @@ class _LoginScreenState extends State<LoginScreen> {
           width: 100,
           height: 100,
           decoration: BoxDecoration(
-            color: const Color(0xFFBBC863),
+            color: AppColors.secondary,
             borderRadius: BorderRadius.circular(25),
           ),
-          child: const Icon(Icons.event, color: Colors.white, size: 50),
+          child: const Icon(Icons.event, color: AppColors.white, size: 50),
         ),
         const SizedBox(height: 24),
-        const Text(
+        Text(
           'flyerr',
-          style: TextStyle(
-            fontSize: 36,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF000000),
+          style: AppTextStyles.display.copyWith(
+            color: AppColors.textPrimary,
             letterSpacing: -1.0,
           ),
         ),
@@ -80,10 +80,9 @@ class _LoginScreenState extends State<LoginScreen> {
         Text(
           'Temuin acara seru, bikin kenangan baru 🚀',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 16,
+          style: AppTextStyles.bodyLarge.copyWith(
             fontWeight: FontWeight.w500,
-            color: Colors.grey[600],
+            color: AppColors.textSecondary,
             letterSpacing: -0.3,
           ),
         ),
@@ -98,8 +97,8 @@ class _LoginScreenState extends State<LoginScreen> {
         key: const Key('google_sign_in_button'),
         onPressed: _isLoading ? null : _handleGoogleSignIn,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFBBC863),
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.secondary,
+          foregroundColor: AppColors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -112,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
                 ),
               )
             : Row(
@@ -127,14 +126,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       return const Icon(
                         Icons.g_mobiledata,
                         size: 32,
-                        color: Colors.white,
+                        color: AppColors.white,
                       );
                     },
                   ),
                   const SizedBox(width: 12),
-                  const Text(
+                  Text(
                     'Lanjut pake Google',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                    style: AppTextStyles.bodyLargeBold,
                   ),
                 ],
               ),
@@ -148,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Text(
         'Dengan lanjut, lo setuju sama Terms of Service dan Privacy Policy kita',
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+        style: AppTextStyles.bodySmall.copyWith(color: AppColors.textTertiary),
       ),
     );
   }
@@ -241,7 +240,7 @@ class _LoginScreenState extends State<LoginScreen> {
               content: Text(
                 'Selamat datang kembali, ${googleAccount.displayName ?? 'User'}! 🎉',
               ),
-              backgroundColor: const Color(0xFFBBC863),
+              backgroundColor: AppColors.secondary,
             ),
           );
         }
@@ -286,11 +285,11 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
               label: 'Tutup',
-              textColor: Colors.white,
+              textColor: AppColors.white,
               onPressed: () {},
             ),
           ),

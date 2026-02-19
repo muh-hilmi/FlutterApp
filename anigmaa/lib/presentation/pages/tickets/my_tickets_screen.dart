@@ -5,6 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/entities/ticket.dart';
+import '../../../core/services/auth_service.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../../bloc/tickets/tickets_bloc.dart';
 import '../../bloc/tickets/tickets_event.dart';
 import '../../bloc/tickets/tickets_state.dart';
@@ -16,26 +19,23 @@ class MyTicketsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userId = di.sl<AuthService>().userId ?? '';
     return BlocProvider(
       create: (_) => di.sl<TicketsBloc>()
-        ..add(const LoadUserTickets('current_user')), // In real app, get from auth
+        ..add(LoadUserTickets(userId)),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.white,
           elevation: 0,
-          title: const Text(
+          title: Text(
             'Tiket Gue',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF1A1A1A),
-            ),
+            style: AppTextStyles.h3,
           ),
           leading: IconButton(
             icon: const Icon(
               Icons.arrow_back_rounded,
-              color: Color(0xFF1A1A1A),
+              color: AppColors.textPrimary,
             ),
             onPressed: () => Navigator.pop(context),
           ),
@@ -45,7 +45,7 @@ class MyTicketsScreen extends StatelessWidget {
             if (state is TicketsLoading) {
               return const Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFBBC863),),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.secondary),
                 ),
               );
             }
@@ -58,27 +58,25 @@ class MyTicketsScreen extends StatelessWidget {
                     Icon(
                       Icons.error_outline,
                       size: 64,
-                      color: Colors.grey[400],
+                      color: AppColors.textTertiary,
                     ),
                     const SizedBox(height: 16),
                     Text(
                       state.message,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.textSecondary,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () {
-                        context.read<TicketsBloc>().add(
-                          const LoadUserTickets('current_user'),
-                        );
+                        final uid = di.sl<AuthService>().userId ?? '';
+                        context.read<TicketsBloc>().add(LoadUserTickets(uid));
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFBBC863),
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.secondary,
+                        foregroundColor: AppColors.white,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 32,
                           vertical: 12,
@@ -123,23 +121,20 @@ class MyTicketsScreen extends StatelessWidget {
           Icon(
             Icons.confirmation_number_outlined,
             size: 80,
-            color: Colors.grey[300],
+            color: AppColors.border,
           ),
           const SizedBox(height: 16),
           Text(
             'Belum Ada Tiket Nih',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Colors.grey[700],
+            style: AppTextStyles.h3.copyWith(
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Tiket yang lo beli bakal muncul di sini',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textTertiary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -164,17 +159,17 @@ class MyTicketsScreen extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isCancelled
-                ? Colors.grey[300]!
-                : const Color(0xFFBBC863).withValues(alpha: 0.3),
+                ? AppColors.border
+                : AppColors.secondary.withValues(alpha: 0.3),
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: AppColors.primary.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -198,10 +193,10 @@ class MyTicketsScreen extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: isCancelled
-                              ? Colors.grey[200]
+                              ? AppColors.border
                               : isCheckedIn
-                                  ? Colors.green[50]
-                                  : const Color(0xFFFCFCFC),
+                                  ? AppColors.success.withValues(alpha: 0.1)
+                                  : AppColors.cardSurface,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
@@ -215,10 +210,10 @@ class MyTicketsScreen extends StatelessWidget {
                                       : Icons.confirmation_number,
                               size: 14,
                               color: isCancelled
-                                  ? Colors.grey[600]
+                                  ? AppColors.textSecondary
                                   : isCheckedIn
-                                      ? Colors.green[700]
-                                      : const Color(0xFFBBC863),
+                                      ? AppColors.success
+                                      : AppColors.secondary,
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -227,14 +222,12 @@ class MyTicketsScreen extends StatelessWidget {
                                   : isCheckedIn
                                       ? 'UDAH CHECK-IN'
                                       : 'AKTIF',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
+                              style: AppTextStyles.label.copyWith(
                                 color: isCancelled
-                                    ? Colors.grey[600]
+                                    ? AppColors.textSecondary
                                     : isCheckedIn
-                                        ? Colors.green[700]
-                                        : const Color(0xFFBBC863),
+                                        ? AppColors.success
+                                        : AppColors.secondary,
                                 letterSpacing: 0.3,
                               ),
                             ),
@@ -245,11 +238,7 @@ class MyTicketsScreen extends StatelessWidget {
                       if (ticket.pricePaid > 0)
                         Text(
                           'Rp ${ticket.pricePaid.toStringAsFixed(0)}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF1A1A1A),
-                          ),
+                          style: AppTextStyles.bodyLargeBold,
                         )
                       else
                         Container(
@@ -258,15 +247,13 @@ class MyTicketsScreen extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFBBC863),
+                            color: AppColors.secondary,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Text(
+                          child: Text(
                             'GRATIS',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
+                            style: AppTextStyles.label.copyWith(
+                              color: AppColors.white,
                               letterSpacing: 0.3,
                             ),
                           ),
@@ -275,12 +262,11 @@ class MyTicketsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   // Event title (placeholder - will get from event data)
-                  const Text(
+                  Text(
                     'Nama Event',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyLargeBold.copyWith(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF1A1A1A),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -290,15 +276,13 @@ class MyTicketsScreen extends StatelessWidget {
                       Icon(
                         Icons.qr_code_2,
                         size: 16,
-                        color: Colors.grey[600],
+                        color: AppColors.textSecondary,
                       ),
                       const SizedBox(width: 6),
                       Text(
                         'Kode: ${ticket.attendanceCode}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[700],
+                        style: AppTextStyles.bodyMediumBold.copyWith(
+                          color: AppColors.textSecondary,
                           fontFamily: 'monospace',
                         ),
                       ),
@@ -311,14 +295,14 @@ class MyTicketsScreen extends StatelessWidget {
                       Icon(
                         Icons.calendar_today,
                         size: 14,
-                        color: Colors.grey[600],
+                        color: AppColors.textSecondary,
                       ),
                       const SizedBox(width: 6),
                       Text(
                         'Dibeli ${_formatDate(ticket.purchasedAt)}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyMedium.copyWith(
                           fontSize: 13,
-                          color: Colors.grey[600],
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -330,14 +314,14 @@ class MyTicketsScreen extends StatelessWidget {
                         Icon(
                           Icons.check,
                           size: 14,
-                          color: Colors.green[600],
+                          color: AppColors.success,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           'Check-in ${_formatDate(ticket.checkedInAt!)}',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyMedium.copyWith(
                             fontSize: 13,
-                            color: Colors.green[600],
+                            color: AppColors.success,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -364,9 +348,9 @@ class MyTicketsScreen extends StatelessWidget {
                           : isCheckedIn
                               ? 'Tiket ini udah kepake'
                               : 'Tap buat liat detail tiket',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyMedium.copyWith(
                         fontSize: 13,
-                        color: Colors.grey[600],
+                        color: AppColors.textSecondary,
                         fontStyle: isCancelled ? FontStyle.italic : null,
                       ),
                     ),
@@ -374,7 +358,7 @@ class MyTicketsScreen extends StatelessWidget {
                   Icon(
                     Icons.arrow_forward_ios_rounded,
                     size: 16,
-                    color: Colors.grey[400],
+                    color: AppColors.textTertiary,
                   ),
                 ],
               ),
@@ -410,7 +394,7 @@ class DashedLinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.grey[300]!
+      ..color = AppColors.border
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
 

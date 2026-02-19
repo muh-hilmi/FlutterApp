@@ -8,19 +8,14 @@ import '../../bloc/my_events/my_events_bloc.dart';
 import '../../bloc/my_events/my_events_event.dart';
 import '../../bloc/my_events/my_events_state.dart';
 import '../event_participants/event_participants_screen.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../create_event/create_event_conversation.dart';
 import '../event_management/event_management_dashboard.dart';
 import '../event_summary/event_summary_screen.dart';
 import '../../../injection_container.dart' as di;
 
-/// Screen displaying events created by the current user
-/// Features:
-/// - Tabs: "Aktif" (upcoming/ongoing) and "Selesai" (ended)
-/// - List of user's hosted events with key details
-/// - Edit, Delete, and Check-in actions (for active events)
-/// - Event Summary with analytics (for completed events)
-/// - Empty state when no events
-/// - FAB to create new event
+/// Modern "My Events" screen with clean, card-based design
 class MyEventsScreen extends StatefulWidget {
   const MyEventsScreen({super.key});
 
@@ -49,245 +44,220 @@ class _MyEventsScreenState extends State<MyEventsScreen>
     return BlocProvider(
       create: (_) => di.sl<MyEventsBloc>()..add(const LoadMyEvents()),
       child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: _buildAppBar(context),
-        body: BlocBuilder<MyEventsBloc, MyEventsState>(
-          builder: (context, state) {
-            if (state is MyEventsLoading) {
-              return _buildLoadingState();
-            }
+        backgroundColor: AppColors.surface,
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(context),
+              BlocBuilder<MyEventsBloc, MyEventsState>(
+                builder: (context, state) {
+                  if (state is MyEventsLoading) {
+                    return const Expanded(child: _LoadingState());
+                  }
 
-            if (state is MyEventsError) {
-              return _buildErrorState(context, state.message);
-            }
+                  if (state is MyEventsError) {
+                    return Expanded(child: _ErrorState(message: state.message));
+                  }
 
-            if (state is MyEventsLoaded) {
-              if (state.events.isEmpty) {
-                return _buildEmptyState(context);
-              }
+                  if (state is MyEventsLoaded) {
+                    if (state.events.isEmpty) {
+                      return const Expanded(child: _EmptyState());
+                    }
 
-              final activeEvents = state.events.where((e) => e.isActive).toList();
-              final completedEvents = state.events.where((e) => e.isCompleted).toList();
+                    final activeEvents = state.events
+                        .where((e) => e.isActive)
+                        .toList();
+                    final completedEvents = state.events
+                        .where((e) => e.isCompleted)
+                        .toList();
 
-              if (activeEvents.isEmpty && completedEvents.isEmpty) {
-                return _buildEmptyState(context);
-              }
+                    if (activeEvents.isEmpty && completedEvents.isEmpty) {
+                      return const Expanded(child: _EmptyState());
+                    }
 
-              return Column(
-                children: [
-                  // Tab bar
-                  _buildTabBar(state.events),
+                    return Expanded(
+                      child: Column(
+                        children: [
+                          _buildTabBar(),
+                          Expanded(
+                            child: TabBarView(
+                              controller: _tabController,
+                              children: [
+                                _ActiveEventsTab(events: activeEvents),
+                                _CompletedEventsTab(events: completedEvents),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
 
-                  // Tab content
-                  Expanded(
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        _buildActiveEventsTab(activeEvents),
-                        _buildCompletedEventsTab(completedEvents),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            }
-
-            return _buildEmptyState(context);
-          },
+                  return const Expanded(child: _EmptyState());
+                },
+              ),
+            ],
+          ),
         ),
         floatingActionButton: _buildCreateEventFAB(context),
       ),
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return AppBar(
-      key: const Key('my_events_app_bar'),
-      backgroundColor: Colors.white,
-      elevation: 0,
-      title: const Text(
-        'Event Gue',
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w800,
-          color: Color(0xFF1A1A1A),
-        ),
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        border: Border(bottom: BorderSide(color: AppColors.divider, width: 1)),
       ),
-      leading: IconButton(
-        key: const Key('my_events_back_button'),
-        icon: const Icon(
-          Icons.arrow_back_rounded,
-          color: Color(0xFF1A1A1A),
-        ),
-        onPressed: () => Navigator.pop(context),
-      ),
-      actions: [
-        IconButton(
-          key: const Key('my_events_refresh_button'),
-          icon: const Icon(
-            Icons.refresh_rounded,
-            color: Color(0xFF1A1A1A),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+            onPressed: () => Navigator.pop(context),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
           ),
-          onPressed: () {
-            context.read<MyEventsBloc>().add(const RefreshMyEvents());
-          },
-        ),
-      ],
+          const SizedBox(width: 12),
+          Text(
+            'Event Gue',
+            style: AppTextStyles.h2.copyWith(letterSpacing: -0.5),
+          ),
+          const Spacer(),
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded),
+            onPressed: () {
+              context.read<MyEventsBloc>().add(const RefreshMyEvents());
+            },
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildTabBar(List<Event> allEvents) {
-    return Column(
-      children: [
-        TabBar(
+  Widget _buildTabBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceAlt,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: TabBar(
           controller: _tabController,
-          labelColor: const Color(0xFFBBC863),
-          unselectedLabelColor: Colors.grey[600],
-          labelStyle: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
+          dividerColor: Colors.transparent,
+          indicator: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          indicatorColor: const Color(0xFFBBC863),
-          indicatorSize: TabBarIndicatorSize.label,
-          tabs: [
-            Tab(
-              text: 'AKTIF',
-              icon: const Icon(Icons.play_circle_outline, size: 20),
-            ),
-            Tab(
-              text: 'SELESAI',
-              icon: const Icon(Icons.check_circle_outline, size:20),
-            ),
+          labelColor: AppColors.secondary,
+          unselectedLabelColor: AppColors.textTertiary,
+          labelStyle: AppTextStyles.bodyMediumBold,
+          unselectedLabelStyle: AppTextStyles.bodyMediumBold,
+          indicatorSize: TabBarIndicatorSize.tab,
+          tabs: const [
+            Tab(text: 'Aktif'),
+            Tab(text: 'Selesai'),
           ],
         ),
-        Container(
-          height: 1,
-          color: Colors.grey[200],
-        ),
-      ],
+      ),
     );
   }
+}
 
-  Widget _buildActiveEventsTab(List<Event> activeEvents) {
-    if (activeEvents.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.upcoming_outlined,
-              size: 64,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Belum Ada Event Aktif',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF1A1A1A),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Event yang akan datang/berlangsung akan muncul di sini',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
+class _ActiveEventsTab extends StatelessWidget {
+  final List<Event> events;
+
+  const _ActiveEventsTab({required this.events});
+
+  @override
+  Widget build(BuildContext context) {
+    if (events.isEmpty) {
+      return const _EmptyTabState(
+        icon: Icons.upcoming_outlined,
+        title: 'Belum Ada Event Aktif',
+        subtitle: 'Event yang akan datang akan muncul di sini',
       );
     }
 
     return RefreshIndicator(
-      key: const Key('active_events_refresh_indicator'),
       onRefresh: () async {
         context.read<MyEventsBloc>().add(const RefreshMyEvents());
       },
-      color: const Color(0xFFBBC863),
+      color: AppColors.secondary,
       child: ListView.builder(
-        key: const Key('active_events_list'),
-        padding: const EdgeInsets.all(16),
-        itemCount: activeEvents.length,
+        padding: const EdgeInsets.all(20),
+        itemCount: events.length,
         itemBuilder: (context, index) {
-          return _buildEventCard(context, activeEvents[index], isActive: true);
+          return _ModernEventCard(event: events[index], isActive: true);
         },
       ),
     );
   }
+}
 
-  Widget _buildCompletedEventsTab(List<Event> completedEvents) {
-    if (completedEvents.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.history,
-            size: 64,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Belum Ada Event Selesai',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF1A1A1A),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Event yang sudah selesai akan muncul di sini',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
+class _CompletedEventsTab extends StatelessWidget {
+  final List<Event> events;
+
+  const _CompletedEventsTab({required this.events});
+
+  @override
+  Widget build(BuildContext context) {
+    if (events.isEmpty) {
+      return const _EmptyTabState(
+        icon: Icons.history,
+        title: 'Belum Ada Event Selesai',
+        subtitle: 'Event yang sudah selesai akan muncul di sini',
       );
     }
 
     return RefreshIndicator(
-      key: const Key('completed_events_refresh_indicator'),
       onRefresh: () async {
         context.read<MyEventsBloc>().add(const RefreshMyEvents());
       },
-      color: const Color(0xFFBBC863),
+      color: AppColors.secondary,
       child: ListView.builder(
-        key: const Key('completed_events_list'),
-        padding: const EdgeInsets.all(16),
-        itemCount: completedEvents.length,
+        padding: const EdgeInsets.all(20),
+        itemCount: events.length,
         itemBuilder: (context, index) {
-          return _buildEventCard(context, completedEvents[index], isActive: false);
+          return _ModernEventCard(event: events[index], isActive: false);
         },
       ),
     );
   }
+}
 
-  Widget _buildEventCard(BuildContext context, Event event, {required bool isActive}) {
+/// Modern card design for events
+class _ModernEventCard extends StatelessWidget {
+  final Event event;
+  final bool isActive;
+
+  const _ModernEventCard({required this.event, required this.isActive});
+
+  @override
+  Widget build(BuildContext context) {
     final attendeesCount = event.attendeeIds.length;
     final maxAttendees = event.maxAttendees;
     final isFull = attendeesCount >= maxAttendees;
 
     return Container(
-      key: Key('my_events_event_card_${event.id}'),
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isActive
-              ? const Color(0xFFBBC863).withValues(alpha: 0.3)
-              : (Colors.blue[700] ?? Colors.blue).withValues(alpha: 0.3),
-          width: 2,
-        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: AppColors.primary.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -296,167 +266,129 @@ class _MyEventsScreenState extends State<MyEventsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Cover image or placeholder
-          if (event.fullImageUrls.isNotEmpty)
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(14),
+          // Image with status badge overlay
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
+                child: event.fullImageUrls.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: event.fullImageUrls.first,
+                        height: 100,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          height: 100,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.secondary.withValues(alpha: 0.3),
+                                AppColors.secondary.withValues(alpha: 0.2),
+                              ],
+                            ),
+                          ),
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.secondary,
+                              ),
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) =>
+                            _buildImagePlaceholder(),
+                      )
+                    : _buildImagePlaceholder(),
               ),
-              child: CachedNetworkImage(
-                imageUrl: event.fullImageUrls.first,
-                height: 160,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  height: 160,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFBBC863).withValues(alpha: 0.1),
-                  ),
-                  child: const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Color(0xFFBBC863),
-                      ),
-                    ),
+              // Status badge
+              Positioned(
+                top: 12,
+                left: 12,
+                child: _StatusBadge(event: event, isActive: isActive),
+              ),
+              // Price badge
+              if (event.isFree)
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: _PriceBadge(text: 'GRATIS', isFree: true),
+                )
+              else if (event.price != null)
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: _PriceBadge(
+                    text: 'Rp ${event.price!.toInt().toString()}',
+                    isFree: false,
                   ),
                 ),
-                errorWidget: (context, url, error) {
-                  AppLogger().error('[MyEvents] Failed to load image for "${event.title}"');
-                  AppLogger().error('[MyEvents] URL: $url');
-                  AppLogger().error('[MyEvents] Error: $error');
-                  return _buildImagePlaceholder();
-                },
-              ),
-            )
-          else
-            _buildImagePlaceholder(),
+            ],
+          ),
 
-          // Event details
+          // Content
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Date badge
-                Row(
-                  children: [
-                    Text(
-                      _formatDate(event.startTime),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
                 // Title
                 Text(
                   event.title,
-                  key: Key('my_events_event_title_${event.id}'),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF1A1A1A),
+                  style: AppTextStyles.bodyLargeBold.copyWith(
+                    letterSpacing: -0.3,
+                    color: AppColors.textEmphasis,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8),
 
-                // Date & Time
-                Row(
-                  children: [
-                    Icon(
-                      Icons.access_time_rounded,
-                      size: 15,
-                      color: Colors.grey[600],
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        _formatDateTime(event.startTime, event.endTime),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                    ),
-                  ],
+                // Date row
+                _InfoRow(
+                  icon: Icons.calendar_today_outlined,
+                  text: _formatDateRange(event.startTime, event.endTime),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
 
-                // Location
-                Row(
-                  children: [
-                    Icon(
-                      Icons.location_on_rounded,
-                      size: 15,
-                      color: Colors.grey[600],
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        event.location.name,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[700],
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+                // Time row
+                _InfoRow(
+                  icon: Icons.access_time_rounded,
+                  text: _formatTimeRange(event.startTime, event.endTime),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 4),
 
-                // Stats row
+                // Location row
+                _InfoRow(
+                  icon: Icons.location_on_outlined,
+                  text: event.location.name,
+                ),
+                const SizedBox(height: 8),
+
+                // Stats
                 Row(
                   children: [
-                    // Attendees count
-                    Icon(
-                      isFull ? Icons.people_rounded : Icons.person_outline_rounded,
-                      size: 15,
-                      color: isFull ? Colors.red[600] : Colors.grey[600],
+                    _StatChip(
+                      icon: Icons.people_outline_rounded,
+                      label: '$attendeesCount/$maxAttendees',
+                      color: isFull ? AppColors.error : AppColors.secondary,
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '$attendeesCount/$maxAttendees',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: isFull ? Colors.red[700] : Colors.grey[700],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    // Tickets sold (if not free)
-                    if (!event.isFree)
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.confirmation_number_outlined,
-                            size: 15,
-                            color: const Color(0xFFBBC863),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '${event.ticketsSold} terjual',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFFBBC863),
-                            ),
-                          ),
-                        ],
+                    const SizedBox(width: 8),
+                    if (!event.isFree && event.ticketsSold > 0)
+                      _StatChip(
+                        icon: Icons.confirmation_number_outlined,
+                        label: '${event.ticketsSold} terjual',
+                        color: AppColors.primary,
                       ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
 
                 // Action buttons
-                _buildActionButtons(context, event, isActive),
+                _buildActionButtons(context),
               ],
             ),
           ),
@@ -465,28 +397,44 @@ class _MyEventsScreenState extends State<MyEventsScreen>
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, Event event, bool isActive) {
+  Widget _buildImagePlaceholder() {
+    return Container(
+      height: 100,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.secondary.withValues(alpha: 0.2),
+            AppColors.secondary.withValues(alpha: 0.15),
+          ],
+        ),
+      ),
+      child: const Center(
+        child: Icon(Icons.event_outlined, size: 36, color: AppColors.secondary),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context) {
     if (isActive) {
-      // Active events: Kelola, Check-in, Delete
       return Row(
         children: [
           Expanded(
-            child: _buildActionButton(
-              key: Key('my_events_manage_button_${event.id}'),
+            child: _ModernButton(
               icon: Icons.manage_accounts_outlined,
               label: 'Kelola',
-              color: const Color(0xFFBBC863),
+              color: AppColors.primary,
+              isFilled: false,
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => EventManagementDashboard(
-                      eventId: event.id,
-                    ),
+                    builder: (context) =>
+                        EventManagementDashboard(eventId: event.id),
                   ),
                 ).then((_) {
-                  if (mounted) {
-                    if (!context.mounted) return;
+                  if (context.mounted) {
                     context.read<MyEventsBloc>().add(const RefreshMyEvents());
                   }
                 });
@@ -495,22 +443,20 @@ class _MyEventsScreenState extends State<MyEventsScreen>
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: _buildActionButton(
-              key: Key('my_events_checkin_button_${event.id}'),
+            child: _ModernButton(
               icon: Icons.qr_code_scanner_rounded,
               label: 'Check-in',
-              color: const Color(0xFF1A1A1A),
+              color: AppColors.primary,
+              isFilled: true,
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => EventParticipantsScreen(
-                      eventId: event.id,
-                    ),
+                    builder: (context) =>
+                        EventParticipantsScreen(eventId: event.id),
                   ),
                 ).then((_) {
-                  if (mounted) {
-                    if (!context.mounted) return;
+                  if (context.mounted) {
                     context.read<MyEventsBloc>().add(const RefreshMyEvents());
                   }
                 });
@@ -518,19 +464,18 @@ class _MyEventsScreenState extends State<MyEventsScreen>
             ),
           ),
           const SizedBox(width: 8),
-          _buildDeleteButton(context, event),
+          _DeleteButton(event: event),
         ],
       );
     } else {
-      // Completed events: Lihat Ringkasan, Re-run
       return Row(
         children: [
           Expanded(
-            child: _buildActionButton(
-              key: Key('my_events_summary_button_${event.id}'),
+            child: _ModernButton(
               icon: Icons.analytics_outlined,
-              label: 'Lihat Ringkasan',
-              color: const Color(0xFF1A1A1A),
+              label: 'Ringkasan',
+              color: AppColors.primary,
+              isFilled: false,
               onTap: () {
                 Navigator.push(
                   context,
@@ -543,14 +488,12 @@ class _MyEventsScreenState extends State<MyEventsScreen>
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: _buildActionButton(
-              key: Key('my_events_rerun_button_${event.id}'),
+            child: _ModernButton(
               icon: Icons.restore,
               label: 'Re-Run',
-              color: const Color(0xFFBBC863),
-              onTap: () {
-                _showReRunDialog(context, event);
-              },
+              color: AppColors.secondary,
+              isFilled: true,
+              onTap: () => _showReRunDialog(context, event),
             ),
           ),
         ],
@@ -558,276 +501,69 @@ class _MyEventsScreenState extends State<MyEventsScreen>
     }
   }
 
-  Widget _buildImagePlaceholder() {
-    return Container(
-      height: 160,
-      decoration: BoxDecoration(
-        color: const Color(0xFFBBC863).withValues(alpha: 0.1),
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(14),
-        ),
-      ),
-      child: const Center(
-        child: Icon(
-          Icons.event_outlined,
-          size: 48,
-          color: Color(0xFFBBC863),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required Key key,
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      key: key,
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: color.withValues(alpha: 0.3),
-            width: 1.5,
-          ),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: color,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: color,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDeleteButton(BuildContext context, Event event) {
-    // Only allow deletion if no attendees and event hasn't started
-    final canDelete = event.attendeeIds.isEmpty && !event.hasEnded;
-
-    return InkWell(
-      key: Key('my_events_delete_button_${event.id}'),
-      onTap: canDelete
-          ? () => _showDeleteDialog(context, event)
-          : null,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-        decoration: BoxDecoration(
-          color: canDelete
-              ? Colors.red[50]
-              : Colors.grey[100],
-          border: Border.all(
-            color: canDelete
-                ? Colors.red[300]!
-                : Colors.grey[300]!,
-            width: 1.5,
-          ),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(
-          Icons.delete_outline_rounded,
-          size: 18,
-          color: canDelete
-              ? Colors.red[700]
-              : Colors.grey[400],
-        ),
-      ),
-    );
-  }
-
-  void _showDeleteDialog(BuildContext context, Event event) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        key: Key('my_events_delete_dialog_${event.id}'),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: const Text(
-          'Hapus Event?',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF1A1A1A),
-          ),
-        ),
-        content: Text(
-          'Lo yakin mau hapus "${event.title}"? Tindakan ini nggak bisa dibatalin.',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[700],
-          ),
-        ),
-        actions: [
-          TextButton(
-            key: const Key('my_events_delete_cancel_button'),
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text(
-              'Batal',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A1A),
-              ),
-            ),
-          ),
-          ElevatedButton(
-            key: Key('my_events_delete_confirm_button_${event.id}'),
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              context.read<MyEventsBloc>().add(DeleteMyEvent(event.id));
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red[600],
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text(
-              'Hapus',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showReRunDialog(BuildContext context, Event event) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        key: Key('my_events_rerun_dialog_${event.id}'),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: const Text(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
           'Buat Event Lagi?',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF1A1A1A),
-          ),
+          style: AppTextStyles.h3.copyWith(color: AppColors.textEmphasis),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Buat event baru berdasarkan "${event.title}" dengan data yang sama. Lo tetap perlu setting tanggal & lokasi.',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[700],
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, size: 16, color: Colors.grey[700]),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Tips: Lo bisa edit tanggal, lokasi, dan harga setelah event dibuat.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+        content: Text(
+          'Buat event baru berdasarkan "${event.title}" dengan data yang sama.',
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text(
+            child: Text(
               'Batal',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A1A),
-              ),
+              style: AppTextStyles.button.copyWith(color: AppColors.textSecondary),
             ),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(dialogContext);
-              // Create a template event from the completed event
-              // This will pre-fill the form with existing data
               final templateEvent = Event(
-                id: '', // Empty ID = create new event
+                id: '',
                 title: event.title,
                 description: event.description,
                 category: event.category,
-                startTime: DateTime.now().add(const Duration(days: 7)), // Default: 1 week from now
-                endTime: DateTime.now().add(const Duration(days: 7)).add(const Duration(hours: 3)), // Default: 3 hours duration
+                startTime: DateTime.now().add(const Duration(days: 7)),
+                endTime: DateTime.now().add(const Duration(days: 7, hours: 3)),
                 location: event.location,
                 host: event.host,
                 imageUrls: event.imageUrls,
                 maxAttendees: event.maxAttendees,
                 price: event.price,
                 isFree: event.isFree,
-                status: EventStatus.upcoming, // Reset to upcoming
-                requirements: event.requirements,
-                // Reset counters
+                status: EventStatus.upcoming,
                 attendeeIds: const [],
                 ticketsSold: 0,
                 interestedUserIds: const [],
+                requirements: event.requirements,
                 waitlistIds: const [],
               );
-
-              // Navigate to create event with pre-filled data
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => CreateEventConversation(event: templateEvent),
+                  builder: (context) =>
+                      CreateEventConversation(event: templateEvent),
                 ),
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFBBC863),
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.secondary,
+              foregroundColor: AppColors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
+            child: Text(
               'Buat',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              ),
+              style: AppTextStyles.button,
             ),
           ),
         ],
@@ -835,70 +571,419 @@ class _MyEventsScreenState extends State<MyEventsScreen>
     );
   }
 
-  Widget _buildLoadingState() {
-    return const Center(
-      child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFBBC863)),
+  String _formatDateRange(DateTime start, DateTime end) {
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agu',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
+    return '${start.day} ${months[start.month - 1]} ${start.year}';
+  }
+
+  String _formatTimeRange(DateTime start, DateTime end) {
+    return '${start.hour.toString().padLeft(2, '0')}:${start.minute.toString().padLeft(2, '0')} - ${end.hour.toString().padLeft(2, '0')}:${end.minute.toString().padLeft(2, '0')}';
+  }
+}
+
+/// Status badge widget
+class _StatusBadge extends StatelessWidget {
+  final Event event;
+  final bool isActive;
+
+  const _StatusBadge({required this.event, required this.isActive});
+
+  @override
+  Widget build(BuildContext context) {
+    String text;
+    Color color;
+
+    if (isActive) {
+      // Check if event is currently happening
+      final now = DateTime.now().toUtc();
+      final isOngoing =
+          now.isAfter(event.startTime.toUtc()) &&
+          now.isBefore(event.endTime.toUtc());
+
+      if (isOngoing) {
+        text = 'SEDANG BERLANGSUNG';
+        color = AppColors.success;
+      } else {
+        text = 'AKAN DATANG';
+        color = AppColors.secondary;
+      }
+    } else {
+      text = 'SELESAI';
+      color = AppColors.textSecondary;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        text,
+        style: AppTextStyles.label.copyWith(
+          color: color,
+          letterSpacing: 0.3,
+        ),
+      ),
+    );
+  }
+}
+
+/// Price badge widget
+class _PriceBadge extends StatelessWidget {
+  final String text;
+  final bool isFree;
+
+  const _PriceBadge({required this.text, required this.isFree});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isFree
+            ? AppColors.success.withValues(alpha: 0.15)
+            : AppColors.white.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        text,
+        style: AppTextStyles.label.copyWith(
+          color: isFree ? AppColors.success : AppColors.textEmphasis,
+        ),
+      ),
+    );
+  }
+}
+
+/// Info row widget
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _InfoRow({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 13, color: AppColors.textTertiary),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            text,
+            style: AppTextStyles.bodySmall.copyWith(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Stat chip widget
+class _StatChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  const _StatChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 3),
+          Text(
+            label,
+            style: AppTextStyles.captionSmall.copyWith(
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Modern button widget
+class _ModernButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final bool isFilled;
+  final VoidCallback onTap;
+
+  const _ModernButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.isFilled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isFilled ? color : Colors.transparent,
+          border: Border.all(color: color, width: 1.5),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16, color: isFilled ? AppColors.white : color),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: AppTextStyles.bodySmall.copyWith(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: isFilled ? AppColors.white : color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Delete button widget
+class _DeleteButton extends StatefulWidget {
+  final Event event;
+
+  const _DeleteButton({required this.event});
+
+  @override
+  State<_DeleteButton> createState() => _DeleteButtonState();
+}
+
+class _DeleteButtonState extends State<_DeleteButton> {
+  bool isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final canDelete =
+        widget.event.attendeeIds.isEmpty && !widget.event.hasEnded;
+
+    return GestureDetector(
+      onTapDown: (_) => setState(() => isPressed = true),
+      onTapUp: (_) => setState(() => isPressed = false),
+      onTapCancel: () => setState(() => isPressed = false),
+      onTap: canDelete ? () => _showDeleteDialog(context) : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: isPressed
+              ? AppColors.error.withValues(alpha: 0.2)
+              : (canDelete ? AppColors.error.withValues(alpha: 0.08) : AppColors.surfaceAlt),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(
+          Icons.delete_outline_rounded,
+          size: 20,
+          color: canDelete ? AppColors.error : AppColors.textTertiary,
+        ),
       ),
     );
   }
 
-  Widget _buildErrorState(BuildContext context, String message) {
+  void _showDeleteDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Hapus Event?',
+          style: AppTextStyles.h3.copyWith(color: AppColors.textEmphasis),
+        ),
+        content: Text(
+          'Lo yakin mau hapus "${widget.event.title}"?',
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(
+              'Batal',
+              style: AppTextStyles.button.copyWith(color: AppColors.textSecondary),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              context.read<MyEventsBloc>().add(DeleteMyEvent(widget.event.id));
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'Hapus',
+              style: AppTextStyles.button,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Empty tab state widget
+class _EmptyTabState extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const _EmptyTabState({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.grey[400],
+          Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              color: AppColors.secondary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 48, color: AppColors.secondary),
           ),
+          const SizedBox(height: 20),
+          Text(
+            title,
+            style: AppTextStyles.h3.copyWith(color: AppColors.textEmphasis),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Loading state widget
+class _LoadingState extends StatelessWidget {
+  const _LoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: CircularProgressIndicator(
+        valueColor: AlwaysStoppedAnimation<Color>(AppColors.secondary),
+      ),
+    );
+  }
+}
+
+/// Error state widget
+class _ErrorState extends StatelessWidget {
+  final String message;
+
+  const _ErrorState({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 64, color: AppColors.border),
           const SizedBox(height: 16),
           Text(
             'Oops!',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Colors.grey[700],
-            ),
+            style: AppTextStyles.h3.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
               message,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            key: const Key('my_events_retry_button'),
             onPressed: () {
               context.read<MyEventsBloc>().add(const LoadMyEvents());
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFBBC863),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 32,
-                vertical: 12,
-              ),
+              backgroundColor: AppColors.secondary,
+              foregroundColor: AppColors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text('Coba Lagi'),
+            child: Text(
+              'Coba Lagi',
+              style: AppTextStyles.button,
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildEmptyState(BuildContext context) {
+/// Empty state widget
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -907,89 +992,54 @@ class _MyEventsScreenState extends State<MyEventsScreen>
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+              color: AppColors.secondary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.event_available_outlined,
               size: 64,
-              color: const Color(0xFFBBC863),
+              color: AppColors.secondary,
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Belum Ada Event',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A1A),
-            ),
+            style: AppTextStyles.h3.copyWith(color: AppColors.textEmphasis),
           ),
           const SizedBox(height: 8),
           Text(
-            'Yakin bikin event seru sekarang!',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
+            'Yuk bikin event seru sekarang!',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildCreateEventFAB(BuildContext context) {
-    return FloatingActionButton.extended(
-      key: const Key('my_events_create_fab'),
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const CreateEventConversation(),
-          ),
-        ).then((_) {
-          if (mounted) {
-            context.read<MyEventsBloc>().add(const RefreshMyEvents());
-          }
-        });
-      },
-      backgroundColor: const Color(0xFFBBC863),
-      icon: const Icon(Icons.add_rounded),
-      label: const Text(
-        'Bikin Event',
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
+/// Create event FAB
+Widget _buildCreateEventFAB(BuildContext context) {
+  return FloatingActionButton.extended(
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const CreateEventConversation(),
         ),
+      ).then((_) {
+        if (context.mounted) {
+          context.read<MyEventsBloc>().add(const RefreshMyEvents());
+        }
+      });
+    },
+    backgroundColor: AppColors.secondary,
+    icon: const Icon(Icons.add_rounded),
+    label: Text(
+      'Bikin Event',
+      style: AppTextStyles.button.copyWith(
+        color: AppColors.primary,
+        letterSpacing: -0.3,
       ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    final localDate = date.toLocal();
-    final months = [
-      'Jan', 'FEB', 'MAR', 'APR', 'MEI', 'JUN',
-      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
-    ];
-    return '${localDate.day} ${months[localDate.month - 1]}';
-  }
-
-  String _formatDateTime(DateTime start, DateTime end) {
-    final localStart = start.toLocal();
-    final localEnd = end.toLocal();
-    final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-
-    final startDay = localStart.day;
-    final startMonth = months[localStart.month - 1];
-    final startHour = localStart.hour.toString().padLeft(2, '0');
-    final startMinute = localStart.minute.toString().padLeft(2, '0');
-
-    final endHour = localEnd.hour.toString().padLeft(2, '0');
-    final endMinute = localEnd.minute.toString().padLeft(2, '0');
-
-    return '$startDay $startMonth, $startHour:$startMinute - $endHour:$endMinute';
-  }
+    ),
+  );
 }

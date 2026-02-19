@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'chat_message_model.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class MessageBubble extends StatelessWidget {
   final ChatMessage message;
@@ -23,14 +25,14 @@ class MessageBubble extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: message.isBot ? Colors.white : const Color(0xFFBBC863),
+                color: message.isBot ? AppColors.white : AppColors.secondary,
                 borderRadius: BorderRadius.circular(20).copyWith(
                   bottomLeft: message.isBot ? const Radius.circular(4) : null,
                   bottomRight: message.isBot ? null : const Radius.circular(4),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: AppColors.primary.withValues(alpha: 0.05),
                     blurRadius: 5,
                     offset: const Offset(0, 2),
                   ),
@@ -39,10 +41,11 @@ class MessageBubble extends StatelessWidget {
               child: message.customWidget ??
                   Text(
                     message.text,
-                    style: TextStyle(
+                    style: AppTextStyles.button.copyWith(
                       fontSize: 15,
-                      color: message.isBot ? Colors.black87 : Colors.white,
+                      color: message.isBot ? AppColors.textEmphasis : AppColors.white,
                       height: 1.4,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
             ),
@@ -51,9 +54,8 @@ class MessageBubble extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
                 DateFormat('HH:mm').format(message.timestamp),
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.grey[500],
+                style: AppTextStyles.captionSmall.copyWith(
+                  color: AppColors.textTertiary,
                 ),
               ),
             ),

@@ -194,7 +194,8 @@ class _ModernFeedScreenState extends State<ModernFeedScreen> {
         buildWhen: (previous, current) {
           // Only rebuild when posts actually change
           return previous.runtimeType != current.runtimeType ||
-                 (current is PostsLoaded && previous is PostsLoaded &&
+              (current is PostsLoaded &&
+                  previous is PostsLoaded &&
                   current.posts.length != previous.posts.length);
         },
         builder: (context, postsState) {
@@ -376,7 +377,7 @@ class _ModernFeedScreenState extends State<ModernFeedScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                   Text(
                     'Masih Sepi Nih...',
                     style: GoogleFonts.plusJakartaSans(
@@ -389,15 +390,15 @@ class _ModernFeedScreenState extends State<ModernFeedScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Yuk gas connect sama yang sefrekuensi! 🚀\nAtau mulai duluan dengan postingan kamu.',
+                    'Yuk gas connect sama yang sefrekuensi! 🚀\natau mulai duluan dengan postingan kamu.',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 15,
-                      color: Colors.grey[600],
-                      height: 1.5,
+                      color: Colors.black,
+                      // height: 1.5,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 36),
+                  const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () async {
                       final result = await CreatePostSheet.show(context);
@@ -439,7 +440,7 @@ class _ModernFeedScreenState extends State<ModernFeedScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 4),
                   TextButton(
                     onPressed: () {
                       context.read<PostsBloc>().add(LoadPosts());

@@ -28,7 +28,7 @@ import 'components/event_sticky_header.dart';
 import 'widgets/event_content.dart';
 import '../../../../presentation/pages/payment/payment_screen.dart';
 import '../tickets/ticket_detail_screen.dart';
-import '../event_management/event_management_dashboard.dart';
+import '../EXPERIMENTAL/tickets/host_checkin_screen.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final Event event;
@@ -57,6 +57,8 @@ class _EventDetailScreenState extends State<EventDetailScreen>
   bool _showConfirmation = false;
   // ignore: unused_field
   int _currentImageIndex = 0;
+  bool _hasUserTicket = false;   // true once we confirm user has a ticket
+  bool _viewTicketPressed = false; // true when user explicitly taps "Lihat Tiket"
 
   @override
   void initState() {
@@ -84,11 +86,17 @@ class _EventDetailScreenState extends State<EventDetailScreen>
 
     _scrollController?.addListener(_onScroll);
 
-    // Fetch fresh event data from backend to avoid stale data from home screen
-    // Skip for preview events
+    // Fetch fresh event data + check if user already has a ticket
     if (widget.event.id != 'preview') {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _eventsBloc?.add(LoadEventById(widget.event.id));
+
+        final userId = _authService.userId;
+        if (userId != null && userId.isNotEmpty) {
+          _ticketsBloc!.add(
+            LoadTicketForEvent(userId: userId, eventId: widget.event.id),
+          );
+        }
       });
     }
   }
@@ -167,13 +175,22 @@ class _EventDetailScreenState extends State<EventDetailScreen>
     _sheetController.forward();
   }
 
+  void _onViewTicketPressed() {
+    final userId = _authService.userId;
+    if (userId == null || userId.isEmpty) return;
+
+    setState(() => _viewTicketPressed = true);
+    _ticketsBloc!.add(
+      LoadTicketForEvent(userId: userId, eventId: widget.event.id),
+    );
+  }
+
   void _onManagePressed() {
-    // Navigate to event management dashboard
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) =>
-            EventManagementDashboard(eventId: widget.event.id),
+            HostCheckInScreen(eventId: widget.event.id),
       ),
     );
   }
@@ -273,7 +290,7 @@ class _EventDetailScreenState extends State<EventDetailScreen>
               BlocListener<TicketsBloc, TicketsState>(
                 listener: (context, state) {
                   if (state is TicketPurchased) {
-                    // Show success message
+                    setState(() => _hasUserTicket = true);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: const Text("Terima kasih! Tiket kamu siap 🎉"),
@@ -282,11 +299,7 @@ class _EventDetailScreenState extends State<EventDetailScreen>
                         duration: const Duration(seconds: 2),
                       ),
                     );
-
-                    // Refresh event to update attendeeIds
-                    _eventsBloc?.add(LoadEventsByMode(mode: 'all'));
-
-                    // Navigate to ticket detail screen after a brief delay
+                    _eventsBloc?.add(LoadEventById(widget.event.id));
                     Future.delayed(const Duration(milliseconds: 500), () {
                       if (mounted && context.mounted) {
                         Navigator.push(
@@ -298,14 +311,34 @@ class _EventDetailScreenState extends State<EventDetailScreen>
                         );
                       }
                     });
+                  } else if (state is TicketLoaded) {
+                    if (_viewTicketPressed) {
+                      // User tapped "Lihat Tiket" — navigate
+                      setState(() => _viewTicketPressed = false);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              TicketDetailScreen(ticket: state.ticket),
+                        ),
+                      );
+                    } else {
+                      // Initial check on screen open — just update button state
+                      setState(() => _hasUserTicket = true);
+                    }
                   } else if (state is TicketsError) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: AppColors.error,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
+                    if (_viewTicketPressed) {
+                      // User tapped "Lihat Tiket" but failed
+                      setState(() => _viewTicketPressed = false);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message),
+                          backgroundColor: AppColors.error,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                    // If initial check → silently ignore (user doesn't have ticket)
                   }
                 },
               ),
@@ -387,8 +420,10 @@ class _EventDetailScreenState extends State<EventDetailScreen>
                       bottom: 0,
                       child: EventActionButtons(
                         event: currentEvent,
+                        isAttending: _hasUserTicket,
                         onJoinPressed: _onJoinPressed,
                         onManagePressed: _onManagePressed,
+                        onViewTicketPressed: _onViewTicketPressed,
                       ),
                     ),
 
@@ -409,7 +444,7 @@ class _EventDetailScreenState extends State<EventDetailScreen>
                                 GestureDetector(
                                   onTap: _dismissConfirmation,
                                   child: Container(
-                                    color: Colors.black.withValues(
+                                    color: AppColors.primary.withValues(
                                       alpha: 0.5 * value,
                                     ),
                                   ),
@@ -478,12 +513,12 @@ class _EventDetailScreenState extends State<EventDetailScreen>
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color: AppColors.primary.withValues(alpha: 0.5),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.more_vert_rounded,
-                    color: Colors.white,
+                    color: AppColors.white,
                     size: 22,
                   ),
                 ),
@@ -521,7 +556,7 @@ class _EventDetailScreenState extends State<EventDetailScreen>
                       children: [
                         const Icon(
                           Icons.flag_rounded,
-                          color: Colors.red,
+                          color: AppColors.error,
                           size: 18,
                         ),
                         const SizedBox(width: 8),
@@ -553,17 +588,17 @@ class _EventDetailScreenState extends State<EventDetailScreen>
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.5),
+          color: AppColors.primary.withValues(alpha: 0.5),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
+              color: AppColors.primary.withValues(alpha: 0.2),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: Icon(icon, color: Colors.white, size: 22),
+        child: Icon(icon, color: AppColors.white, size: 22),
       ),
     );
   }
@@ -604,10 +639,10 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.primary,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close),
@@ -634,10 +669,10 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
                     imageUrl: widget.imageUrls[index],
                     fit: BoxFit.contain,
                     placeholder: (context, url) => const Center(
-                      child: CircularProgressIndicator(color: Colors.white),
+                      child: CircularProgressIndicator(color: AppColors.white),
                     ),
                     errorWidget: (context, url, error) =>
-                        const Icon(Icons.error, color: Colors.white),
+                        const Icon(Icons.error, color: AppColors.white),
                   ),
                 ),
               );
@@ -648,10 +683,8 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
               padding: const EdgeInsets.all(16.0),
               child: Text(
                 '${_currentIndex + 1} / ${widget.imageUrls.length}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                style: AppTextStyles.bodyLargeBold.copyWith(
+                  color: AppColors.white,
                 ),
               ),
             ),

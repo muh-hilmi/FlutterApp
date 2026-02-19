@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../injection_container.dart' as di;
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -61,7 +62,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       key: const Key('onboarding_screen'),
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: Stack(
         children: [
           // Background Elements
@@ -73,7 +74,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+                color: AppColors.secondary.withValues(alpha: 0.1),
                 backgroundBlendMode: BlendMode.multiply,
               ),
             ),
@@ -112,34 +113,29 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: const Color(
-                                0xFFBBC863,
-                              ).withValues(alpha: 0.15),
+                              color: AppColors.secondary.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Icon(
                               Icons.rocket_launch_rounded, // "Gas" icon
                               size: 48,
-                              color: Color(0xFFBBC863),
+                              color: AppColors.secondary,
                             ),
                           ),
                           const SizedBox(height: 32),
                           Text(
                             'Halo, Selamat\nDatang di Flyerr',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 40,
-                              fontWeight: FontWeight.w800,
+                            style: AppTextStyles.display.copyWith(
                               height: 1.1,
                               letterSpacing: -1.5,
-                              color: Colors.black,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'Yuk gas connect sama yang sefrekuensi! 🚀',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 16,
-                              color: Colors.black,
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              color: AppColors.textPrimary,
                               height: 1.5,
                               fontWeight: FontWeight.w500,
                             ),
@@ -161,8 +157,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         key: const Key('start_button'),
                         onPressed: _getStarted,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF000000),
-                          foregroundColor: Colors.white,
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -173,10 +169,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           children: [
                             Text(
                               'Gas Mulai!',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
+                              style: AppTextStyles.bodyLargeBold,
                             ),
                             const SizedBox(width: 8),
                             const Icon(Icons.arrow_forward_rounded, size: 20),

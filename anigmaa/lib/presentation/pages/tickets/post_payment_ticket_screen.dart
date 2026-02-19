@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../domain/entities/event.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 import 'my_tickets_screen.dart';
 import '../../pages/discover/swipeable_events_screen.dart';
 import '../../widgets/notifications/event_notification_scheduler.dart'
@@ -85,10 +86,10 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
 
   Color _getCountdownColor() {
     final days = _timeUntilEvent.inDays;
-    if (days >= 7) return const Color(0xFF9CA3AF); // gray
-    if (days >= 3) return const Color(0xFFBBC863); // green
-    if (days >= 1) return const Color(0xFFF59E0B); // orange
-    return const Color(0xFFEF4444); // red
+    if (days >= 7) return AppColors.textTertiary;
+    if (days >= 3) return AppColors.secondary;
+    if (days >= 1) return AppColors.warning;
+    return AppColors.error;
   }
 
   TicketStatus _getTicketStatus() {
@@ -113,11 +114,11 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
     final status = _getTicketStatus();
     switch (status) {
       case TicketStatus.upcoming:
-        return const Color(0xFFBBC863);
+        return AppColors.secondary;
       case TicketStatus.today:
-        return const Color(0xFFF59E0B);
+        return AppColors.warning;
       case TicketStatus.completed:
-        return Colors.grey;
+        return AppColors.textTertiary;
     }
   }
 
@@ -129,17 +130,17 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
     final status = _getTicketStatus();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFCFCFC),
+      backgroundColor: AppColors.cardSurface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF1F2937)),
+          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textEmphasis),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_horiz, color: Color(0xFF1F2937)),
+            icon: const Icon(Icons.more_horiz, color: AppColors.textEmphasis),
             onPressed: () => _showMoreOptions(context),
           ),
         ],
@@ -159,10 +160,9 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
                 children: [
                   Text(
                     widget.event.title,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: AppTextStyles.h3.copyWith(
                       fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF1F2937),
+                      color: AppColors.textEmphasis,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -171,16 +171,15 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
                       const Icon(
                         Icons.calendar_today_rounded,
                         size: 16,
-                        color: Color(0xFF6B7280),
+                        color: AppColors.textSecondary,
                       ),
                       const SizedBox(width: 6),
                       Text(
                         DateFormat(
                           'EEEE, d MMM yyyy • HH:mm',
                         ).format(widget.event.startTime.toLocal()),
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14,
-                          color: const Color(0xFF6B7280),
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -191,15 +190,14 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
                       const Icon(
                         Icons.location_on_rounded,
                         size: 16,
-                        color: Color(0xFF6B7280),
+                        color: AppColors.textSecondary,
                       ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           widget.event.location.name,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
-                            color: const Color(0xFF6B7280),
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ),
@@ -261,10 +259,8 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
               icon: const Icon(Icons.confirmation_number_rounded, size: 18),
               label: Text(
                 'Lihat Semua Tiket Saya',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFFBBC863),
+                style: AppTextStyles.bodyMediumBold.copyWith(
+                  color: AppColors.secondary,
                 ),
               ),
             ),
@@ -285,8 +281,8 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFFBBC863),
-            const Color(0xFFBBC863).withValues(alpha: 0.7),
+            AppColors.secondary,
+            AppColors.secondary.withValues(alpha: 0.7),
           ],
         ),
       ),
@@ -319,16 +315,14 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
           const SizedBox(width: 10),
           Text(
             'Mulai dalam ',
-            style: GoogleFonts.plusJakartaSans(
+            style: AppTextStyles.bodyMedium.copyWith(
               fontSize: 13,
-              color: const Color(0xFF6B7280),
+              color: AppColors.textSecondary,
             ),
           ),
           Text(
             _formatCountdown(_timeUntilEvent),
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
+            style: AppTextStyles.bodyMediumBold.copyWith(
               color: _getCountdownColor(),
             ),
           ),
@@ -341,11 +335,11 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: AppColors.primary.withValues(alpha: 0.08),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -378,7 +372,7 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.3),
+                    color: AppColors.white.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -386,16 +380,15 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
                     children: [
                       Icon(
                         _getTicketStatusIcon(),
-                        color: Colors.white,
+                        color: AppColors.white,
                         size: 16,
                       ),
                       const SizedBox(width: 6),
                       Text(
                         _getTicketStatusText(),
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
+                        style: AppTextStyles.caption.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: AppColors.white,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -408,7 +401,7 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
@@ -417,14 +410,14 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
                         data: ticketId,
                         version: QrVersions.auto,
                         size: 160,
-                        backgroundColor: Colors.white,
+                        backgroundColor: AppColors.white,
                         eyeStyle: const QrEyeStyle(
                           eyeShape: QrEyeShape.square,
-                          color: Color(0xFF1F2937),
+                          color: AppColors.textEmphasis,
                         ),
                         dataModuleStyle: const QrDataModuleStyle(
                           dataModuleShape: QrDataModuleShape.square,
-                          color: Color(0xFF1F2937),
+                          color: AppColors.textEmphasis,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -433,10 +426,9 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
                       const SizedBox(height: 8),
                       Text(
                         ticketId,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
+                        style: AppTextStyles.caption.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF6B7280),
+                          color: AppColors.textSecondary,
                           letterSpacing: 1,
                         ),
                       ),
@@ -454,9 +446,9 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
               children: [
                 Text(
                   'Tunjukin QR code ini saat check-in',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: AppTextStyles.bodyMedium.copyWith(
                     fontSize: 13,
-                    color: const Color(0xFF6B7280),
+                    color: AppColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -468,8 +460,8 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
                         icon: const Icon(Icons.copy, size: 16),
                         label: const Text('Copy Kode'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF1F2937),
-                          side: const BorderSide(color: Color(0xFFE5E7EB)),
+                          foregroundColor: AppColors.textEmphasis,
+                          side: const BorderSide(color: AppColors.border),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -484,8 +476,8 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
                         icon: const Icon(Icons.download, size: 16),
                         label: const Text('Simpan'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF1F2937),
-                          side: const BorderSide(color: Color(0xFFE5E7EB)),
+                          foregroundColor: AppColors.textEmphasis,
+                          side: const BorderSide(color: AppColors.border),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -516,7 +508,7 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
               gradient: LinearGradient(
                 colors: [
                   Colors.transparent,
-                  const Color(0xFFBBC863).withValues(alpha: 0.8),
+                  AppColors.secondary.withValues(alpha: 0.8),
                   Colors.transparent,
                 ],
               ),
@@ -549,8 +541,8 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
       child: ElevatedButton(
         onPressed: () => _openFindMatches(context),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFBBC863),
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.secondary,
+          foregroundColor: AppColors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
@@ -564,10 +556,7 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
             const SizedBox(width: 10),
             Text(
               'Cari Temen Buat Bareng',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
+              style: AppTextStyles.bodyLargeBold,
             ),
           ],
         ),
@@ -585,8 +574,8 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
       icon: Icon(icon, size: 18),
       label: Text(label),
       style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF1F2937),
-        side: const BorderSide(color: Color(0xFFE5E7EB)),
+        foregroundColor: AppColors.textEmphasis,
+        side: const BorderSide(color: AppColors.border),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(vertical: 12),
       ),
@@ -600,7 +589,7 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
       builder: (context) => Container(
         padding: const EdgeInsets.all(20),
         decoration: const BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -633,9 +622,9 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
       SnackBar(
         content: Text(
           'Kode tiket disalin!',
-          style: GoogleFonts.plusJakartaSans(),
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
         ),
-        backgroundColor: const Color(0xFF1F2937),
+        backgroundColor: AppColors.textEmphasis,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         duration: const Duration(seconds: 2),
@@ -648,9 +637,9 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
       SnackBar(
         content: Text(
           'Fitur simpan tiket coming soon!',
-          style: GoogleFonts.plusJakartaSans(),
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
         ),
-        backgroundColor: const Color(0xFF1F2937),
+        backgroundColor: AppColors.textEmphasis,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
@@ -662,9 +651,9 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
       SnackBar(
         content: Text(
           'Add to Calendar coming soon!',
-          style: GoogleFonts.plusJakartaSans(),
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
         ),
-        backgroundColor: const Color(0xFF1F2937),
+        backgroundColor: AppColors.textEmphasis,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
@@ -676,9 +665,9 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
       SnackBar(
         content: Text(
           'Share coming soon!',
-          style: GoogleFonts.plusJakartaSans(),
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
         ),
-        backgroundColor: const Color(0xFF1F2937),
+        backgroundColor: AppColors.textEmphasis,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),

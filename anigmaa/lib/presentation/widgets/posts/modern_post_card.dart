@@ -11,6 +11,7 @@ import '../modern_post_card_components/event_attachment.dart';
 import '../modern_post_card_components/post_poll.dart';
 import '../modern_post_card_components/post_action_bar.dart';
 import '../modern_post_card_components/comment_preview.dart';
+import '../../../core/theme/app_colors.dart';
 
 class ModernPostCard extends StatelessWidget {
   final Post post;
@@ -43,7 +44,7 @@ class ModernPostCard extends StatelessWidget {
         final currentPost = updatedPost ?? post;
 
         final cardContent = Container(
-          color: Colors.white,
+          color: AppColors.white,
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Column(

@@ -5,6 +5,8 @@ import '../../bloc/qna/qna_bloc.dart';
 import '../../bloc/qna/qna_event.dart';
 import '../../bloc/qna/qna_state.dart';
 import '../profile/profile_screen.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class EventQnAScreen extends StatefulWidget {
   final String eventId;
@@ -74,27 +76,21 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFCFCFC),
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Q&A',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF000000),
-              ),
+              style: AppTextStyles.h3,
             ),
             Text(
               widget.eventTitle,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[600],
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textSecondary,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -102,7 +98,7 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
           ],
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF000000)),
+          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -117,7 +113,7 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
               onChanged: (value) => setState(() {}),
               decoration: InputDecoration(
                 hintText: 'Cari pertanyaan...',
-                prefixIcon: const Icon(Icons.search, color: Color(0xFFBBC863)),
+                prefixIcon: const Icon(Icons.search, color: AppColors.secondary),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear, size: 20),
@@ -129,7 +125,7 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
                       )
                     : null,
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppColors.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -151,7 +147,7 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
               builder: (context, state) {
                 if (state is QnALoading) {
                   return const Center(
-                    child: CircularProgressIndicator(color: Color(0xFFBBC863)),
+                    child: CircularProgressIndicator(color: AppColors.secondary),
                   );
                 }
 
@@ -163,13 +159,13 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
                         const Icon(
                           Icons.error_outline,
                           size: 64,
-                          color: Colors.red,
+                          color: AppColors.error,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           state.message,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 16),
+                          style: AppTextStyles.bodyLarge,
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(
@@ -217,11 +213,11 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _askQuestion,
-        backgroundColor: const Color(0xFFBBC863),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
+        backgroundColor: AppColors.secondary,
+        icon: const Icon(Icons.add, color: AppColors.white),
+        label: Text(
           'Tanya',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          style: AppTextStyles.button.copyWith(color: AppColors.white),
         ),
       ),
     );
@@ -255,17 +251,15 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
           _selectedFilter = value;
         });
       },
-      backgroundColor: Colors.white,
-      selectedColor: const Color(0xFFBBC863),
-      labelStyle: TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: isSelected ? Colors.white : Colors.grey[700],
+      backgroundColor: AppColors.white,
+      selectedColor: AppColors.secondary,
+      labelStyle: AppTextStyles.bodyMediumBold.copyWith(
+        color: isSelected ? AppColors.white : AppColors.textSecondary,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: isSelected ? const Color(0xFFBBC863) : Colors.grey[300]!,
+          color: isSelected ? AppColors.secondary : AppColors.border,
         ),
       ),
     );
@@ -276,11 +270,11 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.primary.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -296,12 +290,12 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+                  color: AppColors.secondary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
                   Icons.help_outline,
-                  color: Color(0xFFBBC863),
+                  color: AppColors.secondary,
                   size: 20,
                 ),
               ),
@@ -312,10 +306,8 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
                   children: [
                     Text(
                       qna.question,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1A1A1A),
+                      style: AppTextStyles.button.copyWith(
+                        color: AppColors.textPrimary,
                         height: 1.4,
                       ),
                     ),
@@ -332,17 +324,15 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
                       },
                       child: RichText(
                         text: TextSpan(
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textSecondary,
                           ),
                           children: [
                             const TextSpan(text: 'Ditanya oleh '),
                             TextSpan(
                               text: qna.askedBy.name,
-                              style: const TextStyle(
-                                color: Color(0xFFBBC863),
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.secondary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -363,9 +353,9 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFFFCFCFC),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[200]!, width: 1),
+                border: Border.all(color: AppColors.surfaceAlt, width: 1),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -375,7 +365,7 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
                       const Icon(
                         Icons.verified,
                         size: 14,
-                        color: Color(0xFFBBC863),
+                        color: AppColors.secondary,
                       ),
                       const SizedBox(width: 4),
                       GestureDetector(
@@ -390,20 +380,17 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
                         },
                         child: Text(
                           qna.answeredBy!.name,
-                          style: const TextStyle(
-                            fontSize: 11,
+                          style: AppTextStyles.captionSmall.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFFBBC863),
+                            color: AppColors.secondary,
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         _formatTime(qna.answeredAt!),
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.w500,
+                        style: AppTextStyles.captionSmall.copyWith(
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -411,9 +398,8 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
                   const SizedBox(height: 6),
                   Text(
                     qna.answer!,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[800],
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textEmphasis,
                       height: 1.4,
                     ),
                   ),
@@ -425,18 +411,17 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.1),
+                color: AppColors.warning.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.schedule, size: 14, color: Colors.orange[700]),
+                  Icon(Icons.schedule, size: 14, color: AppColors.warning),
                   const SizedBox(width: 6),
                   Text(
                     'Menunggu jawaban dari organizer',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.orange[700],
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.warning,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -463,13 +448,13 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: qna.isUpvotedByCurrentUser
-                        ? const Color(0xFFBBC863).withValues(alpha: 0.1)
-                        : Colors.grey[100],
+                        ? AppColors.secondary.withValues(alpha: 0.1)
+                        : AppColors.surfaceAlt,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: qna.isUpvotedByCurrentUser
-                          ? Color(0xFFBBC863)
-                          : Colors.grey[300]!,
+                          ? AppColors.secondary
+                          : AppColors.border,
                       width: 1,
                     ),
                   ),
@@ -482,18 +467,18 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
                             : Icons.thumb_up_outlined,
                         size: 14,
                         color: qna.isUpvotedByCurrentUser
-                            ? const Color(0xFFBBC863)
-                            : Colors.grey[600],
+                            ? AppColors.secondary
+                            : AppColors.textSecondary,
                       ),
                       const SizedBox(width: 6),
                       Text(
                         '${qna.upvotes}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodySmall.copyWith(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: qna.isUpvotedByCurrentUser
-                              ? const Color(0xFFBBC863)
-                              : Colors.grey[700],
+                              ? AppColors.secondary
+                              : AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -505,10 +490,8 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
                 qna.upvotes == 1
                     ? '1 orang merasa terbantu'
                     : '${qna.upvotes} orang merasa terbantu',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w500,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
@@ -539,10 +522,8 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+            style: AppTextStyles.bodyLargeBold.copyWith(
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -561,7 +542,7 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
         ),
         child: Container(
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: SafeArea(
@@ -578,24 +559,23 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
                       height: 4,
                       margin: const EdgeInsets.only(bottom: 20),
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: AppColors.border,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                   ),
                   // Title
-                  const Text(
+                  Text(
                     'Mau Tanya Apa Nih? 🤔',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF1A1A1A),
-                    ),
+                    style: AppTextStyles.h3,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Host bakal jawab pertanyaan lo tentang "${widget.eventTitle}"',
-                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    style: AppTextStyles.bodySmall.copyWith(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   // Question input
@@ -605,12 +585,11 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
                     maxLines: 4,
                     decoration: InputDecoration(
                       hintText: 'Tulis pertanyaan lo di sini...',
-                      hintStyle: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[400],
+                      hintStyle: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.textTertiary,
                       ),
                       filled: true,
-                      fillColor: const Color(0xFFFCFCFC),
+                      fillColor: AppColors.surface,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -631,7 +610,7 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
                               content: const Text(
                                 'Pertanyaan ga boleh kosong!',
                               ),
-                              backgroundColor: Colors.red,
+                              backgroundColor: AppColors.error,
                               behavior: SnackBarBehavior.floating,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
@@ -650,18 +629,23 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
 
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: const Row(
+                            content: Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.check_circle,
-                                  color: Colors.white,
+                                  color: AppColors.white,
                                   size: 20,
                                 ),
-                                SizedBox(width: 8),
-                                Text('Pertanyaan terkirim! ✅'),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Pertanyaan terkirim! ✅',
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    color: AppColors.white,
+                                  ),
+                                ),
                               ],
                             ),
-                            backgroundColor: const Color(0xFFBBC863),
+                            backgroundColor: AppColors.secondary,
                             behavior: SnackBarBehavior.floating,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -670,18 +654,16 @@ class _EventQnAScreenState extends State<EventQnAScreen> {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFBBC863),
+                        backgroundColor: AppColors.secondary,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Kirim Pertanyaan',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                        style: AppTextStyles.bodyLargeBold.copyWith(
+                          color: AppColors.white,
                         ),
                       ),
                     ),

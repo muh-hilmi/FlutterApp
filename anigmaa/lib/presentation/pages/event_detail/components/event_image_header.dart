@@ -119,12 +119,12 @@ class _EventImageHeaderState extends State<EventImageHeader> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Colors.black.withValues(
+            AppColors.primary.withValues(
               alpha: 0.6,
             ), // Top for back button visibility
             Colors.transparent,
             Colors.transparent,
-            Colors.black.withValues(alpha: 0.6), // Bottom for text visibility
+            AppColors.primary.withValues(alpha: 0.6), // Bottom for text visibility
           ],
           stops: const [0.0, 0.2, 0.7, 1.0],
         ),
@@ -137,9 +137,9 @@ class _EventImageHeaderState extends State<EventImageHeader> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.8),
+          color: AppColors.primary.withValues(alpha: 0.8),
           borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+          border: Border.all(color: AppColors.white.withValues(alpha: 0.2)),
         ),
         child: Text(
           'SELESAI',
@@ -182,7 +182,7 @@ class _EventImageHeaderState extends State<EventImageHeader> {
             borderRadius: BorderRadius.circular(2),
             color: _currentIndex == index
                 ? AppColors.secondary
-                : Colors.white.withValues(alpha: 0.5),
+                : AppColors.white.withValues(alpha: 0.5),
           ),
         ),
       ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../domain/entities/event.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class EventRequirementsCard extends StatelessWidget {
   final Event event;
@@ -17,11 +19,11 @@ class EventRequirementsCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.lightBlue[50],
+        color: AppColors.surfaceAlt,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: AppColors.primary.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -30,20 +32,15 @@ class EventRequirementsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Yang Perlu Lo Siapin 📋',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: Colors.black87,
-            ),
+            style: AppTextStyles.bodyLargeBold,
           ),
           const SizedBox(height: 12),
           Text(
             event.requirements!,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[700],
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
               height: 1.5,
             ),
           ),

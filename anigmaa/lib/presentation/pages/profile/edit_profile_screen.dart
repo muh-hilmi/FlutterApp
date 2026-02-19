@@ -1,6 +1,5 @@
-// FILE STATUS: EXPERIMENTAL
-// REASON: Unreachable from main routing - secondary feature screen
-// DATE_CLASSIFIED: 2025-12-29
+// Edit Profile Screen - Connected to API
+// Allows users to edit their profile data and sync with backend
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,8 +11,20 @@ import 'dart:io';
 import '../../../domain/entities/user.dart';
 import '../../bloc/user/user_bloc.dart';
 import '../../bloc/user/user_event.dart';
+import '../../bloc/user/user_state.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
-/// Instagram-style Edit Profile Screen with flyerr theme
+/// Edit Profile Screen with API integration
+///
+/// To use:
+/// ```dart
+/// Navigator.push(
+///   context,
+///   MaterialPageRoute(builder: (context) => EditProfileScreen()),
+/// );
+/// ```
+/// The screen will automatically fetch the current user from UserBloc
 class EditProfileScreen extends StatefulWidget {
   final User? user;
 
@@ -30,12 +41,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _locationController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
 
+  User? _currentUser;
   String? _selectedAvatarUrl;
   File? _selectedImageFile;
   DateTime? _selectedDateOfBirth;
   String? _selectedGender;
   List<String> _selectedInterests = [];
-  bool _isLoading = false;
+  bool _isSaving = false;
   bool _isLoadingLocation = false;
 
   final List<String> _genderOptions = [
@@ -62,15 +74,32 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
+    _initializeUserData();
+  }
+
+  void _initializeUserData() {
+    // If user is passed from constructor, use it
     if (widget.user != null) {
-      _bioController.text = widget.user!.bio ?? '';
-      _phoneController.text = widget.user!.phone ?? '';
-      _locationController.text = widget.user!.location ?? '';
-      _selectedAvatarUrl = widget.user!.avatar;
-      _selectedDateOfBirth = widget.user!.dateOfBirth;
-      _selectedGender = widget.user!.gender;
-      _selectedInterests = List.from(widget.user!.interests);
+      _currentUser = widget.user;
+      _populateFields(_currentUser!);
+    } else {
+      // Otherwise, try to get current user from bloc
+      final state = context.read<UserBloc>().state;
+      if (state is UserLoaded) {
+        _currentUser = state.user;
+        _populateFields(_currentUser!);
+      }
     }
+  }
+
+  void _populateFields(User user) {
+    _bioController.text = user.bio ?? '';
+    _phoneController.text = user.phone ?? '';
+    _locationController.text = user.location ?? '';
+    _selectedAvatarUrl = user.avatar;
+    _selectedDateOfBirth = user.dateOfBirth;
+    _selectedGender = user.gender;
+    _selectedInterests = List.from(user.interests);
   }
 
   @override
@@ -83,119 +112,149 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: _buildAppBar(),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFFBBC863)),
-            )
-          : Form(
-              key: _formKey,
-              child: ListView(
-                children: [
-                  const SizedBox(height: 20),
-                  _buildProfilePhoto(),
-                  const SizedBox(height: 8),
-                  _buildChangePhotoButton(),
-                  const SizedBox(height: 32),
-                  _buildDivider(),
-                  _buildTextField(
-                    label: 'Name',
-                    value: widget.user?.name ?? '',
-                    readOnly: true,
-                    onTap: () {},
-                    trailing: const Icon(
-                      Icons.lock_outline,
-                      size: 20,
-                      color: Colors.grey,
+    return BlocListener<UserBloc, UserState>(
+      listener: (context, state) {
+        // Handle save completion
+        if (_isSaving) {
+          if (state is UserLoaded) {
+            // Profile updated successfully
+            setState(() => _isSaving = false);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Profile updated successfully!'),
+                backgroundColor: AppColors.secondary,
+                duration: Duration(seconds: 2),
+              ),
+            );
+            Navigator.pop(context);
+          } else if (state is UserError) {
+            // Handle error
+            setState(() => _isSaving = false);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+        }
+      },
+      child: BlocBuilder<UserBloc, UserState>(
+        builder: (context, state) {
+          // Get user name from current user or bloc state
+          final userName = _currentUser?.name ??
+              (state is UserLoaded ? state.user.name : 'User');
+
+          return Scaffold(
+            backgroundColor: AppColors.white,
+            appBar: _buildAppBar(),
+            body: _isSaving
+                ? const Center(
+                    child: CircularProgressIndicator(color: AppColors.secondary),
+                  )
+                : Form(
+                    key: _formKey,
+                    child: ListView(
+                      children: [
+                        const SizedBox(height: 20),
+                        _buildProfilePhoto(),
+                        const SizedBox(height: 8),
+                        _buildChangePhotoButton(),
+                        const SizedBox(height: 32),
+                        _buildDivider(),
+                        _buildTextField(
+                          label: 'Name',
+                          value: userName,
+                          readOnly: true,
+                          onTap: () {},
+                          trailing: const Icon(
+                            Icons.lock_outline,
+                            size: 20,
+                            color: AppColors.textTertiary,
+                          ),
+                        ),
+                        _buildDivider(),
+                        _buildTextField(
+                          label: 'Bio',
+                          value: _bioController.text.isEmpty
+                              ? 'Add bio'
+                              : _bioController.text,
+                          onTap: () => _editBio(),
+                        ),
+                        _buildDivider(),
+                        _buildTextField(
+                          label: 'Phone',
+                          value: _phoneController.text.isEmpty
+                              ? 'Add phone number'
+                              : _phoneController.text,
+                          onTap: () => _editPhone(),
+                        ),
+                        _buildDivider(),
+                        _buildTextField(
+                          label: 'Gender',
+                          value: _selectedGender ?? 'Select gender',
+                          onTap: () => _selectGender(),
+                        ),
+                        _buildDivider(),
+                        _buildTextField(
+                          label: 'Date of Birth',
+                          value: _selectedDateOfBirth != null
+                              ? _formatDate(_selectedDateOfBirth!)
+                              : 'Select date',
+                          onTap: () => _selectDate(),
+                        ),
+                        _buildDivider(),
+                        _buildTextField(
+                          label: 'Location',
+                          value: _locationController.text.isEmpty
+                              ? 'Add location'
+                              : _locationController.text,
+                          onTap: () => _editLocation(),
+                          trailing: _isLoadingLocation
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.secondary,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        _buildDivider(),
+                        const SizedBox(height: 24),
+                        _buildSectionHeader('Interests'),
+                        const SizedBox(height: 16),
+                        _buildInterests(),
+                        const SizedBox(height: 40),
+                      ],
                     ),
                   ),
-                  _buildDivider(),
-                  _buildTextField(
-                    label: 'Bio',
-                    value: _bioController.text,
-                    onTap: () => _editBio(),
-                  ),
-                  _buildDivider(),
-                  _buildTextField(
-                    label: 'Phone',
-                    value: _phoneController.text.isEmpty
-                        ? 'Add phone number'
-                        : _phoneController.text,
-                    onTap: () => _editPhone(),
-                  ),
-                  _buildDivider(),
-                  _buildTextField(
-                    label: 'Gender',
-                    value: _selectedGender ?? 'Select gender',
-                    onTap: () => _selectGender(),
-                  ),
-                  _buildDivider(),
-                  _buildTextField(
-                    label: 'Date of Birth',
-                    value: _selectedDateOfBirth != null
-                        ? _formatDate(_selectedDateOfBirth!)
-                        : 'Select date',
-                    onTap: () => _selectDate(),
-                  ),
-                  _buildDivider(),
-                  _buildTextField(
-                    label: 'Location',
-                    value: _locationController.text.isEmpty
-                        ? 'Add location'
-                        : _locationController.text,
-                    onTap: () => _editLocation(),
-                    trailing: _isLoadingLocation
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Color(0xFFBBC863),
-                            ),
-                          )
-                        : null,
-                  ),
-                  _buildDivider(),
-                  const SizedBox(height: 24),
-                  _buildSectionHeader('Interests'),
-                  const SizedBox(height: 16),
-                  _buildInterests(),
-                  const SizedBox(height: 40),
-                ],
-              ),
-            ),
+          );
+        },
+      ),
     );
   }
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.close, color: Colors.black),
+        icon: const Icon(Icons.close, color: AppColors.primary),
         onPressed: () => Navigator.pop(context),
       ),
-      title: const Text(
+      title: Text(
         'Edit Profile',
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
+        style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.textPrimary),
       ),
       centerTitle: true,
       actions: [
         TextButton(
           onPressed: _saveProfile,
-          child: const Text(
+          child: Text(
             'Done',
-            style: TextStyle(
-              color: Color(0xFFBBC863),
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.secondary),
           ),
         ),
       ],
@@ -211,7 +270,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             height: 100,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.grey.shade200, width: 1),
+              border: Border.all(color: AppColors.border, width: 1),
             ),
             child: ClipOval(
               child: _selectedImageFile != null
@@ -222,11 +281,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       imageUrl: _selectedAvatarUrl!,
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
-                        color: Colors.grey.shade100,
+                        color: AppColors.surfaceAlt,
                         child: const Center(
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Color(0xFFBBC863),
+                            color: AppColors.secondary,
                           ),
                         ),
                       ),
@@ -242,19 +301,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildDefaultAvatar() {
+    final userName = _currentUser?.name ?? 'User';
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+      decoration: const BoxDecoration(
+        color: AppColors.surfaceAlt,
         shape: BoxShape.circle,
       ),
       child: Center(
         child: Text(
-          widget.user?.name[0].toUpperCase() ?? 'U',
-          style: TextStyle(
-            fontSize: 40,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey.shade400,
-          ),
+          userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+          style: AppTextStyles.display.copyWith(color: AppColors.textTertiary),
         ),
       ),
     );
@@ -264,20 +320,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Center(
       child: TextButton(
         onPressed: _changeProfilePicture,
-        child: const Text(
+        child: Text(
           'Change photo',
-          style: TextStyle(
-            color: Color(0xFFBBC863),
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.secondary),
         ),
       ),
     );
   }
 
   Widget _buildDivider() {
-    return Divider(height: 1, thickness: 1, color: Colors.grey.shade200);
+    return const Divider(height: 1, thickness: 1, color: AppColors.border);
   }
 
   Widget _buildTextField({
@@ -297,22 +349,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               width: 100,
               child: Text(
                 label,
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
-                ),
+                style: AppTextStyles.button.copyWith(color: AppColors.textPrimary),
               ),
             ),
             Expanded(
               child: Text(
                 value.isEmpty ? 'Add $label' : value,
-                style: TextStyle(
-                  fontSize: 15,
+                style: AppTextStyles.button.copyWith(
                   color: value.isEmpty || readOnly
-                      ? Colors.grey.shade600
-                      : Colors.black,
-                  fontWeight: FontWeight.w400,
+                      ? AppColors.textSecondary
+                      : AppColors.textPrimary,
                 ),
                 textAlign: TextAlign.right,
               ),
@@ -322,7 +368,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               trailing,
             ] else if (!readOnly) ...[
               const SizedBox(width: 8),
-              Icon(Icons.chevron_right, color: Colors.grey.shade400, size: 20),
+              const Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 20),
             ],
           ],
         ),
@@ -335,10 +381,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Text(
         title.toUpperCase(),
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: Colors.grey.shade600,
+        style: AppTextStyles.caption.copyWith(
+          color: AppColors.textSecondary,
           letterSpacing: 0.5,
         ),
       ),
@@ -367,23 +411,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected
-                    ? const Color(0xFFBBC863)
-                    : Colors.grey.shade100,
+                color: isSelected ? AppColors.secondary : AppColors.surfaceAlt,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected
-                      ? const Color(0xFFBBC863)
-                      : Colors.grey.shade300,
+                  color: isSelected ? AppColors.secondary : AppColors.border,
                   width: 1,
                 ),
               ),
               child: Text(
                 interest,
-                style: TextStyle(
-                  fontSize: 14,
+                style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w500,
-                  color: isSelected ? Colors.white : Colors.grey.shade700,
+                  color: isSelected ? AppColors.white : AppColors.textSecondary,
                 ),
               ),
             ),
@@ -416,7 +455,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Cancel',
-              style: TextStyle(color: Colors.grey.shade600),
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
             ),
           ),
           TextButton(
@@ -426,12 +465,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               });
               Navigator.pop(context);
             },
-            child: const Text(
+            child: Text(
               'Save',
-              style: TextStyle(
-                color: Color(0xFFBBC863),
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.secondary),
             ),
           ),
         ],
@@ -460,7 +496,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Cancel',
-              style: TextStyle(color: Colors.grey.shade600),
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
             ),
           ),
           TextButton(
@@ -470,12 +506,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               });
               Navigator.pop(context);
             },
-            child: const Text(
+            child: Text(
               'Save',
-              style: TextStyle(
-                color: Color(0xFFBBC863),
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.secondary),
             ),
           ),
         ],
@@ -509,7 +542,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               icon: const Icon(Icons.my_location, size: 18),
               label: const Text('Use current location'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFFBBC863),
+                foregroundColor: AppColors.secondary,
               ),
             ),
           ],
@@ -519,7 +552,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Cancel',
-              style: TextStyle(color: Colors.grey.shade600),
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
             ),
           ),
           TextButton(
@@ -527,12 +560,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               setState(() {});
               Navigator.pop(context);
             },
-            child: const Text(
+            child: Text(
               'Save',
-              style: TextStyle(
-                color: Color(0xFFBBC863),
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.secondary),
             ),
           ),
         ],
@@ -554,9 +584,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               groupValue: _selectedGender,
               fillColor: WidgetStateProperty.resolveWith<Color>((states) {
                 if (states.contains(WidgetState.selected)) {
-                  return const Color(0xFFBBC863);
+                  return AppColors.secondary;
                 }
-                return Colors.grey.shade600;
+                return AppColors.textSecondary;
               }),
               onChanged: (value) {
                 setState(() {
@@ -580,7 +610,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: Color(0xFFBBC863)),
+            colorScheme: const ColorScheme.light(primary: AppColors.secondary),
           ),
           child: child!,
         );
@@ -626,7 +656,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to get location: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -652,7 +682,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.camera_alt, color: Color(0xFFBBC863)),
+                leading: const Icon(Icons.camera_alt, color: AppColors.secondary),
                 title: const Text('Take Photo'),
                 onTap: () {
                   Navigator.pop(context);
@@ -662,7 +692,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ListTile(
                 leading: const Icon(
                   Icons.photo_library,
-                  color: Color(0xFFBBC863),
+                  color: AppColors.secondary,
                 ),
                 title: const Text('Choose from Gallery'),
                 onTap: () {
@@ -672,7 +702,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               if (_selectedImageFile != null || _selectedAvatarUrl != null)
                 ListTile(
-                  leading: const Icon(Icons.delete, color: Colors.red),
+                  leading: const Icon(Icons.delete, color: AppColors.error),
                   title: const Text('Remove Photo'),
                   onTap: () {
                     setState(() {
@@ -708,7 +738,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to take picture: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -734,7 +764,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to pick image: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -742,12 +772,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _saveProfile() async {
-    if (!_formKey.currentState!.validate()) {
+    // Check if user is available
+    if (_currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to save: User data not loaded'),
+          backgroundColor: AppColors.error,
+        ),
+      );
       return;
     }
 
     setState(() {
-      _isLoading = true;
+      _isSaving = true;
     });
 
     try {
@@ -756,54 +793,37 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       if (mounted) {
         final userBloc = context.read<UserBloc>();
-        final currentUserId = widget.user?.id;
 
+        // Trigger the update via bloc
         userBloc.add(
           UpdateUserProfile(
-            bio: _bioController.text,
-            phone: _phoneController.text,
-            location: _locationController.text,
+            bio: _bioController.text.isEmpty ? null : _bioController.text,
+            phone: _phoneController.text.isEmpty ? null : _phoneController.text,
+            location: _locationController.text.isEmpty ? null : _locationController.text,
             dateOfBirth: _selectedDateOfBirth,
             gender: _selectedGender,
-            interests: _selectedInterests,
+            interests: _selectedInterests.isEmpty ? null : _selectedInterests,
             // avatar: uploadedImageUrl, // Update this after upload
           ),
         );
 
-        // Wait for update to complete
-        await Future.delayed(const Duration(seconds: 1));
-
-        // Refresh the profile data in parent screen
-        if (currentUserId != null) {
-          userBloc.add(LoadUserById(currentUserId));
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile updated successfully!'),
-            backgroundColor: Color(0xFFBBC863),
-            duration: Duration(seconds: 2),
-          ),
-        );
-
-        Navigator.pop(context);
+        // Note: We don't call Navigator.pop() here
+        // The BlocListener will handle navigation after successful update
       }
     } catch (e) {
       if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to save profile: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
     }
+    // Don't set _isSaving = false in finally - let BlocListener handle it
   }
 
   String _formatDate(DateTime date) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class TypingIndicator extends StatelessWidget {
   const TypingIndicator({super.key});
@@ -11,7 +12,7 @@ class TypingIndicator extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(20).copyWith(
             bottomLeft: const Radius.circular(4),
           ),
@@ -39,7 +40,7 @@ class TypingIndicator extends StatelessWidget {
           width: 8,
           height: 8,
           decoration: BoxDecoration(
-            color: Colors.grey[400]!.withValues(alpha: 0.3 + (value * 0.7)),
+            color: AppColors.textTertiary.withValues(alpha: 0.3 + (value * 0.7)),
             shape: BoxShape.circle,
           ),
         );

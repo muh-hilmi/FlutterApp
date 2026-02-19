@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/usecases/check_in_ticket.dart';
 import '../../../domain/usecases/get_user_tickets.dart';
+import '../../../domain/usecases/get_event_tickets.dart';
 import '../../../domain/usecases/purchase_ticket.dart';
 import '../../../core/utils/app_logger.dart';
 import 'tickets_event.dart';
@@ -10,15 +11,19 @@ class TicketsBloc extends Bloc<TicketsEvent, TicketsState> {
   final PurchaseTicket purchaseTicket;
   final GetUserTickets getUserTickets;
   final CheckInTicket checkInTicket;
+  final GetEventTickets getEventTickets;
 
   TicketsBloc({
     required this.purchaseTicket,
     required this.getUserTickets,
     required this.checkInTicket,
+    required this.getEventTickets,
   }) : super(TicketsInitial()) {
     on<LoadUserTickets>(_onLoadUserTickets);
     on<PurchaseTicketRequested>(_onPurchaseTicketRequested);
     on<CheckInTicketRequested>(_onCheckInTicketRequested);
+    on<LoadTicketForEvent>(_onLoadTicketForEvent);
+    on<LoadEventTickets>(_onLoadEventTickets);
   }
 
   Future<void> _onLoadUserTickets(
@@ -66,6 +71,27 @@ class TicketsBloc extends Bloc<TicketsEvent, TicketsState> {
     );
   }
 
+  Future<void> _onLoadTicketForEvent(
+    LoadTicketForEvent event,
+    Emitter<TicketsState> emit,
+  ) async {
+    emit(TicketsLoading());
+
+    final result = await getUserTickets(GetUserTicketsParams(userId: event.userId));
+
+    result.fold(
+      (failure) => emit(TicketsError(failure.message)),
+      (tickets) {
+        final ticket = tickets.where((t) => t.eventId == event.eventId).firstOrNull;
+        if (ticket != null) {
+          emit(TicketLoaded(ticket));
+        } else {
+          emit(const TicketsError('Tiket untuk event ini tidak ditemukan'));
+        }
+      },
+    );
+  }
+
   Future<void> _onCheckInTicketRequested(
     CheckInTicketRequested event,
     Emitter<TicketsState> emit,
@@ -73,7 +99,13 @@ class TicketsBloc extends Bloc<TicketsEvent, TicketsState> {
     emit(TicketsLoading());
 
     final CheckInTicketParams params;
-    if (event.ticketId != null) {
+    if (event.attendanceCode != null && event.eventId != null) {
+      // Host flow: direct backend call
+      params = CheckInTicketParams(
+        attendanceCode: event.attendanceCode,
+        eventId: event.eventId,
+      );
+    } else if (event.ticketId != null) {
       params = CheckInTicketParams.byId(event.ticketId!);
     } else if (event.attendanceCode != null) {
       params = CheckInTicketParams.byCode(event.attendanceCode!);
@@ -87,6 +119,20 @@ class TicketsBloc extends Bloc<TicketsEvent, TicketsState> {
     result.fold(
       (failure) => emit(TicketsError(failure.message)),
       (ticket) => emit(TicketCheckedIn(ticket)),
+    );
+  }
+
+  Future<void> _onLoadEventTickets(
+    LoadEventTickets event,
+    Emitter<TicketsState> emit,
+  ) async {
+    emit(TicketsLoading());
+
+    final result = await getEventTickets(event.eventId);
+
+    result.fold(
+      (failure) => emit(TicketsError(failure.message)),
+      (tickets) => emit(EventTicketsLoaded(tickets)),
     );
   }
 }

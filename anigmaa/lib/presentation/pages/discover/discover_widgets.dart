@@ -4,6 +4,8 @@ import '../../../domain/entities/event.dart';
 import '../../../domain/entities/event_category.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../event_detail/event_detail_screen.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class EventCard extends StatelessWidget {
   final Event event;
@@ -50,22 +52,22 @@ class EventCard extends StatelessWidget {
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
                             height: 200,
-                            color: Colors.grey[200],
+                            color: AppColors.border,
                             child: const Center(
                               child: CircularProgressIndicator(
-                                color: Color(0xFFBBC863),
+                                color: AppColors.secondary,
                               ),
                             ),
                           ),
                           errorWidget: (context, url, error) => Container(
                             height: 200,
-                            color: Colors.grey[200],
+                            color: AppColors.border,
                             child: const Icon(Icons.event, size: 64),
                           ),
                         )
                       : Container(
                           height: 200,
-                          color: Colors.grey[200],
+                          color: AppColors.border,
                           child: const Icon(Icons.event, size: 64),
                         ),
                   // Category badge
@@ -78,13 +80,12 @@ class EventCard extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: AppColors.white.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         event.category.displayName,
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: AppTextStyles.bodySmall.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -92,19 +93,18 @@ class EventCard extends StatelessWidget {
                   ),
                   // Free badge
                   if (event.isFree)
-                    const Positioned(
+                    Positioned(
                       top: 12,
                       right: 12,
                       child: Chip(
                         label: Text(
                           'FREE',
-                          style: TextStyle(
-                            color: Colors.white,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.white,
                             fontWeight: FontWeight.w600,
-                            fontSize: 12,
                           ),
                         ),
-                        backgroundColor: Colors.green,
+                        backgroundColor: AppColors.success,
                       ),
                     ),
                 ],
@@ -121,10 +121,8 @@ class EventCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           event.title,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF1A1A1A),
+                          style: AppTextStyles.bodyLargeBold.copyWith(
+                            color: AppColors.textPrimary,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -138,12 +136,12 @@ class EventCard extends StatelessWidget {
                       Icon(
                         Icons.access_time,
                         size: 16,
-                        color: Colors.grey[600],
+                        color: AppColors.textSecondary,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         _formatDate(event.startTime),
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                        style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
                       ),
                     ],
                   ),
@@ -153,15 +151,14 @@ class EventCard extends StatelessWidget {
                       Icon(
                         Icons.location_on,
                         size: 16,
-                        color: Colors.grey[600],
+                        color: AppColors.textSecondary,
                       ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           event.location.name,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.textSecondary,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -175,14 +172,13 @@ class EventCard extends StatelessWidget {
                         Icon(
                           Icons.directions,
                           size: 16,
-                          color: Colors.grey[600],
+                          color: AppColors.textSecondary,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           '2.5 km away',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -194,19 +190,15 @@ class EventCard extends StatelessWidget {
                       if (event.isFree)
                         Text(
                           'FREE',
-                          style: TextStyle(
-                            color: Colors.green[600],
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
+                          style: AppTextStyles.bodyLargeBold.copyWith(
+                            color: AppColors.success,
                           ),
                         )
                       else if (event.price != null)
                         Text(
                           CurrencyFormatter.format(event.price!.round()),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF1A1A1A),
+                          style: AppTextStyles.bodyLargeBold.copyWith(
+                            color: AppColors.textPrimary,
                           ),
                         ),
                       const Spacer(),
@@ -216,14 +208,13 @@ class EventCard extends StatelessWidget {
                             Icon(
                               Icons.people_outline,
                               size: 16,
-                              color: Colors.grey[600],
+                              color: AppColors.textSecondary,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               '${event.attendeeIds.length}/${event.maxAttendees}',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 14,
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: AppColors.textSecondary,
                               ),
                             ),
                           ],
@@ -287,7 +278,7 @@ class LiveEventCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: AppColors.primary.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -305,7 +296,7 @@ class LiveEventCard extends StatelessWidget {
                     height: 250,
                     fit: BoxFit.cover,
                   )
-                : Container(width: 200, height: 250, color: Colors.grey[300]),
+                : Container(width: 200, height: 250, color: AppColors.border),
             // Gradient overlay
             Container(
               width: 200,
@@ -316,7 +307,7 @@ class LiveEventCard extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.7),
+                    AppColors.primary.withValues(alpha: 0.7),
                   ],
                 ),
               ),
@@ -335,14 +326,13 @@ class LiveEventCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.red,
+                      color: AppColors.error,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Text(
+                    child: Text(
                       'LIVE',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
+                      style: AppTextStyles.captionSmall.copyWith(
+                        color: AppColors.white,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -350,10 +340,8 @@ class LiveEventCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     event.title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                    style: AppTextStyles.bodyMediumBold.copyWith(
+                      color: AppColors.white,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -364,15 +352,14 @@ class LiveEventCard extends StatelessWidget {
                       const Icon(
                         Icons.location_on,
                         size: 12,
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           event.location.name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.white,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -415,7 +402,7 @@ class ModeChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFBBC863) : Colors.grey[100],
+          color: isSelected ? AppColors.secondary : AppColors.surfaceAlt,
           borderRadius: BorderRadius.circular(25),
         ),
         child: Row(
@@ -424,15 +411,14 @@ class ModeChip extends StatelessWidget {
             Icon(
               icon,
               size: 18,
-              color: isSelected ? Colors.white : Colors.grey[600],
+              color: isSelected ? AppColors.white : AppColors.textSecondary,
             ),
             const SizedBox(width: 8),
             Text(
               label,
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.grey[700],
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: isSelected ? AppColors.white : AppColors.textSecondary,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                fontSize: 14,
               ),
             ),
           ],
@@ -464,36 +450,32 @@ class DiscoverErrorWidget extends StatelessWidget {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.1),
+                color: AppColors.error.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.error_outline,
                 size: 48,
-                color: Colors.red[300],
+                color: AppColors.error,
               ),
             ),
             const SizedBox(height: 24),
             Text(
               'Oops! Something went wrong',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF1A1A1A),
-              ),
+              style: AppTextStyles.h3,
             ),
             const SizedBox(height: 12),
             Text(
               message,
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: onRetry,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFBBC863),
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.secondary,
+                foregroundColor: AppColors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,
                   vertical: 12,
@@ -526,28 +508,24 @@ class DiscoverEmptyWidget extends StatelessWidget {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+                color: AppColors.secondary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.event_available,
                 size: 48,
-                color: Color(0xFFBBC863),
+                color: AppColors.secondary,
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'No events found',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF1A1A1A),
-              ),
+              style: AppTextStyles.h3,
             ),
             const SizedBox(height: 12),
             Text(
               'Try adjusting your filters or search terms',
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
           ],

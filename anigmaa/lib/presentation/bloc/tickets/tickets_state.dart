@@ -54,6 +54,20 @@ class TicketCheckedIn extends TicketsState {
   List<Object> get props => [ticket];
 }
 
+/// Event tickets loaded (for host stats)
+class EventTicketsLoaded extends TicketsState {
+  final List<Ticket> tickets;
+  final int checkedInCount;
+  final int totalCount;
+
+  EventTicketsLoaded(this.tickets)
+      : checkedInCount = tickets.where((t) => t.isCheckedIn).length,
+        totalCount = tickets.length;
+
+  @override
+  List<Object> get props => [tickets, checkedInCount, totalCount];
+}
+
 /// Error state
 class TicketsError extends TicketsState {
   final String message;

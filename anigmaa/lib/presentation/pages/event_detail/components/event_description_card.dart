@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../domain/entities/event.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class EventDescriptionCard extends StatelessWidget {
   final Event event;
@@ -12,31 +14,29 @@ class EventDescriptionCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFBBC863).withValues(alpha: 0.2),
+          color: AppColors.secondary.withValues(alpha: 0.2),
           width: 1.5,
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'About Event',
-            style: TextStyle(
+            style: AppTextStyles.bodyLargeBold.copyWith(
               fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A1A),
             ),
           ),
           const SizedBox(height: 12),
           Text(
             event.description,
-            style: TextStyle(
-              fontSize: 15,
+            style: AppTextStyles.button.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w400,
               height: 1.6,
-              color: Colors.grey[700],
             ),
           ),
         ],

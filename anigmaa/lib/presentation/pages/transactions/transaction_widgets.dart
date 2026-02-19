@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../domain/entities/transaction.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class TransactionCard extends StatelessWidget {
   final Transaction transaction;
@@ -38,17 +40,13 @@ class TransactionCard extends StatelessWidget {
                       children: [
                         Text(
                           transaction.eventName,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: AppTextStyles.bodyLargeBold,
                         ),
                         const SizedBox(height: 4),
                         Text(
                           _formatDate(transaction.createdAt),
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -59,12 +57,10 @@ class TransactionCard extends StatelessWidget {
                     children: [
                       Text(
                         _formatCurrency(transaction.totalAmount),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                        style: AppTextStyles.bodyLargeBold.copyWith(
                           color: transaction.status == TransactionStatus.success
-                              ? Colors.green
-                              : Colors.grey[700],
+                              ? AppColors.success
+                              : AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -80,14 +76,13 @@ class TransactionCard extends StatelessWidget {
                     Icon(
                       Icons.payment,
                       size: 16,
-                      color: Colors.grey[600],
+                      color: AppColors.textSecondary,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       transaction.paymentMethod.displayName,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -155,17 +150,17 @@ class TransactionStatusIcon extends StatelessWidget {
   Color _getStatusColor(TransactionStatus status) {
     switch (status) {
       case TransactionStatus.success:
-        return Colors.green;
+        return AppColors.success;
       case TransactionStatus.pending:
       case TransactionStatus.processing:
-        return Colors.orange;
+        return AppColors.warning;
       case TransactionStatus.failed:
       case TransactionStatus.expired:
-        return Colors.red;
+        return AppColors.error;
       case TransactionStatus.refunded:
-        return Colors.blue;
+        return AppColors.info;
       default:
-        return Colors.grey;
+        return AppColors.textTertiary;
     }
   }
 }
@@ -185,9 +180,8 @@ class TransactionStatusBadge extends StatelessWidget {
       ),
       child: Text(
         _getStatusLabel(status),
-        style: TextStyle(
+        style: AppTextStyles.captionSmall.copyWith(
           color: _getStatusColor(status),
-          fontSize: 10,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -216,17 +210,17 @@ class TransactionStatusBadge extends StatelessWidget {
   Color _getStatusColor(TransactionStatus status) {
     switch (status) {
       case TransactionStatus.success:
-        return Colors.green;
+        return AppColors.success;
       case TransactionStatus.pending:
       case TransactionStatus.processing:
-        return Colors.orange;
+        return AppColors.warning;
       case TransactionStatus.failed:
       case TransactionStatus.expired:
-        return Colors.red;
+        return AppColors.error;
       case TransactionStatus.refunded:
-        return Colors.blue;
+        return AppColors.info;
       default:
-        return Colors.grey;
+        return AppColors.textTertiary;
     }
   }
 }
@@ -250,12 +244,12 @@ class StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.primary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -268,18 +262,13 @@ class StatCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A1A),
-            ),
+            style: AppTextStyles.h3.copyWith(fontSize: 20),
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -306,14 +295,14 @@ class RevenueCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFBBC863), Color(0xFFA8B86D)],
+          colors: [AppColors.secondary, Color(0xFFA8B86D)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFBBC863).withValues(alpha: 0.3),
+            color: AppColors.secondary.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -322,11 +311,10 @@ class RevenueCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Total Revenue',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.white,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -337,17 +325,16 @@ class RevenueCard extends StatelessWidget {
               symbol: 'Rp ',
               decimalDigits: 0,
             ).format(netRevenue),
-            style: const TextStyle(
-              color: Colors.white,
+            style: AppTextStyles.h1.copyWith(
+              color: AppColors.white,
               fontSize: 32,
-              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: AppColors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -358,9 +345,8 @@ class RevenueCard extends StatelessWidget {
                     children: [
                       Text(
                         'Gross Revenue',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 12,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.white.withValues(alpha: 0.8),
                         ),
                       ),
                       Text(
@@ -369,10 +355,8 @@ class RevenueCard extends StatelessWidget {
                           symbol: 'Rp ',
                           decimalDigits: 0,
                         ).format(totalRevenue),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                        style: AppTextStyles.bodyMediumBold.copyWith(
+                          color: AppColors.white,
                         ),
                       ),
                     ],
@@ -381,7 +365,7 @@ class RevenueCard extends StatelessWidget {
                 Container(
                   width: 1,
                   height: 40,
-                  color: Colors.white.withValues(alpha: 0.3),
+                  color: AppColors.white.withValues(alpha: 0.3),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -390,9 +374,8 @@ class RevenueCard extends StatelessWidget {
                     children: [
                       Text(
                         'Platform Fee',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 12,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.white.withValues(alpha: 0.8),
                         ),
                       ),
                       Text(
@@ -401,10 +384,8 @@ class RevenueCard extends StatelessWidget {
                           symbol: '-Rp ',
                           decimalDigits: 0,
                         ).format(platformFee),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                        style: AppTextStyles.bodyMediumBold.copyWith(
+                          color: AppColors.white,
                         ),
                       ),
                     ],
@@ -443,15 +424,14 @@ class FilterChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFBBC863) : Colors.grey[100],
+          color: isSelected ? AppColors.secondary : AppColors.surfaceAlt,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.grey[700],
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: isSelected ? AppColors.white : AppColors.textSecondary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            fontSize: 14,
           ),
         ),
       ),

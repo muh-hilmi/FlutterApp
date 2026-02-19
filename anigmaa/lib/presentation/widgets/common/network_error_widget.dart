@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 enum NetworkStatus { online, offline, connecting }
 
@@ -56,13 +58,13 @@ class NetworkErrorWidget extends StatelessWidget {
         icon = LucideIcons.loader;
         title = 'Menghubungkan...';
         message = 'Mencoba menghubungkan kembali ke server.';
-        iconColor = const Color(0xFFBBC863);
+        iconColor = AppColors.secondary;
         break;
       case NetworkStatus.online:
         icon = LucideIcons.wifi;
         title = 'Koneksi Kembali';
         message = 'Internet Anda telah terhubung kembali.';
-        iconColor = const Color(0xFFBBC863);
+        iconColor = AppColors.secondary;
         break;
     }
 
@@ -79,7 +81,7 @@ class NetworkErrorWidget extends StatelessWidget {
               height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.red.withValues(alpha: 0.05),
+                color: AppColors.error.withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -91,7 +93,7 @@ class NetworkErrorWidget extends StatelessWidget {
               height: 180,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+                color: AppColors.secondary.withValues(alpha: 0.1),
               ),
             ),
           ),
@@ -107,11 +109,11 @@ class NetworkErrorWidget extends StatelessWidget {
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
+                        color: AppColors.primary.withValues(alpha: 0.05),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -124,10 +126,7 @@ class NetworkErrorWidget extends StatelessWidget {
                 // Title
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF2D3142),
+                  style: AppTextStyles.h3.copyWith(
                     letterSpacing: -0.5,
                   ),
                   textAlign: TextAlign.center,
@@ -137,9 +136,8 @@ class NetworkErrorWidget extends StatelessWidget {
                 // Message
                 Text(
                   message,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.grey[600],
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.textSecondary,
                     height: 1.5,
                   ),
                   textAlign: TextAlign.center,
@@ -153,7 +151,7 @@ class NetworkErrorWidget extends StatelessWidget {
                 ],
                 if (status == NetworkStatus.connecting) ...[
                   const SizedBox(height: 32),
-                  const CircularProgressIndicator(color: Color(0xFFBBC863)),
+                  CircularProgressIndicator(color: AppColors.secondary),
                 ],
                 if (status == NetworkStatus.online) ...[
                   const SizedBox(height: 32),
@@ -175,21 +173,23 @@ class NetworkErrorWidget extends StatelessWidget {
         children: [
           const Icon(LucideIcons.wifiOff, color: Colors.white, size: 20),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Mode Offline',
-                  style: TextStyle(
-                    color: Colors.white,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.white,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
                 ),
                 Text(
                   'Beberapa fitur tidak tersedia',
-                  style: TextStyle(color: Colors.white70, fontSize: 11),
+                  style: AppTextStyles.captionSmall.copyWith(
+                    color: AppColors.white.withValues(alpha: 0.7),
+                  ),
                 ),
               ],
             ),
@@ -198,7 +198,7 @@ class NetworkErrorWidget extends StatelessWidget {
             TextButton(
               onPressed: onRetry,
               style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 6,
@@ -206,7 +206,12 @@ class NetworkErrorWidget extends StatelessWidget {
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: const Text('Coba', style: TextStyle(fontSize: 12)),
+              child: Text(
+                'Coba',
+                style: AppTextStyles.captionSmall.copyWith(
+                  color: AppColors.white,
+                ),
+              ),
             ),
         ],
       ),
@@ -221,8 +226,8 @@ class NetworkErrorWidget extends StatelessWidget {
         icon: const Icon(LucideIcons.refreshCw, size: 18),
         label: const Text('Coba Lagi'),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFBBC863),
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.secondary,
+          foregroundColor: AppColors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -238,8 +243,8 @@ class NetworkErrorWidget extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onRetry,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFBBC863),
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.secondary,
+          foregroundColor: AppColors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -254,7 +259,7 @@ class NetworkErrorWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.surfaceAlt,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -262,14 +267,13 @@ class NetworkErrorWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(LucideIcons.lightbulb, size: 16, color: Colors.grey[700]),
+              Icon(LucideIcons.lightbulb, size: 16, color: AppColors.textSecondary),
               const SizedBox(width: 8),
               Text(
                 'Tips',
-                style: TextStyle(
+                style: AppTextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                  color: Colors.grey[700],
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
@@ -288,7 +292,9 @@ class NetworkErrorWidget extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 4, left: 24),
       child: Text(
         text,
-        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+        style: AppTextStyles.bodySmall.copyWith(
+          color: AppColors.textSecondary,
+        ),
       ),
     );
   }
@@ -369,7 +375,7 @@ class _NetworkAwareWrapperState extends State<NetworkAwareWrapper> {
         message = 'Tidak ada koneksi internet';
         break;
       case NetworkStatus.connecting:
-        backgroundColor = const Color(0xFFBBC863);
+        backgroundColor = AppColors.secondary;
         icon = LucideIcons.loader;
         message = 'Menghubungkan...';
         break;
@@ -382,14 +388,13 @@ class _NetworkAwareWrapperState extends State<NetworkAwareWrapper> {
       color: backgroundColor,
       child: Row(
         children: [
-          Icon(icon, color: Colors.white, size: 16),
+          Icon(icon, color: AppColors.white, size: 16),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.white,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -398,12 +403,17 @@ class _NetworkAwareWrapperState extends State<NetworkAwareWrapper> {
             TextButton(
               onPressed: _retry,
               style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.white,
                 padding: EdgeInsets.zero,
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: const Text('Coba', style: TextStyle(fontSize: 11)),
+              child: Text(
+                'Coba',
+                style: AppTextStyles.captionSmall.copyWith(
+                  color: AppColors.white,
+                ),
+              ),
             ),
         ],
       ),

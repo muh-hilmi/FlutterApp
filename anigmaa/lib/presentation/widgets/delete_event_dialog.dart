@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../domain/entities/event.dart';
 import '../../../domain/entities/event_category.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 /// Confirmation dialog for deleting an event
 /// Validates that event can be deleted (0 attendees, upcoming status)
@@ -44,17 +46,14 @@ class DeleteEventDialog extends StatelessWidget {
         children: [
           Icon(
             canDelete ? Icons.warning_amber_rounded : Icons.block,
-            color: canDelete ? Colors.orange : Colors.red,
+            color: canDelete ? Colors.orange : AppColors.error,
             size: 28,
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               canDelete ? 'Hapus Event?' : 'Tidak Bisa Hapus Event',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-              ),
+              style: AppTextStyles.h3,
             ),
           ),
         ],
@@ -68,24 +67,22 @@ class DeleteEventDialog extends StatelessWidget {
             decoration: BoxDecoration(
               color: canDelete
                   ? Colors.orange.withValues(alpha: 0.1)
-                  : Colors.red.withValues(alpha: 0.1),
+                  : AppColors.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.event,
-                  color: canDelete ? Colors.orange : Colors.red,
+                  color: canDelete ? Colors.orange : AppColors.error,
                   size: 20,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     event.title,
-                    style: TextStyle(
-                      color: canDelete ? Colors.orange.shade900 : Colors.red.shade900,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
+                    style: AppTextStyles.button.copyWith(
+                      color: canDelete ? Colors.orange.shade900 : AppColors.error,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -99,9 +96,8 @@ class DeleteEventDialog extends StatelessWidget {
             canDelete
                 ? 'Event yang dihapus tidak bisa dikembalikan lagi. Yakin ingin menghapus event ini?'
                 : deleteRestrictionReason,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade700,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
               height: 1.5,
             ),
           ),
@@ -110,17 +106,17 @@ class DeleteEventDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.1),
+                color: AppColors.info.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: Colors.blue.withValues(alpha: 0.3),
+                  color: AppColors.info.withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
                 children: [
                   const Icon(
                     Icons.info_outline,
-                    color: Colors.blue,
+                    color: AppColors.info,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -129,9 +125,8 @@ class DeleteEventDialog extends StatelessWidget {
                       event.currentAttendees > 0
                           ? 'Gunakan fitur edit untuk mengubah detail event.'
                           : 'Hubungi support jika butuh bantuan.',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.blue,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.info,
                       ),
                     ),
                   ),
@@ -146,12 +141,10 @@ class DeleteEventDialog extends StatelessWidget {
           TextButton(
             key: const Key('delete_event_dialog_close_button'),
             onPressed: () => Navigator.pop(context, false),
-            child: const Text(
+            child: Text(
               'Tutup',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFFBBC863),
+              style: AppTextStyles.button.copyWith(
+                color: AppColors.secondary,
               ),
             ),
           )
@@ -159,12 +152,10 @@ class DeleteEventDialog extends StatelessWidget {
           TextButton(
             key: const Key('delete_event_dialog_cancel_button'),
             onPressed: () => Navigator.pop(context, false),
-            child: const Text(
+            child: Text(
               'Batal',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey,
+              style: AppTextStyles.button.copyWith(
+                color: AppColors.textTertiary,
               ),
             ),
           ),
@@ -173,8 +164,8 @@ class DeleteEventDialog extends StatelessWidget {
             key: const Key('delete_event_dialog_confirm_button'),
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.white,
               padding: const EdgeInsets.symmetric(
                 horizontal: 24,
                 vertical: 12,
@@ -183,12 +174,9 @@ class DeleteEventDialog extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text(
+            child: Text(
               'Ya, Hapus',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
+              style: AppTextStyles.button,
             ),
           ),
         ],

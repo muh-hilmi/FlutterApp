@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../domain/entities/event.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class JoinConfirmationTicket extends StatefulWidget {
   final Event event;
@@ -54,13 +56,13 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
     return Material(
       color: Colors.transparent,
       elevation: 8,
-      shadowColor: Colors.black.withValues(alpha: 0.3),
+      shadowColor: AppColors.primary.withValues(alpha: 0.3),
       child: ClipPath(
         clipper: _TicketClipper(),
         child: Container(
           constraints: const BoxConstraints(maxHeight: 600), // Max height cap
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(16),
           ),
           child: SingleChildScrollView(
@@ -82,7 +84,7 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: const Color(0xFFBBC863),
+                              color: AppColors.secondary,
                               width: 2,
                             ),
                             image: DecorationImage(
@@ -99,14 +101,12 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: const Color(
-                                0xFFBBC863,
-                              ).withValues(alpha: 0.15),
+                              color: AppColors.secondary.withValues(alpha: 0.15),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
                               Icons.push_pin_rounded,
-                              color: Color(0xFFBBC863),
+                              color: AppColors.secondary,
                               size: 20,
                             ),
                           ),
@@ -118,9 +118,9 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
                           children: [
                             Text(
                               widget.event.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
+                              style: AppTextStyles.bodyLargeBold.copyWith(
                                 fontSize: 18,
+                                fontWeight: FontWeight.bold,
                                 height: 1.2,
                               ),
                             ),
@@ -152,7 +152,7 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
                       (index) => Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                          child: Container(height: 1, color: Colors.grey[300]),
+                          child: Container(height: 1, color: AppColors.border),
                         ),
                       ),
                     ),
@@ -171,10 +171,10 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
                           padding: const EdgeInsets.all(12),
                           margin: const EdgeInsets.only(bottom: 16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFBBC863).withValues(alpha: 0.15),
+                            color: AppColors.secondary.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: const Color(0xFFBBC863).withValues(alpha: 0.3),
+                              color: AppColors.secondary.withValues(alpha: 0.3),
                             ),
                           ),
                           child: Row(
@@ -182,23 +182,23 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFBBC863).withValues(alpha: 0.2),
+                                  color: AppColors.secondary.withValues(alpha: 0.2),
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
                                   Icons.card_giftcard_rounded,
-                                  color: Color(0xFFBBC863),
+                                  color: AppColors.secondary,
                                   size: 20,
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              const Expanded(
+                              Expanded(
                                 child: Text(
                                   "Yeay! Event ini GRATIS. Tinggal klaim tiket kamu!",
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyMedium.copyWith(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFF556018),
+                                    color: const Color(0xFF556018),
                                     height: 1.4,
                                   ),
                                 ),
@@ -211,9 +211,9 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
                       // const SizedBox(height: 4),
                       Text(
                         requirementsText,
-                        style: TextStyle(
-                          color: Colors.black87,
+                        style: AppTextStyles.bodyMedium.copyWith(
                           fontSize: 13,
+                          color: AppColors.textEmphasis,
                           height: 1.4,
                         ),
                       ),
@@ -240,15 +240,17 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
                       _buildSectionTitle("Terms & Data Consent"),
                       Text(
                         "Dengan bergabung, kamu setuju dengan Syarat & Ketentuan serta Kebijakan Refund.",
-                        style: TextStyle(color: Colors.black54, fontSize: 12),
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                       const SizedBox(height: 10),
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.grey[50],
+                          color: AppColors.surfaceAlt,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.black26),
+                          border: Border.all(color: AppColors.border),
                         ),
                         child: Row(
                           children: [
@@ -257,7 +259,7 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
                               height: 24,
                               child: Checkbox(
                                 value: _isConsentGiven,
-                                activeColor: const Color(0xFFBBC863),
+                                activeColor: AppColors.secondary,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(4),
                                 ),
@@ -272,9 +274,8 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
                             Expanded(
                               child: Text(
                                 "Saya setuju data saya digunakan oleh penyelenggara untuk kelancaran event.",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.black,
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.textPrimary,
                                   height: 1.3,
                                 ),
                               ),
@@ -289,7 +290,7 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
                 // === ACTION Section ===
                 Container(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  color: Colors.white,
+                  color: AppColors.white,
                   child: Column(
                     children: [
                       if (!_isConsentGiven)
@@ -299,9 +300,8 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
                             widget.event.isFree
                                 ? "Centang kotak di atas dulu ya!"
                                 : "Pastikan Anda sudah siap sebelum Confirm",
-                            style: TextStyle(
-                              color: Colors.orange[800],
-                              fontSize: 12,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.warning,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -311,10 +311,10 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
                         child: ElevatedButton(
                           onPressed: _isConsentGiven ? widget.onConfirm : null,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFBBC863),
-                            foregroundColor: Colors.black,
-                            disabledBackgroundColor: Colors.black26,
-                            disabledForegroundColor: Colors.black54,
+                            backgroundColor: AppColors.secondary,
+                            foregroundColor: AppColors.primary,
+                            disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.26),
+                            disabledForegroundColor: AppColors.primary.withValues(alpha: 0.54),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -325,9 +325,8 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
                             widget.event.isFree
                                 ? "Klaim Tiket Gratis"
                                 : "Proceed to Payment",
-                            style: const TextStyle(
+                            style: AppTextStyles.bodyLargeBold.copyWith(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
                             ),
                           ),
                         ),
@@ -336,7 +335,7 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
                       TextButton(
                         onPressed: widget.onDismiss,
                         style: TextButton.styleFrom(
-                          foregroundColor: Colors.black54,
+                          foregroundColor: AppColors.textSecondary,
                           visualDensity: VisualDensity.compact,
                         ),
                         child: const Text("Maybe Later"),
@@ -355,9 +354,8 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
   Widget _buildSectionTitle(String title) {
     return Text(
       title.toUpperCase(),
-      style: TextStyle(
-        fontSize: 11,
-        color: Colors.black,
+      style: AppTextStyles.label.copyWith(
+        color: AppColors.textPrimary,
         fontWeight: FontWeight.bold,
         letterSpacing: 0.5,
       ),
@@ -367,12 +365,15 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
   Widget _buildInfoRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 14, color: Colors.black54),
+        Icon(icon, size: 14, color: AppColors.textSecondary),
         const SizedBox(width: 6),
         Expanded(
           child: Text(
             text,
-            style: TextStyle(color: Colors.black87, fontSize: 13),
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontSize: 13,
+              color: AppColors.textEmphasis,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -385,19 +386,18 @@ class _JoinConfirmationTicketState extends State<JoinConfirmationTicket>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F7FA),
+        color: AppColors.surfaceAlt,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: Colors.black87),
+          Icon(icon, size: 14, color: AppColors.textEmphasis),
           const SizedBox(width: 6),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.grey[800],
+            style: AppTextStyles.captionSmall.copyWith(
+              color: AppColors.textEmphasis,
               fontWeight: FontWeight.w500,
             ),
           ),

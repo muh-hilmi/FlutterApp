@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class EventTermsSection extends StatelessWidget {
   const EventTermsSection({super.key});
@@ -9,16 +11,12 @@ class EventTermsSection extends StatelessWidget {
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         tilePadding: EdgeInsets.zero,
-        title: const Text(
+        title: Text(
           'Syarat & Ketentuan',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF1A1A1A),
-          ),
+          style: AppTextStyles.bodyLargeBold,
         ),
-        iconColor: const Color(0xFFBBC863),
-        collapsedIconColor: Colors.grey[600],
+        iconColor: AppColors.secondary,
+        collapsedIconColor: AppColors.textSecondary,
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 16),
@@ -51,9 +49,8 @@ class EventTermsSection extends StatelessWidget {
   Widget _buildTermItem(String text) {
     return Text(
       text,
-      style: const TextStyle(
-        fontSize: 14,
-        color: Color(0xFF333333),
+      style: AppTextStyles.bodyMedium.copyWith(
+        color: AppColors.textEmphasis,
         height: 1.4,
       ),
     );

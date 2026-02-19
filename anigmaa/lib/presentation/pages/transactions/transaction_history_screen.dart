@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../domain/entities/transaction.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 import 'transaction_widgets.dart' as widgets;
 
 class TransactionHistoryScreen extends StatefulWidget {
@@ -70,17 +72,17 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> wit
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
         title: const Text('Transaction History'),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         bottom: TabBar(
           controller: _tabController,
-          labelColor: const Color(0xFFBBC863),
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: const Color(0xFFBBC863),
+          labelColor: AppColors.secondary,
+          unselectedLabelColor: AppColors.textTertiary,
+          indicatorColor: AppColors.secondary,
           tabs: const [
             Tab(text: 'Purchases'),
             Tab(text: 'Revenue'),
@@ -146,13 +148,9 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> wit
             netRevenue: netRevenue,
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Statistics',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A1A),
-            ),
+            style: AppTextStyles.bodyLargeBold.copyWith(fontSize: 18),
           ),
           const SizedBox(height: 16),
           Row(
@@ -162,7 +160,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> wit
                   label: 'Total Transactions',
                   value: totalTransactions.toString(),
                   icon: Icons.receipt,
-                  color: const Color(0xFFBBC863),
+                  color: AppColors.secondary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -171,7 +169,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> wit
                   label: 'Successful',
                   value: successfulTransactions.toString(),
                   icon: Icons.check_circle,
-                  color: Colors.green,
+                  color: AppColors.success,
                 ),
               ),
             ],
@@ -188,7 +186,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> wit
                     decimalDigits: 0,
                   ).format(averageTicketPrice),
                   icon: Icons.trending_up,
-                  color: Colors.blue,
+                  color: AppColors.info,
                 ),
               ),
               const SizedBox(width: 12),
@@ -197,7 +195,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> wit
                   label: 'Events Hosted',
                   value: '0',
                   icon: Icons.event,
-                  color: Colors.orange,
+                  color: AppColors.warning,
                 ),
               ),
             ],
@@ -260,30 +258,25 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> wit
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+              color: AppColors.secondary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               icon,
               size: 48,
-              color: const Color(0xFFBBC863),
+              color: AppColors.secondary,
             ),
           ),
           const SizedBox(height: 24),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A1A),
-            ),
+            style: AppTextStyles.h3.copyWith(fontSize: 20),
           ),
           const SizedBox(height: 8),
           Text(
             subtitle,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class PostImages extends StatelessWidget {
   final List<String> imageUrls;
@@ -23,17 +25,17 @@ class PostImages extends StatelessWidget {
             memCacheHeight: 600,
             placeholder: (context, url) => Container(
               height: 300,
-              color: Colors.grey[100],
+              color: AppColors.surfaceAlt,
             ),
             errorWidget: (context, url, error) {
               return Container(
                 height: 300,
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: AppColors.surfaceAlt,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Center(
-                  child: Icon(Icons.image_not_supported_rounded, size: 40, color: Colors.grey[400]),
+                  child: Icon(Icons.image_not_supported_rounded, size: 40, color: AppColors.textTertiary),
                 ),
               );
             },
@@ -68,11 +70,11 @@ class PostImages extends StatelessWidget {
                   memCacheWidth: 400,
                   memCacheHeight: 400,
                   placeholder: (context, url) => Container(
-                    color: Colors.grey[100],
+                    color: AppColors.surfaceAlt,
                   ),
                   errorWidget: (context, url, error) => Container(
-                    color: Colors.grey[100],
-                    child: Icon(Icons.image_not_supported_rounded, color: Colors.grey[400]),
+                    color: AppColors.surfaceAlt,
+                    child: Icon(Icons.image_not_supported_rounded, color: AppColors.textTertiary),
                   ),
                 ),
                 if (index == 3 && imageUrls.length > 4)
@@ -80,18 +82,16 @@ class PostImages extends StatelessWidget {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Colors.black.withValues(alpha: 0.6),
-                          Colors.black.withValues(alpha: 0.7),
+                          AppColors.primary.withValues(alpha: 0.6),
+                          AppColors.primary.withValues(alpha: 0.7),
                         ],
                       ),
                     ),
                     child: Center(
                       child: Text(
                         '+${imageUrls.length - 4}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
+                        style: AppTextStyles.h2.copyWith(
+                          color: AppColors.white,
                         ),
                       ),
                     ),

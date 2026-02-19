@@ -15,6 +15,8 @@ import '../payment/payment_screen.dart';
 import '../../widgets/tickets/join_confirmation_ticket.dart';
 import '../../widgets/common/error_state_widget.dart';
 import '../../widgets/common/empty_state_widget.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 /// Single-file implementation of Swipeable Events with Decoupled Feedback
 class SwipeableEventsScreen extends StatefulWidget {
@@ -135,7 +137,7 @@ class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
         SnackBar(
           content: const Text("Joined Event! 🎟️"),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.green[700],
+          backgroundColor: AppColors.success,
         ),
       );
     } else {
@@ -157,12 +159,12 @@ class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: BlocBuilder<EventsBloc, EventsState>(
         builder: (context, state) {
           if (state is EventsLoading) {
             return const Center(
-              child: CircularProgressIndicator(color: Color(0xFFBBC863)),
+              child: CircularProgressIndicator(color: AppColors.secondary),
             );
           }
           if (state is EventsError) {
@@ -194,7 +196,7 @@ class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
               clipBehavior: Clip.none,
               children: [
                 // Background
-                const Positioned.fill(child: ColoredBox(color: Colors.white)),
+                const Positioned.fill(child: ColoredBox(color: AppColors.white)),
 
                 // 2. The Join Confirmation Sheet (Non-blocking Overlay)
 
@@ -242,7 +244,7 @@ class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
                             GestureDetector(
                               onTap: _dismissJoinConfirmation,
                               child: Container(
-                                color: Colors.black.withValues(
+                                color: AppColors.primary.withValues(
                                   alpha: 0.5 * value,
                                 ),
                               ),
@@ -298,17 +300,17 @@ class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
           context.read<EventsBloc>().add(LoadEvents());
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFBBC863),
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.secondary,
+          foregroundColor: AppColors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
-        child: const Text(
+        child: Text(
           "Coba Lagi",
-          style: TextStyle(fontWeight: FontWeight.w700),
+          style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.white),
         ),
       ),
     );
@@ -750,22 +752,18 @@ class _SwipeableCardState extends State<_SwipeableCard>
 
     // Down = JOIN
     if (_dragOffset.dy > 50 && _dragOffset.dy.abs() > _dragOffset.dx.abs()) {
-      content = const Column(
+      content = Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.local_activity_rounded, size: 48, color: Colors.green),
+          Icon(Icons.local_activity_rounded, size: 48, color: AppColors.success),
           Text(
             "JOIN",
-            style: TextStyle(
-              color: Colors.green,
-              fontWeight: FontWeight.w900,
-              fontSize: 24,
-            ),
+            style: AppTextStyles.h2.copyWith(color: AppColors.success),
           ),
         ],
       );
       alignment = Alignment.center;
-      bgColor = Colors.white.withValues(alpha: 0.8);
+      bgColor = AppColors.white.withValues(alpha: 0.8);
     }
     // Up = Interest Prompt
     else if (_dragOffset.dy < -50 &&
@@ -775,8 +773,8 @@ class _SwipeableCardState extends State<_SwipeableCard>
     }
     // Horizontal = SKIP
     else if (_dragOffset.dx.abs() > 50) {
-      content = const Icon(Icons.close, size: 64, color: Colors.red);
-      bgColor = Colors.white.withValues(alpha: 0.8);
+      content = Icon(Icons.close, size: 64, color: AppColors.error);
+      bgColor = AppColors.white.withValues(alpha: 0.8);
     }
 
     if (content == null) return const SizedBox.shrink();
@@ -826,11 +824,11 @@ class _EventCardFace extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: AppColors.primary.withValues(alpha: 0.1),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -847,23 +845,23 @@ class _EventCardFace extends StatelessWidget {
                 imageUrl: event.fullImageUrls.first,
                 fit: BoxFit.cover,
                 placeholder: (_, __) => Container(
-                  color: const Color(0xFFBBC863),
+                  color: AppColors.secondary,
                   child: const Center(
-                    child: Icon(Icons.event, size: 80, color: Colors.black),
+                    child: Icon(Icons.event, size: 80, color: AppColors.primary),
                   ),
                 ),
                 errorWidget: (_, __, ___) => Container(
-                  color: const Color(0xFFBBC863),
+                  color: AppColors.secondary,
                   child: const Center(
-                    child: Icon(Icons.event, size: 80, color: Colors.black),
+                    child: Icon(Icons.event, size: 80, color: AppColors.primary),
                   ),
                 ),
               )
             else
               Container(
-                color: const Color(0xFFBBC863),
+                color: AppColors.secondary,
                 child: const Center(
-                  child: Icon(Icons.event, size: 80, color: Colors.black),
+                  child: Icon(Icons.event, size: 80, color: AppColors.primary),
                 ),
               ),
 
@@ -874,9 +872,9 @@ class _EventCardFace extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.0),
-                    Colors.black.withValues(alpha: 0.2),
-                    Colors.black.withValues(alpha: 0.8),
+                    AppColors.primary.withValues(alpha: 0.0),
+                    AppColors.primary.withValues(alpha: 0.2),
+                    AppColors.primary.withValues(alpha: 0.8),
                   ],
                   stops: const [0.4, 0.7, 1.0],
                 ),
@@ -904,15 +902,13 @@ class _EventCardFace extends StatelessWidget {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFBBC863),
+                            color: AppColors.secondary,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             event.category.name.toUpperCase(),
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                            style: AppTextStyles.label.copyWith(
+                              color: AppColors.primary,
                               letterSpacing: 1.1,
                             ),
                           ),
@@ -942,10 +938,9 @@ class _EventCardFace extends StatelessWidget {
                     // Title
                     Text(
                       event.title,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: AppTextStyles.h1.copyWith(
+                        color: AppColors.white,
                         fontSize: 28,
-                        fontWeight: FontWeight.bold,
                         height: 1.1,
                       ),
                       maxLines: 2,
@@ -956,9 +951,9 @@ class _EventCardFace extends StatelessWidget {
                     // Date & Location
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.calendar_today,
-                          color: Colors.white70,
+                          color: AppColors.white.withValues(alpha: 0.7),
                           size: 14,
                         ),
                         const SizedBox(width: 4),
@@ -966,23 +961,23 @@ class _EventCardFace extends StatelessWidget {
                           DateFormat(
                             'MMM d, HH:mm',
                           ).format(event.startTime.toLocal()),
-                          style: const TextStyle(
-                            color: Colors.white70,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.white.withValues(alpha: 0.7),
                             fontSize: 13,
                           ),
                         ),
                         const SizedBox(width: 16),
-                        const Icon(
+                        Icon(
                           Icons.location_on,
-                          color: Colors.white70,
+                          color: AppColors.white.withValues(alpha: 0.7),
                           size: 14,
                         ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             event.location.name,
-                            style: const TextStyle(
-                              color: Colors.white70,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.white.withValues(alpha: 0.7),
                               fontSize: 13,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -1001,28 +996,25 @@ class _EventCardFace extends StatelessWidget {
                               : CurrencyFormatter.format(
                                   event.price?.round() ?? 0,
                                 ),
-                          style: const TextStyle(
-                            color: Color(0xFFBBC863),
+                          style: AppTextStyles.h2.copyWith(
+                            color: AppColors.secondary,
                             fontSize: 24,
-                            fontWeight: FontWeight.w800,
                           ),
                         ),
                         if (!event.isFree)
-                          const Text(
+                          Text(
                             " /person",
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.white.withValues(alpha: 0.7),
                             ),
                           ),
 
                         const Spacer(),
 
-                        const Text(
+                        Text(
                           "Tap for details",
-                          style: TextStyle(
-                            color: Colors.white54,
-                            fontSize: 12,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.white.withValues(alpha: 0.54),
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -1043,19 +1035,18 @@ class _EventCardFace extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.9),
+                    color: AppColors.error.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.timer, color: Colors.white, size: 14),
-                      SizedBox(width: 4),
+                      const Icon(Icons.timer, color: AppColors.white, size: 14),
+                      const SizedBox(width: 4),
                       Text(
                         "Starting Soon",
-                        style: TextStyle(
-                          color: Colors.white,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 12,
                         ),
                       ),
                     ],
@@ -1077,7 +1068,7 @@ class _EventCardFace extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.5),
+        color: AppColors.primary.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       ),
@@ -1089,9 +1080,8 @@ class _EventCardFace extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             "$count",
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 11,
+            style: AppTextStyles.captionSmall.copyWith(
+              color: AppColors.white,
               fontWeight: FontWeight.bold,
             ),
           ),

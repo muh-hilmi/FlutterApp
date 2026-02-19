@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class DiscoverSearchBar extends StatelessWidget {
   final TextEditingController controller;
@@ -12,10 +14,10 @@ class DiscoverSearchBar extends StatelessWidget {
       child: Container(
         height: 50,
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: AppColors.surfaceAlt,
           borderRadius: BorderRadius.circular(25),
           border: Border.all(
-            color: Colors.grey.shade200,
+            color: AppColors.border,
             width: 1,
           ),
         ),
@@ -23,14 +25,13 @@ class DiscoverSearchBar extends StatelessWidget {
           controller: controller,
           decoration: InputDecoration(
             hintText: 'Cari event, lokasi, atau kategori...',
-            hintStyle: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade500,
+            hintStyle: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textTertiary,
               fontWeight: FontWeight.w500,
             ),
             prefixIcon: Icon(
               Icons.search,
-              color: Colors.grey.shade500,
+              color: AppColors.textTertiary,
               size: 20,
             ),
             suffixIcon: controller.text.isNotEmpty
@@ -38,7 +39,7 @@ class DiscoverSearchBar extends StatelessWidget {
                     onPressed: controller.clear,
                     icon: Icon(
                       Icons.clear,
-                      color: Colors.grey.shade500,
+                      color: AppColors.textTertiary,
                       size: 20,
                     ),
                   )
@@ -49,9 +50,8 @@ class DiscoverSearchBar extends StatelessWidget {
               vertical: 12,
             ),
           ),
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF1A1A1A),
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textPrimary,
             fontWeight: FontWeight.w500,
           ),
         ),

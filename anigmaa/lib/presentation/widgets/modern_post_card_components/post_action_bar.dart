@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../domain/entities/post.dart';
 import '../../bloc/posts/posts_bloc.dart';
 import '../../bloc/posts/posts_event.dart';
 import '../../pages/post_detail/post_detail_screen.dart';
 import '../../pages/profile/profile_screen.dart';
 import '../../../core/services/share_service.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class PostActionBar extends StatefulWidget {
   final Post post;
@@ -213,12 +214,11 @@ class _PostActionBarState extends State<PostActionBar>
                           widget.post.likesCount > 0
                               ? _formatCount(widget.post.likesCount)
                               : 'Gas!',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
+                          style: AppTextStyles.bodyMediumBold.copyWith(
                             fontWeight: _isLiked
                                 ? FontWeight.w700
                                 : FontWeight.w600,
-                            color: const Color(0xFF262626),
+                            color: AppColors.textEmphasis,
                             letterSpacing: -0.3,
                           ),
                         ),
@@ -277,10 +277,9 @@ class _PostActionBarState extends State<PostActionBar>
             const SizedBox(width: 6),
             Text(
               label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
+              style: AppTextStyles.bodyMediumBold.copyWith(
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF262626),
+                color: AppColors.textEmphasis,
                 letterSpacing: -0.3,
               ),
             ),
@@ -432,9 +431,9 @@ class _PostActionBarState extends State<PostActionBar>
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: SafeArea(
           child: Column(
@@ -445,7 +444,7 @@ class _PostActionBarState extends State<PostActionBar>
                 height: 4,
                 margin: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: AppColors.border,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -455,10 +454,7 @@ class _PostActionBarState extends State<PostActionBar>
                   children: [
                     Text(
                       'Bagikan Post',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: AppTextStyles.h3,
                     ),
                     const SizedBox(height: 20),
                     GridView.count(
@@ -471,7 +467,7 @@ class _PostActionBarState extends State<PostActionBar>
                           context,
                           icon: Icons.copy,
                           label: 'Salin Link',
-                          color: Colors.grey[600]!,
+                          color: AppColors.textSecondary,
                           onTap: () {
                             Navigator.pop(context);
                             ShareService().sharePost(
@@ -485,7 +481,7 @@ class _PostActionBarState extends State<PostActionBar>
                           context,
                           icon: Icons.message,
                           label: 'WhatsApp',
-                          color: Colors.green,
+                          color: AppColors.success,
                           onTap: () {
                             Navigator.pop(context);
                             ShareService().sharePost(
@@ -541,7 +537,7 @@ class _PostActionBarState extends State<PostActionBar>
                           context,
                           icon: Icons.email,
                           label: 'Email',
-                          color: Colors.red,
+                          color: AppColors.error,
                           onTap: () {
                             Navigator.pop(context);
                             ShareService().sharePost(
@@ -555,7 +551,7 @@ class _PostActionBarState extends State<PostActionBar>
                           context,
                           icon: Icons.share,
                           label: 'Lainnya',
-                          color: Colors.grey[600]!,
+                          color: AppColors.textSecondary,
                           onTap: () {
                             Navigator.pop(context);
                             ShareService().sharePost(
@@ -569,7 +565,7 @@ class _PostActionBarState extends State<PostActionBar>
                           context,
                           icon: Icons.qr_code,
                           label: 'QR Code',
-                          color: Colors.black,
+                          color: AppColors.primary,
                           onTap: () {
                             Navigator.pop(context);
                             ShareService().showPostQRCode(context, widget.post);
@@ -581,7 +577,7 @@ class _PostActionBarState extends State<PostActionBar>
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.grey[50],
+                        color: AppColors.surfaceAlt,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -600,13 +596,11 @@ class _PostActionBarState extends State<PostActionBar>
                             },
                             child: CircleAvatar(
                               radius: 20,
-                              backgroundColor: const Color(0xFFFCFCFC),
+                              backgroundColor: AppColors.surface,
                               child: Text(
                                 widget.post.author.name[0].toUpperCase(),
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color(0xFFBBC863),
+                                style: AppTextStyles.button.copyWith(
+                                  color: AppColors.secondary,
                                 ),
                               ),
                             ),
@@ -618,19 +612,15 @@ class _PostActionBarState extends State<PostActionBar>
                               children: [
                                 Text(
                                   widget.post.author.name,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: AppTextStyles.bodyMediumBold,
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   widget.post.content.length > 50
                                       ? '${widget.post.content.substring(0, 50)}...'
                                       : widget.post.content,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: AppColors.textSecondary,
                                   ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -676,10 +666,7 @@ class _PostActionBarState extends State<PostActionBar>
           const SizedBox(height: 8),
           Text(
             label,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyles.caption,
             textAlign: TextAlign.center,
           ),
         ],

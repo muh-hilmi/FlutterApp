@@ -10,6 +10,8 @@ import '../../bloc/user/user_state.dart';
 import '../../bloc/user/user_event.dart';
 import '../../../domain/entities/user.dart';
 import 'profile_screen.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 /// Screen untuk menampilkan daftar followers atau following
 class FollowersFollowingScreen extends StatefulWidget {
@@ -72,33 +74,26 @@ class _FollowersFollowingScreenState extends State<FollowersFollowingScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF8F5),
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFBBC863),
-        foregroundColor: const Color(0xFF000000),
+        backgroundColor: AppColors.secondary,
+        foregroundColor: AppColors.primary,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF000000)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Connections',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF000000),
-          ),
+          style: AppTextStyles.h3.copyWith(color: AppColors.textPrimary),
         ),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xFF000000),
+          indicatorColor: AppColors.primary,
           indicatorWeight: 3,
-          labelColor: const Color(0xFF000000),
-          unselectedLabelColor: const Color(0xFF666666),
-          labelStyle: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 15,
-          ),
+          labelColor: AppColors.primary,
+          unselectedLabelColor: AppColors.textSecondary,
+          labelStyle: AppTextStyles.button,
           tabs: const [
             Tab(text: 'Followers'),
             Tab(text: 'Following'),
@@ -139,28 +134,24 @@ class _FollowersFollowingScreenState extends State<FollowersFollowingScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
+                const Icon(Icons.error_outline, size: 48, color: AppColors.error),
                 const SizedBox(height: 16),
                 Text(
                   'Gagal memuat data',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[700],
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   state.message,
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: _loadData,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFBBC863),
-                    foregroundColor: const Color(0xFF000000),
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: AppColors.primary,
                   ),
                   child: const Text('Coba Lagi'),
                 ),
@@ -176,7 +167,7 @@ class _FollowersFollowingScreenState extends State<FollowersFollowingScreen>
         if (users.isEmpty && isLoading) {
           return const Center(
             child: CircularProgressIndicator(
-              color: Color(0xFFBBC863),
+              color: AppColors.secondary,
             ),
           );
         }
@@ -189,11 +180,11 @@ class _FollowersFollowingScreenState extends State<FollowersFollowingScreen>
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
+                        color: AppColors.primary.withValues(alpha: 0.05),
                         blurRadius: 10,
                         offset: const Offset(0, 2),
                       ),
@@ -202,17 +193,13 @@ class _FollowersFollowingScreenState extends State<FollowersFollowingScreen>
                   child: Icon(
                     isFollowers ? Icons.people_outline : Icons.person_add_outlined,
                     size: 64,
-                    color: Colors.grey[300],
+                    color: AppColors.border,
                   ),
                 ),
                 const SizedBox(height: 20),
                 Text(
                   isFollowers ? 'Belum ada followers' : 'Belum ada following',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[600],
-                  ),
+                  style: AppTextStyles.h3.copyWith(color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -233,11 +220,11 @@ class _FollowersFollowingScreenState extends State<FollowersFollowingScreen>
   Widget _buildUserCard(User user) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      color: Colors.white,
+      color: AppColors.white,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey[200]!),
+        side: const BorderSide(color: AppColors.border),
       ),
       child: InkWell(
         onTap: () {
@@ -263,7 +250,7 @@ class _FollowersFollowingScreenState extends State<FollowersFollowingScreen>
                 height: 50,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey[200]!, width: 2),
+                  border: Border.all(color: AppColors.border, width: 2),
                 ),
                 child: ClipOval(
                   child: (user.avatar != null && user.avatar!.isNotEmpty)
@@ -271,11 +258,11 @@ class _FollowersFollowingScreenState extends State<FollowersFollowingScreen>
                           imageUrl: user.avatar!,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
-                            color: const Color(0xFFCCFF00).withValues(alpha: 0.2),
+                            color: AppColors.electricLime.withValues(alpha: 0.2),
                             child: const Center(
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Color(0xFFCCFF00),
+                                color: AppColors.electricLime,
                               ),
                             ),
                           ),
@@ -296,11 +283,7 @@ class _FollowersFollowingScreenState extends State<FollowersFollowingScreen>
                         Flexible(
                           child: Text(
                             user.name,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                            ),
+                            style: AppTextStyles.button.copyWith(color: AppColors.textPrimary),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -309,7 +292,7 @@ class _FollowersFollowingScreenState extends State<FollowersFollowingScreen>
                           const Icon(
                             Icons.verified,
                             size: 16,
-                            color: Color(0xFFCCFF00),
+                            color: AppColors.electricLime,
                           ),
                         ],
                       ],
@@ -318,10 +301,7 @@ class _FollowersFollowingScreenState extends State<FollowersFollowingScreen>
                       const SizedBox(height: 4),
                       Text(
                         user.bio!,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                        ),
+                        style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -330,9 +310,9 @@ class _FollowersFollowingScreenState extends State<FollowersFollowingScreen>
                 ),
               ),
               // Follow indicator arrow
-              Icon(
+              const Icon(
                 Icons.chevron_right,
-                color: Colors.grey[400],
+                color: AppColors.textTertiary,
                 size: 24,
               ),
             ],
@@ -347,7 +327,7 @@ class _FollowersFollowingScreenState extends State<FollowersFollowingScreen>
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color(0xFFCCFF00),
+            AppColors.electricLime,
             Color(0xFFA8B86D),
           ],
           begin: Alignment.topLeft,
@@ -357,11 +337,7 @@ class _FollowersFollowingScreenState extends State<FollowersFollowingScreen>
       child: Center(
         child: Text(
           name.isNotEmpty ? name[0].toUpperCase() : '?',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTextStyles.h3.copyWith(color: AppColors.white),
         ),
       ),
     );

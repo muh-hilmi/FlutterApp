@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../domain/entities/post.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class ShareBottomSheet extends StatelessWidget {
   final Post post;
@@ -15,7 +17,7 @@ class ShareBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SafeArea(
@@ -27,17 +29,14 @@ class ShareBottomSheet extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: AppColors.border,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Share Post',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTextStyles.bodyLargeBold.copyWith(fontSize: 18),
             ),
             const SizedBox(height: 20),
             // Preview
@@ -45,22 +44,20 @@ class ShareBottomSheet extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 20),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey[50],
+                color: AppColors.surfaceAlt,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundColor: const Color(0xFFFCFCFC),
+                    backgroundColor: AppColors.cardSurface,
                     child: Text(
                       post.author.name.isNotEmpty
                           ? post.author.name[0].toUpperCase()
                           : '?',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFFBBC863),
+                      style: AppTextStyles.button.copyWith(
+                        color: AppColors.secondary,
                       ),
                     ),
                   ),
@@ -71,19 +68,15 @@ class ShareBottomSheet extends StatelessWidget {
                       children: [
                         Text(
                           post.author.name,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: AppTextStyles.bodyMediumBold,
                         ),
                         const SizedBox(height: 2),
                         Text(
                           post.content.length > 50
                               ? '${post.content.substring(0, 50)}...'
                               : post.content,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -108,7 +101,7 @@ class ShareBottomSheet extends StatelessWidget {
                   _buildShareOption(
                     icon: Icons.link,
                     label: 'Copy Link',
-                    color: Colors.grey[600]!,
+                    color: AppColors.textSecondary,
                     onTap: () {
                       _copyPostLink(context);
                     },
@@ -148,7 +141,7 @@ class ShareBottomSheet extends StatelessWidget {
                   _buildShareOption(
                     icon: Icons.email,
                     label: 'Email',
-                    color: Colors.red,
+                    color: AppColors.error,
                     onTap: () {
                       _shareViaEmail(context);
                     },
@@ -156,7 +149,7 @@ class ShareBottomSheet extends StatelessWidget {
                   _buildShareOption(
                     icon: Icons.share,
                     label: 'More',
-                    color: Colors.grey[600]!,
+                    color: AppColors.textSecondary,
                     onTap: () {
                       _shareMore(context);
                     },
@@ -164,7 +157,7 @@ class ShareBottomSheet extends StatelessWidget {
                   _buildShareOption(
                     icon: Icons.qr_code,
                     label: 'QR Code',
-                    color: Colors.black,
+                    color: AppColors.primary,
                     onTap: () {
                       _showQRCode(context);
                     },
@@ -203,10 +196,7 @@ class ShareBottomSheet extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyles.caption,
             textAlign: TextAlign.center,
           ),
         ],

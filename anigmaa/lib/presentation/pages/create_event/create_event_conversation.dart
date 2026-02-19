@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -29,6 +30,8 @@ import 'components/category_selector.dart';
 import 'components/price_selector.dart';
 import 'components/image_options_selector.dart';
 import '../event_detail/event_detail_screen.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class _EditOption {
   final IconData icon;
@@ -427,19 +430,123 @@ class _CreateEventConversationState extends State<CreateEventConversation>
   }
 
   void _showDatePicker({required bool isStart}) async {
-    final date = await showDatePicker(
+    final initialDate = DateTime.now().add(const Duration(days: 1));
+    DateTime selectedDate = initialDate;
+
+    final date = await showModalBottomSheet<DateTime>(
       context: context,
-      initialDate: DateTime.now().add(const Duration(days: 1)),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: Color(0xFFBBC863)),
-          ),
-          child: child!,
-        );
-      },
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+            decoration: const BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Handle
+                Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 8),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                // Title
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.calendar_today, color: AppColors.secondary, size: 24),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Pilih Tanggal',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textEmphasis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Calendar Grid with reduced padding
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  child: CalendarDatePicker(
+                    initialDate: initialDate,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                    onDateChanged: (date) {
+                      setModalState(() {
+                        selectedDate = date;
+                      });
+                    },
+                    onDisplayedMonthChanged: (month) {},
+                    initialCalendarMode: DatePickerMode.day,
+                  ),
+                ),
+                // Action buttons with reduced spacing
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            side: const BorderSide(color: AppColors.secondary),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Batal',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.secondary,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context, selectedDate),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.secondary,
+                            foregroundColor: AppColors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Pilih',
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          );
+        },
+      ),
     );
 
     if (date != null) {
@@ -460,29 +567,21 @@ class _CreateEventConversationState extends State<CreateEventConversation>
   }
 
   void _showTimePicker({required bool isStart}) async {
-    // Calculate initial end time (start time + 2 hours)
-    TimeOfDay initialEndTime = const TimeOfDay(hour: 21, minute: 0);
-    if (_startTime != null) {
-      int endHour = (_startTime!.hour + 2) % 24;
-      initialEndTime = TimeOfDay(hour: endHour, minute: _startTime!.minute);
-    }
+    TimeOfDay initialTime = isStart
+        ? const TimeOfDay(hour: 19, minute: 0)
+        : (_startTime != null
+            ? TimeOfDay(hour: (_startTime!.hour + 2) % 24, minute: _startTime!.minute)
+            : const TimeOfDay(hour: 21, minute: 0));
 
-    final time = await showTimePicker(
+    final time = await showModalBottomSheet<TimeOfDay>(
       context: context,
-      initialTime: isStart
-          ? const TimeOfDay(hour: 19, minute: 0)
-          : initialEndTime,
-      builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-          child: Theme(
-            data: Theme.of(context).copyWith(
-              colorScheme: const ColorScheme.light(primary: Color(0xFFBBC863)),
-            ),
-            child: child!,
-          ),
-        );
-      },
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: false,
+      builder: (context) => _CustomTimePicker(
+        initialTime: initialTime,
+        title: isStart ? 'Jam Mulai' : 'Jam Selesai',
+      ),
     );
 
     if (time != null) {
@@ -580,7 +679,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
           ),
           child: Container(
             decoration: const BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: SafeArea(
@@ -597,7 +696,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                         height: 4,
                         margin: const EdgeInsets.only(bottom: 20),
                         decoration: BoxDecoration(
-                          color: Colors.grey[300],
+                          color: AppColors.border,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -608,13 +707,13 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF1A1A1A),
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Masukkan harga per orang dalam Rupiah',
-                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                      style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: 6),
                     Container(
@@ -623,7 +722,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+                        color: AppColors.secondary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -632,7 +731,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                           Icon(
                             Icons.info_outline,
                             size: 14,
-                            color: const Color(0xFFBBC863),
+                            color: AppColors.secondary,
                           ),
                           const SizedBox(width: 6),
                           Text(
@@ -640,7 +739,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFFBBC863),
+                              color: AppColors.secondary,
                             ),
                           ),
                         ],
@@ -654,10 +753,10 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                         vertical: 12,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFCFCFC),
+                        color: AppColors.cardSurface,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: const Color(0xFFBBC863).withValues(alpha: 0.3),
+                          color: AppColors.secondary.withValues(alpha: 0.3),
                           width: 2,
                         ),
                       ),
@@ -679,7 +778,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
-                                color: Color(0xFFBBC863),
+                                color: AppColors.secondary,
                               ),
                             ),
                           ),
@@ -694,14 +793,14 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                               style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w700,
-                                color: Color(0xFF1A1A1A),
+                                color: AppColors.textPrimary,
                               ),
                               decoration: InputDecoration(
                                 hintText: '50.000',
                                 hintStyle: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w700,
-                                  color: Colors.grey[300],
+                                  color: AppColors.border,
                                 ),
                                 border: InputBorder.none,
                                 contentPadding: EdgeInsets.zero,
@@ -754,7 +853,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                                 content: const Text(
                                   'Maksimal harga Rp 1.000.000',
                                 ),
-                                backgroundColor: Colors.red,
+                                backgroundColor: AppColors.error,
                                 behavior: SnackBarBehavior.floating,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
@@ -767,7 +866,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                                 content: const Text(
                                   'Masukkan harga yang valid',
                                 ),
-                                backgroundColor: Colors.red,
+                                backgroundColor: AppColors.error,
                                 behavior: SnackBarBehavior.floating,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
@@ -777,8 +876,8 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFBBC863),
-                          foregroundColor: Colors.white,
+                          backgroundColor: AppColors.secondary,
+                          foregroundColor: AppColors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
@@ -903,7 +1002,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                style: TextButton.styleFrom(foregroundColor: AppColors.error),
                 child: const Text('Ya, Keluar'),
               ),
             ],
@@ -919,7 +1018,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
           builder: (context) => AlertDialog(
             title: Row(
               children: [
-                Icon(Icons.error_outline, color: Colors.red[700], size: 28),
+                Icon(Icons.error_outline, color: AppColors.error, size: 28),
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Text('Upload Gagal!', style: TextStyle(fontSize: 20)),
@@ -934,7 +1033,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red[50],
+                      color: AppColors.error.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(
@@ -945,7 +1044,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                             Icon(
                               Icons.info_outline,
                               size: 16,
-                              color: Colors.red[700],
+                              color: AppColors.error,
                             ),
                             const SizedBox(width: 6),
                             Text(
@@ -953,7 +1052,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: Colors.red[700],
+                                color: AppColors.error,
                               ),
                             ),
                           ],
@@ -974,13 +1073,13 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[800],
+                      color: AppColors.textEmphasis,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Kamu bisa lanjut buat event tanpa cover, atau batalkan untuk coba lagi nanti.',
-                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -990,15 +1089,15 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                 onPressed: () => Navigator.pop(context, false),
                 icon: const Icon(Icons.cancel_outlined),
                 label: const Text('Batalkan'),
-                style: TextButton.styleFrom(foregroundColor: Colors.grey[700]),
+                style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
               ),
               ElevatedButton.icon(
                 onPressed: () => Navigator.pop(context, true),
                 icon: const Icon(Icons.check_circle_outline),
                 label: const Text('Lanjut Tanpa Foto'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFBBC863),
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.secondary,
+                  foregroundColor: AppColors.white,
                 ),
               ),
             ],
@@ -1026,12 +1125,12 @@ class _CreateEventConversationState extends State<CreateEventConversation>
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.white,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFFBBC863)),
+            icon: const Icon(Icons.arrow_back, color: AppColors.secondary),
             onPressed: _handleBackNavigation,
           ),
           title: Column(
@@ -1041,7 +1140,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                 _isEditMode ? 'Edit Event' : 'Buat Event Baru',
                 key: const Key('create_event_title'),
                 style: const TextStyle(
-                  color: Colors.black,
+                  color: AppColors.textPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -1050,7 +1149,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                 _isEditMode ? 'Ubah detail event' : 'Isi detail event kamu',
                 key: const Key('create_event_subtitle'),
                 style: const TextStyle(
-                  color: Color(0xFFBBC863),
+                  color: AppColors.secondary,
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                 ),
@@ -1087,15 +1186,8 @@ class _CreateEventConversationState extends State<CreateEventConversation>
   Widget _buildQuickRepliesArea() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
+      decoration: const BoxDecoration(
+        color: Colors.transparent,
       ),
       child: SafeArea(
         top: false,
@@ -1189,10 +1281,10 @@ class _CreateEventConversationState extends State<CreateEventConversation>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.primary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -1213,21 +1305,22 @@ class _CreateEventConversationState extends State<CreateEventConversation>
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFFBBC863), Color(0xFFA8B657)],
+            colors: [AppColors.secondary, AppColors.secondary],
           ),
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFBBC863).withValues(alpha: 0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+              color: AppColors.secondary.withValues(alpha: 0.4),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+              spreadRadius: 2,
             ),
           ],
         ),
         child: Text(
           text,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppColors.white,
             fontWeight: FontWeight.w700,
             fontSize: 15,
             letterSpacing: -0.3,
@@ -1255,7 +1348,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
             decoration: InputDecoration(
               hintText: _getInputHint(),
               filled: true,
-              fillColor: const Color(0xFFFCFCFC),
+              fillColor: AppColors.cardSurface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(24),
                 borderSide: BorderSide.none,
@@ -1263,14 +1356,14 @@ class _CreateEventConversationState extends State<CreateEventConversation>
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(24),
                 borderSide: BorderSide(
-                  color: const Color(0xFFBBC863).withValues(alpha: 0.3),
+                  color: AppColors.secondary.withValues(alpha: 0.3),
                   width: 1.5,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(24),
                 borderSide: const BorderSide(
-                  color: Color(0xFFBBC863),
+                  color: AppColors.secondary,
                   width: 2,
                 ),
               ),
@@ -1288,10 +1381,10 @@ class _CreateEventConversationState extends State<CreateEventConversation>
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: const BoxDecoration(
-              color: Color(0xFFBBC863),
+              color: AppColors.secondary,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.send, color: Colors.white, size: 20),
+            child: const Icon(Icons.send, color: AppColors.white, size: 20),
           ),
         ),
       ],
@@ -1302,10 +1395,10 @@ class _CreateEventConversationState extends State<CreateEventConversation>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFCFCFC),
+        color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFFBBC863).withValues(alpha: 0.3),
+          color: AppColors.secondary.withValues(alpha: 0.3),
           width: 1.5,
         ),
       ),
@@ -1322,7 +1415,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                   style: const TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF1A1A1A),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const Text(
@@ -1330,7 +1423,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF666666),
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -1349,7 +1442,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[600],
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   Text(
@@ -1357,7 +1450,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFFBBC863),
+                      color: AppColors.secondary,
                     ),
                   ),
                 ],
@@ -1365,12 +1458,10 @@ class _CreateEventConversationState extends State<CreateEventConversation>
               const SizedBox(height: 12),
               SliderTheme(
                 data: SliderThemeData(
-                  activeTrackColor: const Color(0xFFBBC863),
-                  inactiveTrackColor: const Color(
-                    0xFFBBC863,
-                  ).withValues(alpha: 0.2),
-                  thumbColor: const Color(0xFFBBC863),
-                  overlayColor: const Color(0xFFBBC863).withValues(alpha: 0.1),
+                  activeTrackColor: AppColors.secondary,
+                  inactiveTrackColor: AppColors.secondary.withValues(alpha: 0.2),
+                  thumbColor: AppColors.secondary,
+                  overlayColor: AppColors.secondary.withValues(alpha: 0.1),
                   trackHeight: 8,
                   thumbShape: const RoundSliderThumbShape(
                     enabledThumbRadius: 12,
@@ -1398,7 +1489,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 10),
@@ -1421,24 +1512,24 @@ class _CreateEventConversationState extends State<CreateEventConversation>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+                color: AppColors.secondary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: const Color(0xFFBBC863).withValues(alpha: 0.3),
+                  color: AppColors.secondary.withValues(alpha: 0.3),
                   width: 1.5,
                 ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.edit, size: 18, color: const Color(0xFFBBC863)),
+                  Icon(Icons.edit, size: 18, color: AppColors.secondary),
                   const SizedBox(width: 8),
                   Text(
                     'Input Manual',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFFBBC863),
+                      color: AppColors.secondary,
                     ),
                   ),
                 ],
@@ -1450,12 +1541,12 @@ class _CreateEventConversationState extends State<CreateEventConversation>
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+              color: AppColors.secondary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, size: 18, color: Colors.grey[700]),
+                Icon(Icons.info_outline, size: 18, color: AppColors.textSecondary),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -1463,7 +1554,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: Colors.grey[700],
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ),
@@ -1479,8 +1570,8 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                 _handleTextInput(_capacity.toString());
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFBBC863),
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.secondary,
+                foregroundColor: AppColors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -1510,10 +1601,10 @@ class _CreateEventConversationState extends State<CreateEventConversation>
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFFBBC863) : Colors.grey[100],
+            color: isSelected ? AppColors.secondary : AppColors.surfaceAlt,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isSelected ? const Color(0xFFBBC863) : Colors.grey[300]!,
+              color: isSelected ? AppColors.secondary : AppColors.border,
               width: 1.5,
             ),
           ),
@@ -1523,7 +1614,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: isSelected ? Colors.white : Colors.grey[700],
+              color: isSelected ? AppColors.white : AppColors.textSecondary,
             ),
           ),
         ),
@@ -1564,7 +1655,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Masukkan angka 3 - 500'),
-                    backgroundColor: Colors.red,
+                    backgroundColor: AppColors.error,
                   ),
                 );
               }
@@ -1596,18 +1687,18 @@ class _CreateEventConversationState extends State<CreateEventConversation>
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+            color: AppColors.secondary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: TextButton.icon(
             onPressed: _showEditOptions,
-            icon: const Icon(Icons.edit, size: 18, color: Color(0xFFBBC863)),
+            icon: const Icon(Icons.edit, size: 18, color: AppColors.secondary),
             label: const Text(
               'Edit Detail Event ✏️',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFFBBC863),
+                color: AppColors.secondary,
               ),
             ),
             style: TextButton.styleFrom(
@@ -1624,7 +1715,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                 onPressed: _handleBackNavigation,
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  side: const BorderSide(color: Color(0xFFBBC863)),
+                  side: const BorderSide(color: AppColors.secondary),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -1634,7 +1725,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFFBBC863),
+                    color: AppColors.secondary,
                   ),
                 ),
               ),
@@ -1645,10 +1736,8 @@ class _CreateEventConversationState extends State<CreateEventConversation>
               child: ElevatedButton(
                 onPressed: _isSubmitting ? null : _submitEvent,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFBBC863),
-                  disabledBackgroundColor: const Color(
-                    0xFFBBC863,
-                  ).withValues(alpha: 0.6),
+                  backgroundColor: AppColors.secondary,
+                  disabledBackgroundColor: AppColors.secondary.withValues(alpha: 0.6),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -1661,7 +1750,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
+                            AppColors.white,
                           ),
                         ),
                       )
@@ -1671,7 +1760,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: AppColors.white,
                         ),
                       ),
               ),
@@ -1689,7 +1778,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: const BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: SafeArea(
@@ -1703,7 +1792,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                   height: 4,
                   margin: const EdgeInsets.only(top: 12, bottom: 8),
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: AppColors.border,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -1713,21 +1802,21 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
                 child: Row(
                   children: [
-                    const Icon(Icons.edit, color: Color(0xFFBBC863), size: 24),
+                    const Icon(Icons.edit, color: AppColors.secondary, size: 24),
                     const SizedBox(width: 12),
                     const Text(
                       'Edit Event',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF1A1A1A),
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     const Spacer(),
                     IconButton(
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.close),
-                      color: Colors.grey[600],
+                      color: AppColors.textSecondary,
                     ),
                   ],
                 ),
@@ -1810,7 +1899,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(color: Colors.grey[200]!, width: 1),
+            bottom: BorderSide(color: AppColors.border, width: 1),
           ),
         ),
         child: Row(
@@ -1818,13 +1907,13 @@ class _CreateEventConversationState extends State<CreateEventConversation>
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+                color: AppColors.secondary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 option.icon,
                 size: 20,
-                color: const Color(0xFFBBC863),
+                color: AppColors.secondary,
               ),
             ),
             const SizedBox(width: 14),
@@ -1837,7 +1926,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF1A1A1A),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -1846,7 +1935,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: Colors.grey[600],
+                      color: AppColors.textSecondary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -1854,7 +1943,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: Colors.grey[400], size: 20),
+            Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 20),
           ],
         ),
       ),
@@ -2174,5 +2263,249 @@ class _CreateEventConversationState extends State<CreateEventConversation>
       _addBotMessage('❌ Terjadi kesalahan: $e');
       if (mounted) setState(() => _isSubmitting = false);
     }
+  }
+}
+
+class _CustomTimePicker extends StatefulWidget {
+  final TimeOfDay initialTime;
+  final String title;
+
+  const _CustomTimePicker({
+    required this.initialTime,
+    required this.title,
+  });
+
+  @override
+  State<_CustomTimePicker> createState() => _CustomTimePickerState();
+}
+
+class _CustomTimePickerState extends State<_CustomTimePicker> {
+  late FixedExtentScrollController _hourController;
+  late FixedExtentScrollController _minuteController;
+  late int _selectedHour;
+  late int _selectedMinute;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedHour = widget.initialTime.hour;
+    _selectedMinute = widget.initialTime.minute;
+    _hourController = FixedExtentScrollController(initialItem: _selectedHour);
+    _minuteController = FixedExtentScrollController(initialItem: _selectedMinute);
+  }
+
+  @override
+  void dispose() {
+    _hourController.dispose();
+    _minuteController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle
+          Container(
+            margin: const EdgeInsets.only(top: 12, bottom: 8),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppColors.border,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          // Title
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Row(
+              children: [
+                const Icon(Icons.access_time, color: AppColors.secondary, size: 24),
+                const SizedBox(width: 12),
+                Text(
+                  widget.title,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Time picker
+          SizedBox(
+            height: 150,
+            child: Row(
+              children: [
+                // Hours
+                Expanded(
+                  child: CupertinoPicker(
+                    scrollController: _hourController,
+                    itemExtent: 50,
+                    onSelectedItemChanged: (index) {
+                      setState(() {
+                        _selectedHour = index;
+                      });
+                    },
+                    selectionOverlay: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.secondary.withValues(alpha: 0.3),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    children: List.generate(
+                      24,
+                      (index) => Center(
+                        child: Text(
+                          index.toString().padLeft(2, '0'),
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: index == _selectedHour ? FontWeight.w800 : FontWeight.w500,
+                            color: index == _selectedHour ? AppColors.secondary : AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // Separator
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  child: const Text(
+                    ':',
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.secondary,
+                    ),
+                  ),
+                ),
+                // Minutes
+                Expanded(
+                  child: CupertinoPicker(
+                    scrollController: _minuteController,
+                    itemExtent: 50,
+                    onSelectedItemChanged: (index) {
+                      setState(() {
+                        _selectedMinute = index;
+                      });
+                    },
+                    selectionOverlay: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.secondary.withValues(alpha: 0.3),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    children: List.generate(
+                      60,
+                      (index) => Center(
+                        child: Text(
+                          index.toString().padLeft(2, '0'),
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: index == _selectedMinute ? FontWeight.w800 : FontWeight.w500,
+                            color: index == _selectedMinute ? AppColors.secondary : AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Selected time display
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.secondary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.schedule, color: AppColors.secondary.withValues(alpha: 0.7)),
+                const SizedBox(width: 8),
+                Text(
+                  '${_selectedHour.toString().padLeft(2, '0')}:${_selectedMinute.toString().padLeft(2, '0')}',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.secondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Action buttons
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: const BorderSide(color: AppColors.secondary),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Batal',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(
+                      context,
+                      TimeOfDay(hour: _selectedHour, minute: _selectedMinute),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.secondary,
+                      foregroundColor: AppColors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Pilih',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
   }
 }

@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import 'package:google_fonts/google_fonts.dart';
 import '../../../domain/entities/comment.dart';
 import '../../../domain/entities/post.dart';
 import '../../bloc/user/user_bloc.dart';
 import '../../bloc/user/user_state.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class CommentItem extends StatelessWidget {
   final Post post;
@@ -79,17 +80,17 @@ class CommentItem extends StatelessWidget {
 
     return CircleAvatar(
       radius: isReply ? 14 : 16,
-      backgroundColor: const Color(0xFFF3F4F6),
+      backgroundColor: AppColors.surfaceAlt,
       backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
           ? CachedNetworkImageProvider(avatarUrl)
           : null,
       child: avatarUrl == null || avatarUrl.isEmpty
           ? Text(
               initials,
-              style: GoogleFonts.plusJakartaSans(
+              style: AppTextStyles.bodyMedium.copyWith(
                 fontSize: isReply ? 12 : 14,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF9CA3AF),
+                color: AppColors.textTertiary,
               ),
             )
           : null,
@@ -105,18 +106,15 @@ class CommentItem extends StatelessWidget {
           children: [
             Text(
               comment.author.name,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF1F2937),
+              style: AppTextStyles.bodyMediumBold.copyWith(
+                color: AppColors.textEmphasis,
               ),
             ),
             const SizedBox(width: 6),
             Text(
               timeago.format(comment.createdAt, locale: 'id'),
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                color: const Color(0xFF9CA3AF),
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.textTertiary,
               ),
             ),
           ],
@@ -126,10 +124,8 @@ class CommentItem extends StatelessWidget {
         // Comment content
         Text(
           comment.content,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: const Color(0xFF374151),
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textEmphasis,
             height: 1.4,
           ),
         ),
@@ -154,17 +150,15 @@ class CommentItem extends StatelessWidget {
                       : Icons.favorite_border_rounded,
                   size: 14,
                   color: comment.isLikedByCurrentUser
-                      ? const Color(0xFFED4956)
-                      : const Color(0xFF9CA3AF),
+                      ? AppColors.error
+                      : AppColors.textTertiary,
                 ),
                 if (comment.likesCount > 0) ...[
                   const SizedBox(width: 4),
                   Text(
                     '${comment.likesCount}',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF9CA3AF),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textTertiary,
                     ),
                   ),
                 ],
@@ -180,19 +174,17 @@ class CommentItem extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.chat_bubble_outline_rounded,
                     size: 14,
-                    color: Color(0xFF9CA3AF),
+                    color: AppColors.textTertiary,
                   ),
                   if (comment.repliesCount > 0) ...[
                     const SizedBox(width: 4),
                     Text(
                       '${comment.repliesCount}',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF9CA3AF),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textTertiary,
                       ),
                     ),
                   ],
@@ -208,12 +200,12 @@ class CommentItem extends StatelessWidget {
   Widget _buildMoreButton(BuildContext context) {
     return GestureDetector(
       onTap: () => _showDeleteDialog(context),
-      child: const Padding(
-        padding: EdgeInsets.all(4),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
         child: Icon(
           Icons.more_horiz,
           size: 16,
-          color: Color(0xFF9CA3AF),
+          color: AppColors.textTertiary,
         ),
       ),
     );
@@ -224,9 +216,9 @@ class CommentItem extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         ),
         child: SafeArea(
           child: Column(
@@ -237,18 +229,15 @@ class CommentItem extends StatelessWidget {
                 height: 4,
                 margin: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: AppColors.border,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: Color(0xFFED4956)),
+                leading: Icon(Icons.delete_outline, color: AppColors.error),
                 title: Text(
                   'Hapus Komentar',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTextStyles.bodyLargeBold,
                 ),
                 onTap: () {
                   Navigator.pop(context);

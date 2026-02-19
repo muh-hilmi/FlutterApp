@@ -3,6 +3,8 @@ import '../feed/modern_feed_screen.dart';
 import '../discover/swipeable_events_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../tickets/my_tickets_screen.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int)? onTabChanged;
@@ -41,10 +43,10 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
+        backgroundColor: AppColors.white,
+        surfaceTintColor: AppColors.white,
         elevation: 0,
         toolbarHeight: 88,
         titleSpacing: 20,
@@ -57,22 +59,19 @@ class _HomeScreenState extends State<HomeScreen>
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFBBC863),
+                  color: AppColors.secondary,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.home_rounded,
-                  color: Color(0xFF000000),
+                  color: AppColors.primary,
                   size: 22,
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
+              Text(
                 'flyerr',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF000000),
+                style: AppTextStyles.h2.copyWith(
                   letterSpacing: -0.8,
                 ),
               ),
@@ -82,14 +81,14 @@ class _HomeScreenState extends State<HomeScreen>
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
+                  color: AppColors.surfaceAlt,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: IconButton(
                   padding: EdgeInsets.zero,
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.confirmation_number_rounded,
-                    color: Color(0xFF000000),
+                    color: AppColors.primary,
                     size: 22,
                   ),
                   onPressed: () {
@@ -108,14 +107,14 @@ class _HomeScreenState extends State<HomeScreen>
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFBBC863),
+                  color: AppColors.secondary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: IconButton(
                   padding: EdgeInsets.zero,
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.notifications,
-                    color: Color(0xFF000000),
+                    color: AppColors.primary,
                     size: 22,
                   ),
                   onPressed: () {
@@ -135,17 +134,14 @@ class _HomeScreenState extends State<HomeScreen>
           preferredSize: const Size.fromHeight(57),
           child: TabBar(
             controller: _tabController,
-            indicatorColor: const Color(0xFF000000),
+            indicatorColor: AppColors.primary,
             indicatorWeight: 5,
-            labelColor: const Color(0xFF000000),
-            unselectedLabelColor: const Color(0xFF000000),
-            labelStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
+            labelColor: AppColors.primary,
+            unselectedLabelColor: AppColors.primary,
+            labelStyle: AppTextStyles.bodyLargeBold.copyWith(
               letterSpacing: -0.3,
             ),
-            unselectedLabelStyle: const TextStyle(
-              fontSize: 16,
+            unselectedLabelStyle: AppTextStyles.bodyLarge.copyWith(
               fontWeight: FontWeight.w500,
               letterSpacing: -0.3,
             ),

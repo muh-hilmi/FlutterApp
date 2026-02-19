@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 enum ReportType {
   harassment,
@@ -121,9 +123,9 @@ class _ReportScreenState extends State<ReportScreen> {
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
       child: Row(
         children: [
@@ -131,10 +133,13 @@ class _ReportScreenState extends State<ReportScreen> {
             icon: const Icon(LucideIcons.x),
             onPressed: () => Navigator.pop(context),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
               'Laporkan',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: AppTextStyles.bodyLargeBold.copyWith(
+                fontSize: 18,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
         ],
@@ -148,27 +153,24 @@ class _ReportScreenState extends State<ReportScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.surfaceAlt,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Icon(LucideIcons.flag, size: 20, color: Colors.grey[700]),
+          Icon(LucideIcons.flag, size: 20, color: AppColors.textSecondary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Melaporkan',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.textTertiary),
                 ),
                 Text(
                   widget.targetName ?? targetLabel,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.textPrimary),
                 ),
               ],
             ),
@@ -182,14 +184,14 @@ class _ReportScreenState extends State<ReportScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Alasan Laporan',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.textPrimary),
         ),
         const SizedBox(height: 4),
         Text(
           'Pilih alasan mengapa kamu melaporkan konten ini',
-          style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+          style: AppTextStyles.bodySmall.copyWith(fontSize: 13, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 12),
         ...ReportType.values.map((type) {
@@ -213,12 +215,12 @@ class _ReportScreenState extends State<ReportScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           border: Border.all(
-            color: isSelected ? const Color(0xFFBBC863) : Colors.grey[300]!,
+            color: isSelected ? AppColors.secondary : AppColors.border,
           ),
           borderRadius: BorderRadius.circular(12),
           color: isSelected
-              ? const Color(0xFFBBC863).withValues(alpha: 0.05)
-              : Colors.white,
+              ? AppColors.secondary.withValues(alpha: 0.05)
+              : AppColors.white,
         ),
         child: Row(
           children: [
@@ -227,13 +229,13 @@ class _ReportScreenState extends State<ReportScreen> {
               height: 44,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? const Color(0xFFBBC863).withValues(alpha: 0.1)
-                    : Colors.grey[100],
+                    ? AppColors.secondary.withValues(alpha: 0.1)
+                    : AppColors.surfaceAlt,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 reason.icon,
-                color: isSelected ? const Color(0xFFBBC863) : Colors.grey[700],
+                color: isSelected ? AppColors.secondary : AppColors.textSecondary,
               ),
             ),
             const SizedBox(width: 12),
@@ -243,17 +245,15 @@ class _ReportScreenState extends State<ReportScreen> {
                 children: [
                   Text(
                     reason.title,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.w500,
-                      color: isSelected
-                          ? const Color(0xFFBBC863)
-                          : Colors.grey[800],
+                      color: isSelected ? AppColors.secondary : AppColors.textEmphasis,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     reason.description,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -264,9 +264,7 @@ class _ReportScreenState extends State<ReportScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected
-                      ? const Color(0xFFBBC863)
-                      : Colors.grey[400]!,
+                  color: isSelected ? AppColors.secondary : AppColors.textTertiary,
                 ),
               ),
               child: isSelected
@@ -274,7 +272,7 @@ class _ReportScreenState extends State<ReportScreen> {
                       child: Icon(
                         LucideIcons.check,
                         size: 12,
-                        color: Color(0xFFBBC863),
+                        color: AppColors.secondary,
                       ),
                     )
                   : null,
@@ -289,14 +287,14 @@ class _ReportScreenState extends State<ReportScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Deskripsi Tambahan (Opsional)',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.textPrimary),
         ),
         const SizedBox(height: 4),
         Text(
           'Berikan detail tambahan untuk membantu kami meninjau laporan ini',
-          style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+          style: AppTextStyles.bodySmall.copyWith(fontSize: 13, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 12),
         TextFormField(
@@ -306,18 +304,18 @@ class _ReportScreenState extends State<ReportScreen> {
             hintText: 'Jelaskan lebih lanjut...',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFBBC863)),
+              borderSide: const BorderSide(color: AppColors.secondary),
             ),
             filled: true,
-            fillColor: Colors.grey[50],
+            fillColor: AppColors.surfaceAlt,
           ),
         ),
       ],
@@ -343,7 +341,7 @@ class _ReportScreenState extends State<ReportScreen> {
               children: [
                 Text(
                   'Privasi Terlindungi',
-                  style: TextStyle(
+                  style: AppTextStyles.bodySmall.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: Colors.orange[700],
@@ -352,7 +350,7 @@ class _ReportScreenState extends State<ReportScreen> {
                 const SizedBox(height: 4),
                 Text(
                   'Identitas pelapor akan dirahasiakan. Pengguna yang dilaporkan tidak akan mengetahui siapa yang melaporkan.',
-                  style: TextStyle(fontSize: 12, color: Colors.orange[700]),
+                  style: AppTextStyles.bodySmall.copyWith(color: Colors.orange[700]),
                 ),
               ],
             ),
@@ -370,8 +368,8 @@ class _ReportScreenState extends State<ReportScreen> {
             ? null
             : _submitReport,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red,
-          disabledBackgroundColor: Colors.grey[300],
+          backgroundColor: AppColors.error,
+          disabledBackgroundColor: AppColors.border,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -383,12 +381,12 @@ class _ReportScreenState extends State<ReportScreen> {
                 width: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
                 ),
               )
-            : const Text(
+            : Text(
                 'Kirim Laporan',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.white),
               ),
       ),
     );
@@ -421,8 +419,8 @@ class _ReportScreenState extends State<ReportScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFD4EDDA),
+              decoration: const BoxDecoration(
+                color: Color(0xFFD4EDDA),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -432,14 +430,20 @@ class _ReportScreenState extends State<ReportScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Laporan Terkirim',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: AppTextStyles.bodyLargeBold.copyWith(
+                fontSize: 18,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Terima kasih telah membantu kami menjaga komunitas tetap aman.',
-              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+              style: AppTextStyles.bodySmall.copyWith(
+                fontSize: 13,
+                color: AppColors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
@@ -451,10 +455,10 @@ class _ReportScreenState extends State<ReportScreen> {
                   Navigator.pop(context); // Close screen
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFBBC863),
+                  backgroundColor: AppColors.secondary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text('Selesai'),
+                child: Text('Selesai', style: AppTextStyles.button),
               ),
             ),
           ],

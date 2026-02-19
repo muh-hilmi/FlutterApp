@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../domain/entities/post.dart';
 import '../../../domain/entities/event.dart';
 import '../../bloc/events/events_bloc.dart';
@@ -10,6 +9,8 @@ import '../../pages/event_detail/event_detail_screen.dart';
 import '../common/jumping_emoji.dart';
 import '../events/modern_event_mini_card.dart';
 import '../common/find_matches_modal.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class EventAttachment extends StatefulWidget {
   final Post post;
@@ -73,13 +74,13 @@ class _EventAttachmentState extends State<EventAttachment> {
                       SnackBar(
                         content: Text(
                           'Mantap! Lo udah ikutan event ini. Cek "Cari Temen" yuk!',
-                          style: GoogleFonts.plusJakartaSans(),
+                          style: AppTextStyles.bodyMedium,
                         ),
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        backgroundColor: const Color(0xFFBBC863),
+                        backgroundColor: AppColors.secondary,
                       ),
                     );
                   },

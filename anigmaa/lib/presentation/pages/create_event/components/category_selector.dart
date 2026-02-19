@@ -1,6 +1,8 @@
 import 'package:anigmaa/core/utils/event_category_utils.dart';
 import 'package:anigmaa/domain/entities/event_category.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class CategorySelector extends StatelessWidget {
   final Function(EventCategory) onCategorySelected;
@@ -71,22 +73,20 @@ class CategorySelector extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Pilih Kategori Event',
-                style: TextStyle(
+                style: AppTextStyles.h3.copyWith(
                   fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1A1A1A),
                   letterSpacing: -0.5,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 'Tap untuk memilih kategori yang paling cocok',
-                style: TextStyle(
-                  fontSize: 13,
+                style: AppTextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey[600],
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
@@ -123,8 +123,8 @@ class CategorySelector extends StatelessWidget {
       child: InkWell(
         onTap: () => onCategorySelected(category),
         borderRadius: BorderRadius.circular(16),
-        splashColor: const Color(0xFFBBC863).withValues(alpha: 0.2),
-        highlightColor: const Color(0xFFBBC863).withValues(alpha: 0.1),
+        splashColor: AppColors.secondary.withValues(alpha: 0.2),
+        highlightColor: AppColors.secondary.withValues(alpha: 0.1),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
@@ -132,18 +132,18 @@ class CategorySelector extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                const Color(0xFFFCFCFC),
-                const Color(0xFFF5F5F5),
+                AppColors.cardSurface,
+                AppColors.surfaceAlt,
               ],
             ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: const Color(0xFFBBC863).withValues(alpha: 0.4),
+              color: AppColors.secondary.withValues(alpha: 0.4),
               width: 2,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFBBC863).withValues(alpha: 0.08),
+                color: AppColors.secondary.withValues(alpha: 0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -155,7 +155,7 @@ class CategorySelector extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFBBC863).withValues(alpha: 0.15),
+                  color: AppColors.secondary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -172,8 +172,8 @@ class CategorySelector extends StatelessWidget {
                   children: [
                     Text(
                       name,
-                      style: const TextStyle(
-                        color: Color(0xFF1A1A1A),
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textPrimary,
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                         letterSpacing: -0.3,
@@ -183,8 +183,8 @@ class CategorySelector extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       description,
-                      style: TextStyle(
-                        color: Colors.grey[600],
+                      style: AppTextStyles.captionSmall.copyWith(
+                        color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
                         fontSize: 10,
                         letterSpacing: -0.2,

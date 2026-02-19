@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class PostContent extends StatelessWidget {
   final String content;
@@ -10,11 +11,9 @@ class PostContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       content,
-      style: GoogleFonts.plusJakartaSans(
-        fontSize: 15,
+      style: AppTextStyles.bodyLarge.copyWith(
+        color: AppColors.textPrimary,
         height: 1.5,
-        color: const Color(0xFF1a1a1a),
-        fontWeight: FontWeight.w400,
         letterSpacing: -0.2,
       ),
     );

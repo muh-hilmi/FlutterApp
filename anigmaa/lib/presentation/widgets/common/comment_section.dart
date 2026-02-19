@@ -6,6 +6,8 @@ import '../../bloc/posts/posts_bloc.dart';
 import '../../bloc/posts/posts_event.dart';
 import '../../bloc/posts/posts_state.dart';
 import 'comment_item.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class CommentSection extends StatefulWidget {
   final Post post;
@@ -31,7 +33,7 @@ class _CommentSectionState extends State<CommentSection> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: AppColors.white,
       child: BlocBuilder<PostsBloc, PostsState>(
         builder: (context, state) {
           if (state is PostsLoading) {
@@ -120,8 +122,8 @@ class _CommentSectionState extends State<CommentSection> {
   Widget _buildLoadingState() {
     return Container(
       padding: const EdgeInsets.all(32),
-      child: const Center(
-        child: CircularProgressIndicator(color: Color(0xFFBBC863)),
+      child: Center(
+        child: CircularProgressIndicator(color: AppColors.secondary),
       ),
     );
   }
@@ -135,30 +137,28 @@ class _CommentSectionState extends State<CommentSection> {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: const Color(0xFFF3F4F6),
+              color: AppColors.surfaceAlt,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.chat_bubble_outline_rounded,
               size: 32,
-              color: Color(0xFF9CA3AF),
+              color: AppColors.textTertiary,
             ),
           ),
           const SizedBox(height: 16),
           Text(
             'Belum ada komentar',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1F2937),
+            style: AppTextStyles.bodyLargeBold.copyWith(
+              color: AppColors.textEmphasis,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             'Jadilah yang pertama memberikan komentar!',
-            style: TextStyle(
+            style: AppTextStyles.bodySmall.copyWith(
               fontSize: 13,
-              color: Color(0xFF9CA3AF),
+              color: AppColors.textTertiary,
             ),
           ),
         ],

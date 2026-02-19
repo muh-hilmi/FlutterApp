@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../settings/settings_screen.dart';
 import '../tickets/my_tickets_screen.dart';
@@ -21,6 +20,8 @@ import '../../bloc/user/user_event.dart';
 import '../../widgets/posts/modern_post_card.dart';
 import '../../widgets/profile/profile_header_widget.dart';
 import '../../widgets/profile/profile_menu_widget.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 /// Refactored profile screen with cleaner architecture
 /// - Extracted widgets for better maintainability
@@ -115,7 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: BlocListener<UserBloc, UserState>(
         listener: (context, state) {
           if (state is UserLoaded ||
@@ -131,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.error,
                 ),
               );
             }
@@ -147,7 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           builder: (context, state) {
             if (state is UserLoading) {
               return const Center(
-                child: CircularProgressIndicator(color: Color(0xFFBBC863)),
+                child: CircularProgressIndicator(color: AppColors.secondary),
               );
             }
 
@@ -158,7 +159,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             if (state is UserLoaded) {
               if (_tabController == null) {
                 return const Center(
-                  child: CircularProgressIndicator(color: Color(0xFFBBC863)),
+                  child: CircularProgressIndicator(color: AppColors.secondary),
                 );
               }
 
@@ -177,31 +178,24 @@ class _ProfileScreenState extends State<ProfileScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
+          const Icon(Icons.error_outline, size: 48, color: AppColors.error),
           const SizedBox(height: 16),
           Text(
             'Gagal memuat profil',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 16,
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 8),
           Text(
             state.message,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: _initialize,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFBBC863),
-              foregroundColor: const Color(0xFF000000),
+              backgroundColor: AppColors.secondary,
+              foregroundColor: AppColors.primary,
             ),
             child: const Text('Coba Lagi'),
           ),
@@ -237,12 +231,19 @@ class _ProfileScreenState extends State<ProfileScreen>
                   onFollowTap: () =>
                       _handleFollow(user.id, user.isFollowing ?? false),
                   onEditProfileTap: () {
+                    final userBloc = context.read<UserBloc>();
+                    final currentUserId = _currentUserId;
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const EditProfileScreen(),
+                        builder: (context) => EditProfileScreen(user: user),
                       ),
-                    );
+                    ).then((_) {
+                      // Refresh user data when returning from Edit Profile
+                      if (currentUserId != null && mounted) {
+                        userBloc.add(LoadUserById(currentUserId));
+                      }
+                    });
                   },
                   onFollowersTap: () {
                     Navigator.push(
@@ -277,6 +278,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                     }
                   },
                   onManageEventsTap: () {
+                    final userBloc = context.read<UserBloc>();
+                    final currentUserId = _currentUserId;
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -284,10 +287,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                       ),
                     ).then((_) {
                       // Refresh user data when returning from My Events
-                      if (_currentUserId != null && mounted) {
-                        context.read<UserBloc>().add(
-                          LoadUserById(_currentUserId!),
-                        );
+                      if (currentUserId != null && mounted) {
+                        userBloc.add(LoadUserById(currentUserId));
                       }
                     });
                   },
@@ -301,20 +302,13 @@ class _ProfileScreenState extends State<ProfileScreen>
                 delegate: _StickyTabBarDelegate(
                   TabBar(
                     controller: _tabController!,
-                    labelColor: Colors.black,
-                    unselectedLabelColor: Colors.black,
-                    indicatorColor: const Color(0xFFBBC863),
+                    labelColor: AppColors.textPrimary,
+                    unselectedLabelColor: AppColors.textPrimary,
+                    indicatorColor: AppColors.secondary,
                     indicatorWeight: 3,
-                    indicatorSize:
-                        TabBarIndicatorSize.label, // Minimalist indicator
-                    labelStyle: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                    ),
-                    unselectedLabelStyle: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                    ),
+                    indicatorSize: TabBarIndicatorSize.label, // Minimalist indicator
+                    labelStyle: AppTextStyles.tabLabel,
+                    unselectedLabelStyle: AppTextStyles.tabLabel,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     tabs: [
                       Tab(child: _buildTabLabel('Postingan', state.postsCount)),
@@ -340,7 +334,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             left: 8,
             child: SafeArea(
               child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
+                icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -353,7 +347,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             child: IconButton(
               icon: Icon(
                 _isOwnProfile ? Icons.menu : Icons.more_vert,
-                color: Colors.black,
+                color: AppColors.textPrimary,
               ),
               onPressed: () {
                 if (_isOwnProfile) {
@@ -448,16 +442,12 @@ class _ProfileScreenState extends State<ProfileScreen>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
           decoration: BoxDecoration(
-            color: Colors.grey[100],
+            color: AppColors.surfaceAlt,
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
             count.toString(),
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: Colors.grey[600],
-            ),
+            style: AppTextStyles.tabLabel.copyWith(color: AppColors.textSecondary),
           ),
         ),
       ],
@@ -470,24 +460,17 @@ class _ProfileScreenState extends State<ProfileScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.article_outlined, size: 64, color: Colors.grey[300]),
+            const Icon(Icons.article_outlined, size: 64, color: AppColors.border),
             const SizedBox(height: 16),
             Text(
               'Belum ada postingan',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[500],
-              ),
+              style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.textTertiary),
             ),
             if (_isOwnProfile) ...[
               const SizedBox(height: 8),
               Text(
                 'Mulai berbagi momenmu!',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  color: Colors.grey[400],
-                ),
+                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
               ),
             ],
           ],
@@ -513,15 +496,11 @@ class _ProfileScreenState extends State<ProfileScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.event_outlined, size: 64, color: Colors.grey[300]),
+            const Icon(Icons.event_outlined, size: 64, color: AppColors.border),
             const SizedBox(height: 16),
             Text(
               'Belum ada event',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[500],
-              ),
+              style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.textTertiary),
             ),
           ],
         ),
@@ -551,11 +530,11 @@ class _ProfileScreenState extends State<ProfileScreen>
           },
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: AppColors.primary.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -572,13 +551,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                           imageUrl: event.fullImageUrls.first,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
-                            color: const Color(
-                              0xFFBBC863,
-                            ).withValues(alpha: 0.1),
+                            color: AppColors.secondary.withValues(alpha: 0.1),
                             child: const Center(
                               child: CircularProgressIndicator(
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  Color(0xFFBBC863),
+                                  AppColors.secondary,
                                 ),
                               ),
                             ),
@@ -591,22 +568,20 @@ class _ProfileScreenState extends State<ProfileScreen>
                             AppLogger().error('[Profile Event Grid] URL: $url');
                             AppLogger().error('[Profile Event Grid] Error: $error');
                             return Container(
-                              color: const Color(
-                                0xFFBBC863,
-                              ).withValues(alpha: 0.1),
+                              color: AppColors.secondary.withValues(alpha: 0.1),
                               child: const Icon(
                                 Icons.event,
-                                color: Color(0xFFBBC863),
+                                color: AppColors.secondary,
                                 size: 40,
                               ),
                             );
                           },
                         )
                       : Container(
-                          color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+                          color: AppColors.secondary.withValues(alpha: 0.1),
                           child: const Icon(
                             Icons.event,
-                            color: Color(0xFFBBC863),
+                            color: AppColors.secondary,
                             size: 40,
                           ),
                         ),
@@ -618,7 +593,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withValues(alpha: 0.7),
+                          AppColors.primary.withValues(alpha: 0.7),
                         ],
                       ),
                     ),
@@ -636,29 +611,23 @@ class _ProfileScreenState extends State<ProfileScreen>
                         children: [
                           Text(
                             event.title,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
+                            style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.white),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.calendar_today,
                                 size: 12,
-                                color: Colors.white70,
+                                color: AppColors.white.withValues(alpha: 0.7),
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 _formatEventDate(event.startTime),
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white70,
+                                style: AppTextStyles.captionSmall.copyWith(
+                                  color: AppColors.white.withValues(alpha: 0.7),
                                 ),
                               ),
                             ],
@@ -714,11 +683,11 @@ class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
     bool overlapsContent,
   ) {
     return Container(
-      color: Colors.white,
+      color: AppColors.white,
       child: Column(
         children: [
           tabBar,
-          const Divider(height: 1, color: Color(0xFFEEEEEE)),
+          const Divider(height: 1, color: AppColors.divider),
         ],
       ),
     );

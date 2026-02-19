@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/event_attendee.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
 
 /// Dialog for confirming manual check-in of an attendee
 class CheckinDialog extends StatelessWidget {
@@ -30,7 +32,7 @@ class CheckinDialog extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFBBC863).withValues(alpha: 0.1),
+                    color: AppColors.secondary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: attendee.avatar != null
@@ -42,7 +44,7 @@ class CheckinDialog extends StatelessWidget {
                             errorBuilder: (context, error, stackTrace) {
                               return const Icon(
                                 Icons.person,
-                                color: Color(0xFFBBC863),
+                                color: AppColors.secondary,
                                 size: 32,
                               );
                             },
@@ -50,7 +52,7 @@ class CheckinDialog extends StatelessWidget {
                         )
                       : const Icon(
                           Icons.person,
-                          color: Color(0xFFBBC863),
+                          color: AppColors.secondary,
                           size: 32,
                         ),
                 ),
@@ -59,21 +61,15 @@ class CheckinDialog extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Check-In Peserta',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1A1A1A),
-                        ),
+                        style: AppTextStyles.h3.copyWith(fontSize: 18),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         attendee.name,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF666666),
+                        style: AppTextStyles.bodyLargeBold.copyWith(
+                          color: AppColors.textSecondary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -88,7 +84,7 @@ class CheckinDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F5F5),
+                color: AppColors.surfaceAlt,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -99,24 +95,21 @@ class CheckinDialog extends StatelessWidget {
                       const Icon(
                         Icons.confirmation_number,
                         size: 18,
-                        color: Color(0xFF666666),
+                        color: AppColors.textSecondary,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         'Tiket',
-                        style: TextStyle(
-                          fontSize: 13,
+                        style: AppTextStyles.bodySmall.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey[600],
+                          color: AppColors.textSecondary,
                         ),
                       ),
                       const Spacer(),
                       Text(
                         attendee.ticketType,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1A1A1A),
+                        style: AppTextStyles.bodyMediumBold.copyWith(
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ],
@@ -128,25 +121,22 @@ class CheckinDialog extends StatelessWidget {
                         const Icon(
                           Icons.check_circle,
                           size: 18,
-                          color: Colors.green,
+                          color: AppColors.success,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           'Sudah Check-In',
-                          style: TextStyle(
-                            fontSize: 13,
+                          style: AppTextStyles.bodySmall.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
                           ),
                         ),
                         const Spacer(),
                         if (attendee.formattedCheckInTime != null)
                           Text(
                             attendee.formattedCheckInTime!,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.green,
+                            style: AppTextStyles.bodyMediumBold.copyWith(
+                              color: AppColors.success,
                             ),
                           ),
                       ],
@@ -162,19 +152,19 @@ class CheckinDialog extends StatelessWidget {
               decoration: BoxDecoration(
                 color: attendee.checkedIn
                     ? Colors.orange.withValues(alpha: 0.1)
-                    : const Color(0xFFBBC863).withValues(alpha: 0.1),
+                    : AppColors.secondary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: attendee.checkedIn
                       ? Colors.orange.withValues(alpha: 0.3)
-                      : const Color(0xFFBBC863).withValues(alpha: 0.3),
+                      : AppColors.secondary.withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
                 children: [
                   Icon(
                     attendee.checkedIn ? Icons.info_outline : Icons.check_circle_outline,
-                    color: attendee.checkedIn ? Colors.orange : const Color(0xFFBBC863),
+                    color: attendee.checkedIn ? Colors.orange : AppColors.secondary,
                     size: 20,
                   ),
                   const SizedBox(width: 12),
@@ -183,10 +173,9 @@ class CheckinDialog extends StatelessWidget {
                       attendee.checkedIn
                           ? 'Peserta ini sudah check-in sebelumnya.'
                           : 'Konfirmasi check-in untuk peserta ini?',
-                      style: TextStyle(
-                        fontSize: 14,
+                      style: AppTextStyles.bodyMedium.copyWith(
                         fontWeight: FontWeight.w500,
-                        color: attendee.checkedIn ? Colors.orange.shade900 : const Color(0xFF1A1A1A),
+                        color: attendee.checkedIn ? Colors.orange.shade900 : AppColors.textPrimary,
                       ),
                     ),
                   ),
@@ -207,12 +196,10 @@ class CheckinDialog extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Batal',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF666666),
+                      style: AppTextStyles.bodyLargeBold.copyWith(
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ),
@@ -226,9 +213,9 @@ class CheckinDialog extends StatelessWidget {
                         : () => Navigator.pop(context, true),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: attendee.checkedIn
-                          ? Colors.grey
-                          : const Color(0xFFBBC863),
-                      foregroundColor: Colors.white,
+                          ? AppColors.textTertiary
+                          : AppColors.secondary,
+                      foregroundColor: AppColors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -237,10 +224,7 @@ class CheckinDialog extends StatelessWidget {
                     ),
                     child: Text(
                       attendee.checkedIn ? 'Sudah Check-In' : 'Check-In',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: AppTextStyles.bodyLargeBold,
                     ),
                   ),
                 ),

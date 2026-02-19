@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/entities/event.dart';
 import '../../../domain/entities/event_category.dart';
 import '../../bloc/events/events_bloc.dart';
 import '../../bloc/events/events_event.dart';
 import '../../bloc/events/events_state.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class ModernEventMiniCard extends StatelessWidget {
   final Event event;
@@ -74,17 +75,13 @@ class ModernEventMiniCard extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: isEnded
-                  ? const Color(0xFFFCFCFC)
-                  : const Color(
-                      0xFFE8EDDA,
-                    ), // Beige for ended, Green-tint for active
+                  ? AppColors.surface
+                  : AppColors.secondary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isEnded
-                    ? const Color(0xFFE8E4DD)
-                    : const Color(
-                        0xFFBBC863,
-                      ), // Gray for ended, Green for active
+                    ? AppColors.border
+                    : AppColors.secondary,
                 width: 1.5,
               ),
             ),
@@ -99,10 +96,7 @@ class ModernEventMiniCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         displayEvent.title,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF000000),
+                        style: AppTextStyles.bodyLargeBold.copyWith(
                           letterSpacing: -0.4,
                         ),
                         maxLines: 2,
@@ -144,10 +138,10 @@ class ModernEventMiniCard extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.white,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: const Color(0xFFE8E4DD),
+                          color: AppColors.border,
                           width: 1,
                         ),
                       ),
@@ -157,17 +151,17 @@ class ModernEventMiniCard extends StatelessWidget {
                           Icon(
                             Icons.people_rounded,
                             size: 16,
-                            color: Colors.grey[700],
+                            color: AppColors.textSecondary,
                           ),
                           const SizedBox(width: 6),
                           Text(
                             isEnded
                                 ? '${displayEvent.currentAttendees} attended'
                                 : '${displayEvent.currentAttendees} joined',
-                            style: GoogleFonts.plusJakartaSans(
+                            style: AppTextStyles.bodySmall.copyWith(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF000000),
+                              color: AppColors.textPrimary,
                               letterSpacing: -0.2,
                             ),
                           ),
@@ -193,13 +187,13 @@ class ModernEventMiniCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: displayEvent.isInterested
-                              ? const Color(0xFFBBC863).withValues(alpha: 0.2)
-                              : Colors.white,
+                              ? AppColors.secondary.withValues(alpha: 0.2)
+                              : AppColors.white,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: displayEvent.isInterested
-                                ? const Color(0xFFBBC863)
-                                : const Color(0xFFE8E4DD),
+                                ? AppColors.secondary
+                                : AppColors.border,
                             width: 1,
                           ),
                         ),
@@ -218,12 +212,12 @@ class ModernEventMiniCard extends StatelessWidget {
                             const SizedBox(width: 6),
                             Text(
                               '${displayEvent.interestedCount}',
-                              style: GoogleFonts.plusJakartaSans(
+                              style: AppTextStyles.bodySmall.copyWith(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: displayEvent.isInterested
                                     ? const Color(0xFF556018)
-                                    : const Color(0xFF000000),
+                                    : AppColors.textPrimary,
                                 letterSpacing: -0.2,
                               ),
                             ),
@@ -247,15 +241,15 @@ class ModernEventMiniCard extends StatelessWidget {
   Widget _buildInfoRow(IconData icon, String text, bool isEnded) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.grey[700]),
+        Icon(icon, size: 16, color: AppColors.textSecondary),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             text,
-            style: GoogleFonts.plusJakartaSans(
+            style: AppTextStyles.bodySmall.copyWith(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: Colors.grey[700],
+              color: AppColors.textSecondary,
               letterSpacing: -0.1,
             ),
             maxLines: 1,
@@ -270,7 +264,7 @@ class ModernEventMiniCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.grey[600],
+        color: AppColors.textSecondary,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -278,19 +272,17 @@ class ModernEventMiniCard extends StatelessWidget {
         children: [
           Text(
             '✓',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
+            style: AppTextStyles.label.copyWith(
               fontWeight: FontWeight.w900,
-              color: Colors.white,
+              color: AppColors.white,
             ),
           ),
-          SizedBox(width: 4),
+          const SizedBox(width: 4),
           Text(
             'SELESAI',
-            style: GoogleFonts.plusJakartaSans(
+            style: AppTextStyles.label.copyWith(
               fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: AppColors.white,
               letterSpacing: 0.5,
             ),
           ),
@@ -299,64 +291,19 @@ class ModernEventMiniCard extends StatelessWidget {
     );
   }
 
-  // Widget _buildParticipantAvatars() {
-  //   // Show up to 3 stacked avatars
-  //   const maxAvatars = 3;
-  //   final avatarCount = event.currentAttendees > maxAvatars
-  //       ? maxAvatars
-  //       : event.currentAttendees;
-
-  //   if (avatarCount == 0) {
-  //     return const SizedBox.shrink();
-  //   }
-
-  //   return SizedBox(
-  //     width: avatarCount * 18.0 + 6,
-  //     height: 24,
-  //     child: Stack(
-  //       children: List.generate(avatarCount, (index) {
-  //         return Positioned(
-  //           left: index * 18.0,
-  //           child: Container(
-  //             width: 24,
-  //             height: 24,
-  //             decoration: BoxDecoration(
-  //               shape: BoxShape.circle,
-  //               border: Border.all(color: const Color(0xFFF5F5F7), width: 2),
-  //               color: const Color(0xFFBBC863).withValues(alpha: 0.2),
-  //             ),
-  //             child: CircleAvatar(
-  //               radius: 10,
-  //               backgroundColor: const Color(0xFFBBC863).withValues(alpha: 0.15),
-  //               child: Text(
-  //                 String.fromCharCode(65 + index), // A, B, C
-  //                 style: const TextStyle(
-  //                   fontSize: 10,
-  //                   fontWeight: FontWeight.w600,
-  //                   color: Color(0xFFBBC863),
-  //                 ),
-  //               ),
-  //             ),
-  //           ),
-  //         );
-  //       }),
-  //     ),
-  //   );
-  // }
-
   Widget _buildPriceBadge(Event event) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: event.isFree ? const Color(0xFF000000) : const Color(0xFFBBC863),
+        color: event.isFree ? AppColors.primary : AppColors.secondary,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         event.isFree ? 'Gratis' : _formatPrice(event.price ?? 0),
-        style: GoogleFonts.plusJakartaSans(
+        style: AppTextStyles.bodySmall.copyWith(
           fontSize: 13,
           fontWeight: FontWeight.w700,
-          color: Colors.white,
+          color: AppColors.white,
           letterSpacing: -0.2,
         ),
       ),
