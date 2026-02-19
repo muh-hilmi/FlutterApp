@@ -58,6 +58,7 @@ BLUEPRINT/
 | Challenge decision | [`09_architecture_decisions.md`](BLUEPRINT/09_architecture_decisions.md) |
 | Check if feature | [`10_non_goals.md`](BLUEPRINT/10_non_goals.md) |
 | Check state rules | [`11_state_machines.md`](BLUEPRINT/11_state_machines.md) |
+| **Write UI (colors/fonts)** | [`12_design_system.md`](BLUEPRINT/12_design_system.md) 🎨 |
 
 ---
 
@@ -306,6 +307,7 @@ flutter drive --target=test_driver/tests/01_auth_flow_test.dart
 - **Architecture Decisions**: [`BLUEPRINT/09_architecture_decisions.md`](BLUEPRINT/09_architecture_decisions.md) 🔒
 - **Non-Goals**: [`BLUEPRINT/10_non_goals.md`](BLUEPRINT/10_non_goals.md) ❌
 - **State Machines**: [`BLUEPRINT/11_state_machines.md`](BLUEPRINT/11_state_machines.md) 📊
+- **Design System**: [`BLUEPRINT/12_design_system.md`](BLUEPRINT/12_design_system.md) 🎨
 
 ---
 

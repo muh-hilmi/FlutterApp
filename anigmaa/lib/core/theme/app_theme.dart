@@ -4,16 +4,21 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 import 'app_text_styles.dart';
 
+/// ANIGMAA Theme v1.0
+///
+/// AGENTS: Do NOT override theme values inline in widgets.
+/// Use Theme.of(context) or AppTextStyles/AppColors tokens instead.
+/// See BLUEPRINT/12_design_system.md for the full design system.
 class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
 
-      // Colors
+      // ─── Color Scheme ───────────────────────────────────────────────────
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         primary: AppColors.primary,
-        secondary: AppColors.secondary,
+        secondary: AppColors.secondary, // Warm Lime #BBC863
         surface: AppColors.surface,
         error: AppColors.error,
         brightness: Brightness.light,
@@ -21,13 +26,13 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
       primaryColor: AppColors.primary,
 
-      // Typography
+      // ─── Typography ─────────────────────────────────────────────────────
       textTheme: GoogleFonts.plusJakartaSansTextTheme().apply(
         bodyColor: AppColors.textPrimary,
         displayColor: AppColors.textPrimary,
       ),
 
-      // App Bar
+      // ─── App Bar ────────────────────────────────────────────────────────
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.surface,
         elevation: 0,
@@ -42,46 +47,50 @@ class AppTheme {
         systemOverlayStyle: SystemUiOverlayStyle.dark,
       ),
 
-      // Buttons
+      // ─── Buttons ────────────────────────────────────────────────────────
+      // PRIMARY: Black background + Warm Lime text
+      // Use for: main CTAs ("Beli Tiket", "Ikuti", "Simpan")
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary, // Black button
-          foregroundColor: AppColors.secondary, // Lime text
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.secondary, // Warm Lime text on black
           elevation: 0,
-          textStyle: AppTextStyles.button.copyWith(fontWeight: FontWeight.w700),
+          textStyle: AppTextStyles.button,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       ),
+
+      // GHOST: Transparent + black text
+      // Use for: secondary actions ("Lihat Detail", "Batal")
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
-          textStyle: AppTextStyles.button.copyWith(
-            color: AppColors.primary,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: AppTextStyles.button.copyWith(color: AppColors.primary),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.border, width: 1.5),
-          textStyle: AppTextStyles.button.copyWith(
-            color: AppColors.primary,
-            fontWeight: FontWeight.w600,
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
       ),
 
-      // Cards
+      // OUTLINED: Border + black text
+      // Use for: "Edit Profil", "Mengikuti" (already following state)
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          side: const BorderSide(color: AppColors.border, width: 1.5),
+          textStyle: AppTextStyles.button.copyWith(color: AppColors.primary),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+
+      // ─── Cards ──────────────────────────────────────────────────────────
       cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 0,
@@ -92,7 +101,7 @@ class AppTheme {
         ),
       ),
 
-      // Inputs
+      // ─── Text Inputs ────────────────────────────────────────────────────
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceAlt,
@@ -110,15 +119,19 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.borderFocus, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.error, width: 1.5),
         ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+        ),
       ),
 
-      // Bottom Navigation Bar
+      // ─── Bottom Navigation ──────────────────────────────────────────────
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.surface,
         selectedItemColor: AppColors.primary,
@@ -129,17 +142,28 @@ class AppTheme {
         showUnselectedLabels: true,
       ),
 
-      // Dividers
+      // ─── Dividers ───────────────────────────────────────────────────────
       dividerTheme: const DividerThemeData(
         color: AppColors.divider,
         thickness: 1,
         space: 1,
       ),
 
-      // Progress Indicator
+      // ─── Progress Indicator ─────────────────────────────────────────────
       progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: AppColors.secondary, // Lime loading
+        color: AppColors.secondary, // Warm Lime
         circularTrackColor: AppColors.surfaceAlt,
+      ),
+
+      // ─── Tab Bar ────────────────────────────────────────────────────────
+      tabBarTheme: TabBarThemeData(
+        labelColor: AppColors.textPrimary,
+        unselectedLabelColor: AppColors.textPrimary,
+        indicatorColor: AppColors.secondary, // Warm Lime indicator
+        indicatorSize: TabBarIndicatorSize.label,
+        labelStyle: AppTextStyles.tabLabel,
+        unselectedLabelStyle: AppTextStyles.tabLabel,
+        dividerColor: Colors.transparent,
       ),
     );
   }
@@ -147,8 +171,6 @@ class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
-
-      // Colors
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         primary: AppColors.primary,
@@ -159,14 +181,10 @@ class AppTheme {
       ),
       scaffoldBackgroundColor: AppColors.background,
       primaryColor: AppColors.primary,
-
-      // Typography
       textTheme: GoogleFonts.plusJakartaSansTextTheme().apply(
         bodyColor: AppColors.textPrimary,
         displayColor: AppColors.textPrimary,
       ),
-
-      // App Bar
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.surface,
         elevation: 0,
@@ -180,8 +198,6 @@ class AppTheme {
         titleTextStyle: AppTextStyles.h3,
         systemOverlayStyle: SystemUiOverlayStyle.light,
       ),
-
-      // Cards
       cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 0,

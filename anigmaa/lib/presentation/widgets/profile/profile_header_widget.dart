@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../../../domain/entities/user.dart';
 
 class ProfileHeaderWidget extends StatelessWidget {
@@ -48,11 +50,11 @@ class ProfileAvatar extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white,
-        border: Border.all(color: Colors.grey[200]!, width: 1),
+        color: AppColors.white,
+        border: Border.all(color: AppColors.border, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: AppColors.primary.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -74,12 +76,12 @@ class ProfileAvatar extends StatelessWidget {
 
   Widget _buildDefaultAvatar() {
     return Container(
-      color: const Color(0xFFF5F5F5),
+      color: AppColors.surfaceAlt,
       child: Center(
         child: Text(
           name.isNotEmpty ? name[0].toUpperCase() : '?',
           style: GoogleFonts.plusJakartaSans(
-            color: Colors.grey[400],
+            color: AppColors.textTertiary,
             fontSize: size * 0.4,
             fontWeight: FontWeight.bold,
           ),
@@ -153,12 +155,10 @@ class ProfileInfoWidget extends StatelessWidget {
                       Text(
                         key: const Key('profile_name'),
                         user.name,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: AppTextStyles.h2.copyWith(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
                           height: 1.1,
-                          letterSpacing: -0.5,
-                          color: Colors.black,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -173,17 +173,13 @@ class ProfileInfoWidget extends StatelessWidget {
                             Icon(
                               Icons.location_on,
                               size: 13,
-                              color: Colors.grey[500],
+                              color: AppColors.textTertiary,
                             ),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 user.location!,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12,
-                                  color: Colors.grey[500],
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: AppTextStyles.caption,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -207,11 +203,10 @@ class ProfileInfoWidget extends StatelessWidget {
                     ? user.bio!
                     : 'Belum ada bio.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
+                style: AppTextStyles.bodyMedium.copyWith(
                   color: user.bio != null && user.bio!.isNotEmpty
-                      ? Colors.black87
-                      : Colors.grey[500],
+                      ? AppColors.textEmphasis
+                      : AppColors.textTertiary,
                   height: 1.4,
                 ),
                 maxLines: 2,
@@ -221,7 +216,7 @@ class ProfileInfoWidget extends StatelessWidget {
 
             const SizedBox(height: 48),
 
-            // Simple Stats (Centered to match Bio)
+            // Stats (Centered)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -247,7 +242,7 @@ class ProfileInfoWidget extends StatelessWidget {
             // Actions
             _buildActionButton(),
 
-            // Events Hosted Section (Only for own profile)
+            // Events Hosted Section (Own profile only)
             if (isOwnProfile) ...[
               const SizedBox(height: 16),
               _buildEventsHostedSection(),
@@ -264,10 +259,10 @@ class ProfileInfoWidget extends StatelessWidget {
       key: const Key('profile_events_hosted_section'),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F8F8),
+        color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFBBC863).withValues(alpha: 0.3),
+          color: AppColors.accentBorder,
           width: 1,
         ),
       ),
@@ -278,12 +273,12 @@ class ProfileInfoWidget extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFBBC863).withValues(alpha: 0.15),
+                  color: AppColors.accentSurface,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   Icons.event_available_rounded,
-                  color: Color(0xFFBBC863),
+                  color: AppColors.secondary,
                   size: 20,
                 ),
               ),
@@ -294,20 +289,15 @@ class ProfileInfoWidget extends StatelessWidget {
                   children: [
                     Text(
                       'Event kamu saat ini',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
+                      style: AppTextStyles.bodyMediumBold.copyWith(
+                        color: AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       '$activeEventsCount event',
                       key: const Key('profile_events_count'),
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
+                      style: AppTextStyles.caption,
                     ),
                   ],
                 ),
@@ -316,8 +306,8 @@ class ProfileInfoWidget extends StatelessWidget {
                 key: const Key('profile_manage_events_button'),
                 onPressed: onManageEventsTap,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFBBC863),
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.secondary,
+                  foregroundColor: AppColors.white,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -326,9 +316,9 @@ class ProfileInfoWidget extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  textStyle: GoogleFonts.plusJakartaSans(
+                  textStyle: AppTextStyles.button.copyWith(
                     fontSize: 13,
-                    fontWeight: FontWeight.w700,
+                    color: AppColors.white,
                   ),
                 ),
                 child: const Text('Kelola'),
@@ -354,7 +344,7 @@ class ProfileInfoWidget extends StatelessWidget {
   Widget _buildMiniStat(String label, VoidCallback? onTap) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.surfaceAlt,
         borderRadius: BorderRadius.circular(8),
       ),
       child: InkWell(
@@ -364,10 +354,9 @@ class ProfileInfoWidget extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           child: Text(
             label,
-            style: GoogleFonts.plusJakartaSans(
+            style: AppTextStyles.bodyMediumBold.copyWith(
               fontSize: 13,
-              color: Colors.black87,
-              fontWeight: FontWeight.w600,
+              color: AppColors.textEmphasis,
             ),
           ),
         ),
@@ -381,8 +370,6 @@ class ProfileInfoWidget extends StatelessWidget {
     } else if (number >= 10000) {
       return '${(number / 1000).toStringAsFixed(1).replaceAll('.0', '')}rb';
     }
-
-    // Indonesian format: 1.234 instead of 1,234 or 1.2rb
     return number.toString().replaceAllMapped(
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
       (Match m) => '${m[1]}.',
@@ -391,7 +378,7 @@ class ProfileInfoWidget extends StatelessWidget {
 }
 
 class ProfileStatsRow extends StatelessWidget {
-  // Legacy component kept for safety if referenced elsewhere, but unused in this file
+  // Legacy component kept for safety — not used in active screens
   const ProfileStatsRow({
     super.key,
     required this.postsCount,
@@ -462,7 +449,7 @@ class ProfileActionButton extends StatelessWidget {
           label: 'Batal Mengikuti?',
           onTap: isProcessing ? null : onFollowTap,
           isOutline: true,
-          colorOverride: Colors.red,
+          colorOverride: AppColors.error,
           isPrimary: false,
         );
       }
@@ -482,7 +469,7 @@ class ProfileActionButton extends StatelessWidget {
     required bool isPrimary,
     Color? colorOverride,
   }) {
-    final primaryColor = colorOverride ?? const Color(0xFFBBC863);
+    final accentColor = colorOverride ?? AppColors.secondary;
 
     return SizedBox(
       width: double.infinity,
@@ -490,18 +477,19 @@ class ProfileActionButton extends StatelessWidget {
       child: TextButton(
         onPressed: onTap,
         style: TextButton.styleFrom(
-          backgroundColor: isOutline ? Colors.transparent : primaryColor,
+          backgroundColor: isOutline ? Colors.transparent : accentColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
             side: isOutline
-                ? BorderSide(color: Colors.grey[300]!, width: 1)
+                ? BorderSide(color: AppColors.border, width: 1)
                 : BorderSide.none,
           ),
           elevation: isPrimary ? 4 : 0,
-          shadowColor: isPrimary ? primaryColor.withValues(alpha: 0.3) : null,
+          shadowColor:
+              isPrimary ? accentColor.withValues(alpha: 0.3) : null,
           overlayColor: isOutline
-              ? Colors.grey[100]
-              : Colors.white.withValues(alpha: 0.2),
+              ? AppColors.surfaceAlt
+              : AppColors.white.withValues(alpha: 0.2),
         ),
         child: isProcessing
             ? SizedBox(
@@ -510,18 +498,16 @@ class ProfileActionButton extends StatelessWidget {
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    isOutline ? Colors.black : Colors.white,
+                    isOutline ? AppColors.textPrimary : AppColors.white,
                   ),
                 ),
               )
             : Text(
                 label,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
+                style: AppTextStyles.button.copyWith(
                   color: isOutline
-                      ? (colorOverride ?? Colors.black)
-                      : Colors.white,
+                      ? (colorOverride ?? AppColors.textPrimary)
+                      : AppColors.white,
                 ),
               ),
       ),

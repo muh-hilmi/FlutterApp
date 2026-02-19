@@ -58,13 +58,19 @@ This blueprint is **authoritative**. It defines:
 | **07_qa_strategy.md** | Testing requirements & reports | QA & testing |
 | **08_coding_standards.md** | BLoC, navigation, DI patterns | Writing code |
 
-### Governance (NEW - LOCKED)
+### Governance (LOCKED)
 
 | File | Purpose | Authority |
 |------|---------|-----------|
 | **09_architecture_decisions.md** | Locked technology choices | Project Owner approval to change |
 | **10_non_goals.md** | Out of scope features | Project Owner approval to add |
 | **11_state_machines.md** | Entity states & transitions | MANDATORY - all code must follow |
+
+### Design System (LOCKED)
+
+| File | Purpose | Authority |
+|------|---------|-----------|
+| **12_design_system.md** | Colors, typography, spacing, components | Project Owner approval to change |
 
 ---
 
@@ -276,6 +282,7 @@ If you find yourself saying:
 | Challenge decision | [`09_architecture_decisions.md`](./09_architecture_decisions.md) |
 | Check if feature | [`10_non_goals.md`](./10_non_goals.md) |
 | Check state rules | [`11_state_machines.md`](./11_state_machines.md) |
+| **UI colors / typography** | [`12_design_system.md`](./12_design_system.md) |
 
 ---
 
