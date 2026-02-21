@@ -49,7 +49,6 @@ client_secret*.json
 google-services.json
 GoogleService-Info.plist
 
-# Environment variables
-.env
+# Environment variables (only local overrides, not the committed default)
 .env.local
 .env.*.local
