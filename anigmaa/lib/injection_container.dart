@@ -140,8 +140,8 @@ Future<void> init() async {
   );
 
   // Features - Auth
-  // Bloc
-  sl.registerLazySingleton(() => AuthBloc(sl(), sl()));
+  // Bloc - DioClient passed explicitly to avoid timing issues
+  sl.registerLazySingleton(() => AuthBloc(sl(), sl(), sl()));
 
   // Features - Events
   // Bloc

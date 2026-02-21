@@ -65,13 +65,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       // Wrap with explicit timeout to prevent infinite loading when retry queue traps the request
       // This ensures we get an exception even if the RetryInterceptor queues the request
+      // 10s timeout = 1 retry (1s) + connection timeout + buffer
       final response = await dioClient.post(
         '/auth/google',
         data: {
           'idToken': idToken,
         },
       ).timeout(
-        const Duration(seconds: 20),
+        const Duration(seconds: 10),
         onTimeout: () {
           throw TimeoutException('Login request timeout - server unreachable');
         },

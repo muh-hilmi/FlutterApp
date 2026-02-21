@@ -429,13 +429,18 @@ class _ModernFeedScreenState extends State<ModernFeedScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.add_circle_outline_rounded, size: 24),
+                        const Icon(
+                          Icons.add_circle_outline_rounded,
+                          size: 24,
+                          color: Colors.black,
+                        ),
                         const SizedBox(width: 8),
                         Text(
-                          'Bikin Post Baru',
+                          'Bikin Post baru',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
+                            color: Colors.black,
                           ),
                         ),
                       ],
@@ -448,11 +453,11 @@ class _ModernFeedScreenState extends State<ModernFeedScreen> {
                       context.read<EventsBloc>().add(LoadEvents());
                     },
                     child: Text(
-                      'Refresh Feed',
+                      'Coba lagi?',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textDisabled,
+                        color: AppColors.primary,
                       ),
                     ),
                   ),

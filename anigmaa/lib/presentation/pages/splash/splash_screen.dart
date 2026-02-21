@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/google_auth_service.dart';
@@ -10,6 +11,7 @@ import '../../../injection_container.dart' as di;
 import '../server_unavailable/server_unavailable_screen.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/constants/app_config.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -34,6 +36,23 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(const Duration(milliseconds: 1500));
 
     if (!mounted) return;
+
+    // Quick server check first - don't waste time on auth if server is down
+    setState(() {
+      _statusText = 'Mengecek koneksi...';
+    });
+
+    final serverReachable = await _quickServerCheck();
+
+    if (!mounted) return;
+
+    if (!serverReachable) {
+      // Server down - skip silent sign-in and token validation
+      // Go straight to login
+      _logger.info('[Splash] Server unreachable, skipping auth checks');
+      _navigateToLogin();
+      return;
+    }
 
     final authService = di.sl<AuthService>();
     final authBloc = di.sl<AuthBloc>();
@@ -128,7 +147,13 @@ class _SplashScreenState extends State<SplashScreen> {
 
         if (idToken != null) {
           final authDataSource = di.sl<AuthRemoteDataSource>();
-          final authResponse = await authDataSource.loginWithGoogle(idToken);
+          // Faster timeout for silent sign-in (5s vs 10s for manual login)
+          final authResponse = await authDataSource.loginWithGoogle(idToken).timeout(
+            const Duration(seconds: 5),
+            onTimeout: () {
+              throw Exception('Silent sign-in timeout');
+            },
+          );
 
           final authService = di.sl<AuthService>();
           final authBloc = di.sl<AuthBloc>();
@@ -198,6 +223,38 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (mounted) {
       Navigator.pushReplacementNamed(context, route);
+    }
+  }
+
+  /// Quick server check - returns true if server is reachable
+  /// Uses lightweight HEAD request to minimize server load
+  Future<bool> _quickServerCheck() async {
+    try {
+      final dio = Dio(BaseOptions(
+        baseUrl: AppConfig.apiUrl,
+        connectTimeout: const Duration(seconds: 3),
+        receiveTimeout: const Duration(seconds: 3),
+      ));
+
+      // HEAD request to root - minimal server load
+      // Any response (even 404) means server is up
+      await dio.head(
+        '/',
+        options: Options(
+          validateStatus: (status) => status != null && status < 600,
+        ),
+      ).timeout(
+        const Duration(seconds: 3),
+        onTimeout: () {
+          throw Exception('Server check timeout');
+        },
+      );
+
+      _logger.debug('[Splash] Server is reachable');
+      return true;
+    } catch (e) {
+      _logger.debug('[Splash] Server check failed: $e');
+      return false;
     }
   }
 

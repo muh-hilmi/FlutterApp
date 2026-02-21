@@ -196,7 +196,9 @@ class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
               clipBehavior: Clip.none,
               children: [
                 // Background
-                const Positioned.fill(child: ColoredBox(color: AppColors.white)),
+                const Positioned.fill(
+                  child: ColoredBox(color: AppColors.white),
+                ),
 
                 // 2. The Join Confirmation Sheet (Non-blocking Overlay)
 
@@ -310,7 +312,9 @@ class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
         ),
         child: Text(
           "Coba Lagi",
-          style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.white),
+          style: AppTextStyles.bodyMediumBold.copyWith(
+            color: AppColors.textPrimary,
+          ),
         ),
       ),
     );
@@ -732,8 +736,10 @@ class _SwipeableCardState extends State<_SwipeableCard>
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
                     child: Transform.scale(
-                      scaleX: 1.0 - (_isCardLeaving ? _cardController.value : 0.0),
-                      scaleY: 1.0 - (_isCardLeaving ? _cardController.value : 0.0),
+                      scaleX:
+                          1.0 - (_isCardLeaving ? _cardController.value : 0.0),
+                      scaleY:
+                          1.0 - (_isCardLeaving ? _cardController.value : 0.0),
                       child: const Text("📌", style: TextStyle(fontSize: 64)),
                     ),
                   ),
@@ -755,7 +761,11 @@ class _SwipeableCardState extends State<_SwipeableCard>
       content = Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.local_activity_rounded, size: 48, color: AppColors.success),
+          Icon(
+            Icons.local_activity_rounded,
+            size: 48,
+            color: AppColors.success,
+          ),
           Text(
             "JOIN",
             style: AppTextStyles.h2.copyWith(color: AppColors.success),
@@ -847,13 +857,21 @@ class _EventCardFace extends StatelessWidget {
                 placeholder: (_, __) => Container(
                   color: AppColors.secondary,
                   child: const Center(
-                    child: Icon(Icons.event, size: 80, color: AppColors.primary),
+                    child: Icon(
+                      Icons.event,
+                      size: 80,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ),
                 errorWidget: (_, __, ___) => Container(
                   color: AppColors.secondary,
                   child: const Center(
-                    child: Icon(Icons.event, size: 80, color: AppColors.primary),
+                    child: Icon(
+                      Icons.event,
+                      size: 80,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ),
               )

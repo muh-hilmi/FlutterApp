@@ -7,6 +7,9 @@ import '../api/dio_client.dart';
 import '../../injection_container.dart' show sl;
 import 'auth_state.dart';
 
+/// Callback for token refresh notification
+typedef OnTokenRefreshedCallback = void Function(String accessToken, String? refreshToken);
+
 /// Events for AuthBloc
 abstract class AuthEvent {}
 
@@ -43,6 +46,7 @@ class AuthEnterOfflineMode extends AuthEvent {}
 class AuthBloc extends Bloc<AuthEvent, AuthStateData> {
   final AuthService _authService;
   final AuthRemoteDataSource _authDataSource;
+  final DioClient? _dioClient; // Optional to avoid breaking changes
   final AppLogger _logger = AppLogger();
 
   // Request deduplication - prevent multiple simultaneous validations
@@ -56,8 +60,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthStateData> {
   final StreamController<AuthValidateRequested> _validationRequestController =
       StreamController<AuthValidateRequested>.broadcast();
 
-  AuthBloc(this._authService, this._authDataSource)
-      : super(AuthStateData.initial) {
+  AuthBloc(
+    this._authService,
+    this._authDataSource, [
+    this._dioClient,
+  ]) : super(AuthStateData.initial) {
     // Register event handlers
     on<AuthValidateRequested>(_onValidateRequested);
     on<AuthTokenRefreshed>(_onTokenRefreshed);
@@ -71,22 +78,37 @@ class AuthBloc extends Bloc<AuthEvent, AuthStateData> {
       add(AuthValidateRequested(forceRetry: request.forceRetry));
     });
 
-    // Register token refresh callback with DioClient
+    // Register token refresh callback with DioClient if provided
     // This allows AuthInterceptor to notify AuthBloc when token is refreshed
-    _registerTokenRefreshCallback();
+    if (_dioClient != null) {
+      _registerTokenRefreshCallback();
+    } else {
+      _logger.warning('[AuthBloc] DioClient not provided, token refresh callback not registered');
+    }
   }
 
-  /// Register callback to be notified when token is refreshed by AuthInterceptor
+  /// Register callbacks to be notified by AuthInterceptor
   void _registerTokenRefreshCallback() {
+    if (_dioClient == null) {
+      _logger.warning('[AuthBloc] Cannot register callback: DioClient is null');
+      return;
+    }
+
     try {
-      final dioClient = sl<DioClient>();
-      dioClient.setOnTokenRefreshedCallback((accessToken, refreshToken) {
+      _dioClient!.setOnTokenRefreshedCallback((accessToken, refreshToken) {
         _logger.info('[AuthBloc] Token refresh callback received from AuthInterceptor');
         add(AuthTokenRefreshed(
           accessToken: accessToken,
           refreshToken: refreshToken,
         ));
       });
+
+      _dioClient!.setOnSessionExpiredCallback(() {
+        _logger.warning('[AuthBloc] Session expired callback received — logging out');
+        add(AuthLogoutRequested());
+      });
+
+      _logger.debug('[AuthBloc] Auth callbacks registered successfully');
     } catch (e) {
       _logger.error('[AuthBloc] Failed to register token refresh callback', e);
     }
@@ -165,8 +187,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthStateData> {
 
     try {
       // Call API to validate token (with timeout)
+      // Reduced timeout for faster user feedback (5s instead of 10s)
       final user = await _authDataSource.getCurrentUser().timeout(
-        const Duration(seconds: 10),
+        const Duration(seconds: 5),
         onTimeout: () {
           throw TimeoutException('Token validation timeout');
         },

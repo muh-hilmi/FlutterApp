@@ -6,9 +6,11 @@ class AuthService {
   static const String _keyHasSeenOnboarding = 'has_seen_onboarding';
   static const String _keyUserEmail = 'user_email';
   static const String _keyUserName = 'user_name';
-  static const String _keyAccessToken = 'access_token';
-  static const String _keyRefreshToken = 'refresh_token';
   static const String _keyUserId = 'user_id';
+
+  // Public so AuthInterceptor can use the same keys — single source of truth
+  static const String keyAccessToken = 'access_token';
+  static const String keyRefreshToken = 'refresh_token';
 
   final SharedPreferences _prefs;
   final FlutterSecureStorage _secureStorage;
@@ -57,19 +59,19 @@ class AuthService {
 
   // Token management (SECURE - using FlutterSecureStorage)
   Future<String?> get accessToken async {
-    return await _secureStorage.read(key: _keyAccessToken);
+    return await _secureStorage.read(key: keyAccessToken);
   }
 
   Future<void> setAccessToken(String token) async {
-    await _secureStorage.write(key: _keyAccessToken, value: token);
+    await _secureStorage.write(key: keyAccessToken, value: token);
   }
 
   Future<String?> get refreshToken async {
-    return await _secureStorage.read(key: _keyRefreshToken);
+    return await _secureStorage.read(key: keyRefreshToken);
   }
 
   Future<void> setRefreshToken(String token) async {
-    await _secureStorage.write(key: _keyRefreshToken, value: token);
+    await _secureStorage.write(key: keyRefreshToken, value: token);
   }
 
   // Save auth data from API response
@@ -103,8 +105,8 @@ class AuthService {
     await _prefs.remove(_keyUserEmail);
     await _prefs.remove(_keyUserName);
     await _prefs.remove(_keyUserId);
-    await _secureStorage.delete(key: _keyAccessToken);
-    await _secureStorage.delete(key: _keyRefreshToken);
+    await _secureStorage.delete(key: keyAccessToken);
+    await _secureStorage.delete(key: keyRefreshToken);
   }
 
   // Clear all data (for complete reset)
@@ -116,8 +118,8 @@ class AuthService {
   // Clear auth data (tokens only)
   Future<void> clearAuthData() async {
     await setLoggedIn(false);
-    await _secureStorage.delete(key: _keyAccessToken);
-    await _secureStorage.delete(key: _keyRefreshToken);
+    await _secureStorage.delete(key: keyAccessToken);
+    await _secureStorage.delete(key: keyRefreshToken);
   }
 
   // Check if token exists

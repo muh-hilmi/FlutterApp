@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/app_logger.dart';
 import '../../network/error_classifier.dart';
-import '../../../main.dart' show navigatorKey;
+import '../../constants/app_config.dart';
+import '../../services/auth_service.dart';
 
 /// Callback function type for token refresh success notification
 typedef OnTokenRefreshedCallback = void Function(String accessToken, String? refreshToken);
@@ -26,24 +26,28 @@ class AuthInterceptor extends Interceptor {
   /// Callback called when token is successfully refreshed
   OnTokenRefreshedCallback? onTokenRefreshed;
 
+  /// Callback called when session expires (token refresh failed) — no UI here
+  /// Caller (AuthBloc) is responsible for clearing state and navigating
+  VoidCallback? onSessionExpired;
+
   /// Creates a new AuthInterceptor
   ///
-  /// [onTokenRefreshed] is called when token is successfully refreshed,
-  /// allowing the AuthBloc to update its state
-  AuthInterceptor({this.onTokenRefreshed});
+  /// [onTokenRefreshed] is called when token is successfully refreshed
+  /// [onSessionExpired] is called when refresh fails — triggers logout in AuthBloc
+  AuthInterceptor({this.onTokenRefreshed, this.onSessionExpired});
 
-  // Static state to prevent duplicate refresh attempts across instances
-  static bool _isRedirectingToLogin = false;
-  static bool _isRefreshing = false;
+  // Instance state (not static — AuthInterceptor is a singleton via DioClient)
+  bool _isRedirectingToLogin = false;
+  bool _isRefreshing = false;
 
   // Request queue: stores pending requests during refresh
   final List<_QueuedRequest> _requestQueue = [];
 
   // Rate limiting for 401 errors (prevent infinite retry loops)
-  static int _consecutive401Count = 0;
-  static DateTime? _last401Time;
+  int _consecutive401Count = 0;
+  DateTime? _last401Time;
   static const _maxConsecutive401 = 3;
-  static final _resetDurationAfter401Error = Duration(minutes: 1);
+  static const _resetDurationAfter401Error = Duration(minutes: 1);
 
   @override
   void onRequest(
@@ -51,7 +55,7 @@ class AuthInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     try {
-      final token = await _secureStorage.read(key: 'access_token');
+      final token = await _secureStorage.read(key: AuthService.keyAccessToken);
 
       if (token != null && token.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $token';
@@ -96,7 +100,7 @@ class AuthInterceptor extends Interceptor {
         '❌ Too many consecutive 401s ($_consecutive401Count), '
         'forcing logout to prevent infinite loop',
       );
-      await _logoutUser(showLoginDialog: true);
+      await _logoutUser();
       handler.next(err);
       return;
     }
@@ -114,7 +118,7 @@ class AuthInterceptor extends Interceptor {
     _isRefreshing = true;
 
     try {
-      final refreshToken = await _secureStorage.read(key: 'refresh_token');
+      final refreshToken = await _secureStorage.read(key: AuthService.keyRefreshToken);
 
       if (refreshToken == null || refreshToken.isEmpty) {
         _logger.warning('❌ No refresh token available - logging out');
@@ -151,9 +155,9 @@ class AuthInterceptor extends Interceptor {
 
         if (newAccessToken != null) {
           // Store new tokens
-          await _secureStorage.write(key: 'access_token', value: newAccessToken);
+          await _secureStorage.write(key: AuthService.keyAccessToken, value: newAccessToken);
           if (newRefreshToken != null) {
-            await _secureStorage.write(key: 'refresh_token', value: newRefreshToken);
+            await _secureStorage.write(key: AuthService.keyRefreshToken, value: newRefreshToken);
           }
 
           _logger.info('✅ Token refreshed successfully');
@@ -169,13 +173,13 @@ class AuthInterceptor extends Interceptor {
             final response = await refreshDio.fetch(originalRequest);
             handler.resolve(response);
 
-            // Process queued requests with new token
-            await _processQueuedRequests(newAccessToken);
+            // Process queued requests with new token (reuse same refreshDio)
+            await _processQueuedRequests(newAccessToken, refreshDio);
             return;
           } catch (retryError) {
             _logger.error('❌ Failed to retry original request after refresh', retryError);
             // Still process queue - other requests might succeed
-            await _processQueuedRequests(newAccessToken);
+            await _processQueuedRequests(newAccessToken, refreshDio);
           }
         }
       } else {
@@ -223,7 +227,8 @@ class AuthInterceptor extends Interceptor {
   }
 
   /// Process all queued requests with the new token
-  Future<void> _processQueuedRequests(String newToken) async {
+  /// Uses [refreshDio] (already configured with base URL & timeouts) — no bare Dio
+  Future<void> _processQueuedRequests(String newToken, Dio refreshDio) async {
     if (_requestQueue.isEmpty) return;
 
     _logger.info('[Auth] Processing ${_requestQueue.length} queued requests');
@@ -234,8 +239,7 @@ class AuthInterceptor extends Interceptor {
     for (final queued in requests) {
       try {
         queued.requestOptions.headers['Authorization'] = 'Bearer $newToken';
-        final dio = Dio();
-        final response = await dio.fetch(queued.requestOptions);
+        final response = await refreshDio.fetch(queued.requestOptions);
         queued.handler.resolve(response);
       } catch (e) {
         _logger.error('[Auth] Queued request failed', e);
@@ -244,117 +248,39 @@ class AuthInterceptor extends Interceptor {
     }
   }
 
-  /// Extract base URL from request options
+  /// Extract base URL from request options, fallback to AppConfig
   String _getBaseUrl(RequestOptions options) {
-    // Try to get from options
     if (options.baseUrl.isNotEmpty) {
       return options.baseUrl;
     }
-
-    // Fallback to known base URLs
-    // Check if we can determine from the path
-    if (options.path.contains('/api/v1') ||
-        options.path.contains('/auth') ||
-        options.path.contains('/users')) {
-      // Assuming localhost for development
-      return 'http://localhost:8123/api/v1';
-    }
-
-    // Ultimate fallback
-    return 'http://localhost:8123/api/v1';
+    return AppConfig.apiUrl;
   }
 
-  /// Log out the user
-  Future<void> _logoutUser({bool showLoginDialog = true}) async {
+  /// Clear tokens and notify caller that session has expired.
+  /// Navigation and UI are handled by AuthBloc (via onSessionExpired callback) —
+  /// the network layer must not touch UI or routing directly.
+  Future<void> _logoutUser() async {
     if (_isRedirectingToLogin) return;
-
     _isRedirectingToLogin = true;
-    _logger.warning('🔒 Logging out user - token refresh failed');
 
-    // Clear tokens
+    _logger.warning('🔒 Session expired - clearing tokens');
+
     try {
-      await _secureStorage.delete(key: 'access_token');
-      await _secureStorage.delete(key: 'refresh_token');
+      await _secureStorage.delete(key: AuthService.keyAccessToken);
+      await _secureStorage.delete(key: AuthService.keyRefreshToken);
       _logger.info('✅ Tokens cleared from secure storage');
     } catch (e) {
       _logger.error('Failed to clear tokens', e);
-    }
-
-    // Clear SharedPreferences
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('is_logged_in', false);
-      await prefs.remove('user_email');
-      await prefs.remove('user_name');
-      await prefs.remove('user_id');
-      _logger.info('✅ User preferences cleared');
-    } catch (e) {
-      _logger.error('Failed to clear preferences', e);
     }
 
     // Reset 401 counter
     _consecutive401Count = 0;
     _last401Time = null;
 
-    // Navigate to login screen
-    if (!showLoginDialog) {
-      _isRedirectingToLogin = false;
-      return;
-    }
+    // Notify AuthBloc — it handles clearing state + navigating to login
+    onSessionExpired?.call();
 
-    final context = navigatorKey.currentContext;
-    if (context != null && context.mounted) {
-      _logger.info('🔄 Showing login dialog');
-
-      Future.microtask(() async {
-        if (!context.mounted) return;
-
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (dialogContext) => AlertDialog(
-            title: const Row(
-              children: [
-                Icon(Icons.lock_clock, color: Colors.orange),
-                SizedBox(width: 12),
-                Text('Sesi Berakhir'),
-              ],
-            ),
-            content: const Text(
-              'Sesi kamu telah berakhir. Silakan login kembali untuk melanjutkan.',
-              style: TextStyle(fontSize: 15),
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            actions: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop();
-                  Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFBBC863),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                ),
-                child: const Text(
-                  'Login',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-        );
-
-        _isRedirectingToLogin = false;
-      });
-    } else {
-      _isRedirectingToLogin = false;
-    }
+    _isRedirectingToLogin = false;
   }
 }
 

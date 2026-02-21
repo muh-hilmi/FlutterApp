@@ -22,7 +22,10 @@
       "Bash(node -e:*)",
       "Bash(node:*)",
       "Bash(BASE=\"C:/Users/mailh/OneDrive/Desktop/FlutterApp/anigmaa/lib\")",
-      "Bash(git -C /c/Users/mailh/OneDrive/Desktop/FlutterApp/anigmaa diff HEAD -- lib/presentation/pages/profile/edit_profile_screen.dart)"
+      "Bash(git -C /c/Users/mailh/OneDrive/Desktop/FlutterApp/anigmaa diff HEAD -- lib/presentation/pages/profile/edit_profile_screen.dart)",
+      "Bash(git stash pop:*)",
+      "Bash(git stash drop:*)",
+      "Bash(git push:*)"
     ]
   },
   "prefersReducedMotion": true

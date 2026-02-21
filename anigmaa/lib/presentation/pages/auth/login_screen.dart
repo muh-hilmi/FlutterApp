@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/google_auth_service.dart';
 import '../../../core/utils/app_logger.dart';
@@ -237,7 +238,12 @@ class _LoginScreenState extends State<LoginScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Selamat datang kembali, ${googleAccount.displayName ?? 'User'}! 🎉',
+                'Halo, ${googleAccount.displayName ?? 'User'}! 🎉',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                ),
               ),
               backgroundColor: AppColors.secondary,
             ),
@@ -253,7 +259,8 @@ class _LoginScreenState extends State<LoginScreen> {
         String errorMessage = 'Yah, gagal login 😢';
 
         // Better error messages - Gen Z friendly
-        if (e.toString().contains('timeout') || e.toString().contains('connectTimeout')) {
+        if (e.toString().contains('timeout') ||
+            e.toString().contains('connectTimeout')) {
           // Timeout errors are already handled in datasource with good messages
           errorMessage = e.toString().replaceFirst('NetworkFailure: ', '');
         } else if (e.toString().contains('401')) {
@@ -262,9 +269,11 @@ class _LoginScreenState extends State<LoginScreen> {
           errorMessage = 'Server-nya ilang. Hubungi admin.';
         } else if (e.toString().contains('500')) {
           errorMessage = 'Server lagi error. Sabar ya, coba lagi nanti.';
-        } else if (e.toString().contains('network') || e.toString().contains('wifi')) {
+        } else if (e.toString().contains('network') ||
+            e.toString().contains('wifi')) {
           errorMessage = e.toString().replaceFirst('NetworkFailure: ', '');
-        } else if (e.toString().contains('PlatformException') || e.toString().contains('channel-error')) {
+        } else if (e.toString().contains('PlatformException') ||
+            e.toString().contains('channel-error')) {
           errorMessage = 'Google Sign-In error. Coba lagi ya.';
         } else if (e.toString().contains('NetworkFailure:')) {
           // Extract the message from NetworkFailure

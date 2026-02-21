@@ -261,10 +261,7 @@ class ProfileInfoWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.accentBorder,
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.accentBorder, width: 1),
       ),
       child: Column(
         children: [
@@ -307,7 +304,6 @@ class ProfileInfoWidget extends StatelessWidget {
                 onPressed: onManageEventsTap,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.secondary,
-                  foregroundColor: AppColors.white,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -316,12 +312,14 @@ class ProfileInfoWidget extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  textStyle: AppTextStyles.button.copyWith(
+                ),
+                child: Text(
+                  'Kelola',
+                  style: AppTextStyles.button.copyWith(
                     fontSize: 13,
-                    color: AppColors.white,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                child: const Text('Kelola'),
               ),
             ],
           ),
@@ -485,8 +483,7 @@ class ProfileActionButton extends StatelessWidget {
                 : BorderSide.none,
           ),
           elevation: isPrimary ? 4 : 0,
-          shadowColor:
-              isPrimary ? accentColor.withValues(alpha: 0.3) : null,
+          shadowColor: isPrimary ? accentColor.withValues(alpha: 0.3) : null,
           overlayColor: isOutline
               ? AppColors.surfaceAlt
               : AppColors.white.withValues(alpha: 0.2),

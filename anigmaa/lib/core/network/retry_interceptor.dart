@@ -105,8 +105,8 @@ class RetryInterceptor extends Interceptor {
     // For auth requests, max 1 retry with 1s delay (total ~2s instead of ~14s)
     final effectiveMaxRetries = isAuthRequest ? 1 : maxRetries;
 
-    // Check if we've exceeded max retries
-    if (currentRetry >= maxRetries) {
+    // Check if we've exceeded max retries (auth requests cap at 1)
+    if (currentRetry >= effectiveMaxRetries) {
       _logger.warning(
         '[Retry] Max retries ($maxRetries) exceeded for ${err.requestOptions.path}',
       );

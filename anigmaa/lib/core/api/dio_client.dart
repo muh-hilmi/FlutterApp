@@ -70,12 +70,16 @@ class DioClient {
   }
 
   /// Set callback to be called when token is successfully refreshed
-  ///
-  /// This should be called after dependency injection is complete,
-  /// typically from AuthBloc's constructor or initialization
   void setOnTokenRefreshedCallback(OnTokenRefreshedCallback callback) {
     _authInterceptor.onTokenRefreshed = callback;
     _logger.debug('[DioClient] Token refresh callback registered');
+  }
+
+  /// Set callback to be called when session expires (token refresh failed)
+  /// AuthBloc should handle clearing state and navigating to login
+  void setOnSessionExpiredCallback(void Function() callback) {
+    _authInterceptor.onSessionExpired = callback;
+    _logger.debug('[DioClient] Session expired callback registered');
   }
 
   /// Get the retry interceptor instance

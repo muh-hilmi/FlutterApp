@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -21,7 +22,7 @@ import '../../bloc/ranked_feed/ranked_feed_state.dart';
 import '../../../injection_container.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import 'dart:math';
+import 'widgets/discover_map_view.dart';
 
 class DiscoverScreen extends StatefulWidget {
   const DiscoverScreen({super.key});
@@ -45,135 +46,15 @@ class DiscoverScreenState extends State<DiscoverScreen>
   LatLng _currentPosition = const LatLng(-6.2088, 106.8456);
   String? _locationName;
 
+  // Toggle state — default to map view
+  bool _isMapView = true;
+
   // Flags
   bool _hasTriggeredRanking = false;
   bool _hasAppliedRankedResults = false;
   bool _hasAppliedInitialFilter = false;
   bool _hasCenteredMap = false;
   bool _isMapReady = false;
-
-  // Map style for dark theme
-  final String _mapStyle = '''
-  [
-    {
-      "featureType": "all",
-      "elementType": "geometry",
-      "stylers": [
-        {
-          "color": "#242f3e"
-        }
-      ]
-    },
-    {
-      "featureType": "all",
-      "elementType": "labels.text.stroke",
-      "stylers": [
-        {
-          "lightness": -80
-        }
-      ]
-    },
-    {
-      "featureType": "all",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {
-          "color": "#746855"
-        }
-      ]
-    },
-    {
-      "featureType": "administrative",
-      "elementType": "geometry",
-      "stylers": [
-        {
-          "visibility": "off"
-        }
-      ]
-    },
-    {
-      "featureType": "administrative.locality",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {
-          "color": "#d59563"
-        }
-      ]
-    },
-    {
-      "featureType": "poi",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {
-          "color": "#d59563"
-        }
-      ]
-    },
-    {
-      "featureType": "poi.park",
-      "elementType": "geometry",
-      "stylers": [
-        {
-          "color": "#263c3f"
-        }
-      ]
-    },
-    {
-      "featureType": "poi.park",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {
-          "color": "#6b9a76"
-        }
-      ]
-    },
-    {
-      "featureType": "road",
-      "elementType": "geometry.fill",
-      "stylers": [
-        {
-          "color": "#38414e"
-        }
-      ]
-    },
-    {
-      "featureType": "road",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {
-          "color": "#98a0b0"
-        }
-      ]
-    },
-    {
-      "featureType": "water",
-      "elementType": "geometry",
-      "stylers": [
-        {
-          "color": "#17263c"
-        }
-      ]
-    },
-    {
-      "featureType": "water",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {
-          "color": "#515c6d"
-        }
-      ]
-    },
-    {
-      "featureType": "water",
-      "elementType": "labels.text.stroke",
-      "stylers": [
-        {
-          "lightness": -20
-        }
-      ]
-    }
-  ]
-  ''';
 
   @override
   bool get wantKeepAlive => true;
@@ -351,515 +232,43 @@ class DiscoverScreenState extends State<DiscoverScreen>
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-
-    final userState = context.watch<UserBloc>().state;
-    final locationName =
-        _locationName ??
-        (userState is UserLoaded
-            ? (userState.user.location ?? 'Jakarta Area')
-            : 'Jakarta Area');
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          // Map Background
-          BlocBuilder<PostsBloc, PostsState>(
-            builder: (context, postsState) {
-              return BlocConsumer<EventsBloc, EventsState>(
-                listener: (context, state) {
-                  if (state is EventsLoaded) {
-                    setState(() {
-                      _allEvents = state.filteredEvents;
-                    });
-
-                    if (postsState is PostsLoaded) {
-                      _triggerRankingIfNeeded(postsState, state.events);
-                    }
-
-                    if (!_hasAppliedInitialFilter) {
-                      _hasAppliedInitialFilter = true;
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        _applyModeFilter();
-                      });
-                    }
-                  }
-                },
-                builder: (context, eventsState) {
-                  return BlocBuilder<RankedFeedBloc, RankedFeedState>(
-                    bloc: _rankedFeedBloc,
-                    builder: (context, rankedState) {
-                      _updateRankedFeedData(rankedState);
-                      return _buildMapContent(eventsState);
-                    },
-                  );
-                },
-              );
-            },
-          ),
-
-          // Top UI Overlays
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: _buildTopOverlays(locationName),
-          ),
-
-          // Middle Controls (Floating buttons)
-          Positioned(
-            right: 16,
-            bottom: 280,
-            child: _buildFloatingControls(),
-          ),
-
-          // Bottom Event Carousel
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: _buildBottomCarousel(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMapContent(EventsState eventsState) {
-    return GoogleMap(
-      initialCameraPosition: CameraPosition(
-        target: _currentPosition,
-        zoom: 14.0,
-      ),
-      onMapCreated: (GoogleMapController controller) {
-        _mapController.complete(controller);
-        setState(() {
-          _isMapReady = true;
-        });
-        if (!_hasCenteredMap) {
-          _centerMapOnLocation(_currentPosition);
-        }
-      },
-      style: _mapStyle,
-      myLocationEnabled: false,
-      myLocationButtonEnabled: false,
-      zoomControlsEnabled: false,
-      compassEnabled: false,
-      mapToolbarEnabled: false,
-      markers: _buildMarkers(),
-    );
-  }
-
-  Set<Marker> _buildMarkers() {
-    return _filteredEvents.map((event) {
-      return Marker(
-        markerId: MarkerId(event.id),
-        position: LatLng(event.location.latitude, event.location.longitude),
-        onTap: () {
-          // Navigate to event detail
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => EventDetailScreen(event: event),
-            ),
-          );
-        },
-        icon: _getMarkerIcon(event.category),
-      );
-    }).toSet();
-  }
-
-  BitmapDescriptor _getMarkerIcon(EventCategory category) {
-    // Use default marker for now - can be customized
-    return BitmapDescriptor.defaultMarkerWithHue(
-      BitmapDescriptor.hueGreen,
-    );
-  }
-
-  Widget _buildTopOverlays(String locationName) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Column(
-          children: [
-            // Search Bar
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.8),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: AppColors.textTertiary.withValues(alpha: 0.3),
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(left: 16, right: 12),
-                    child: Icon(
-                      Icons.search,
-                      color: AppColors.textTertiary,
-                      size: 22,
-                    ),
-                  ),
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.white,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Cari event di sekitar...',
-                        hintStyle: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textTertiary,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 14,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Filter button
-                  Container(
-                    margin: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: AppColors.secondary.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.tune,
-                        color: AppColors.secondary,
-                        size: 20,
-                      ),
-                      onPressed: () {
-                        // Show advanced filter
-                      },
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 36,
-                        minHeight: 36,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // Filter Pills
-            SizedBox(
-              height: 40,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  _buildFilterChip(
-                    label: 'Semua',
-                    icon: Icons.auto_awesome,
-                    isSelected: _selectedCategory == 'all',
-                    onTap: () => _changeCategory('all'),
-                  ),
-                  const SizedBox(width: 8),
-                  _buildFilterChip(
-                    label: 'Belajar',
-                    icon: Icons.menu_book,
-                    isSelected: _selectedCategory == 'learning',
-                    onTap: () => _changeCategory('learning'),
-                  ),
-                  const SizedBox(width: 8),
-                  _buildFilterChip(
-                    label: 'Nongkrong',
-                    icon: Icons.coffee,
-                    isSelected: _selectedCategory == 'social',
-                    onTap: () => _changeCategory('social'),
-                  ),
-                  const SizedBox(width: 8),
-                  _buildFilterChip(
-                    label: 'Hangout',
-                    icon: Icons.groups,
-                    isSelected: _selectedCategory == 'meetup',
-                    onTap: () => _changeCategory('meetup'),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterChip({
-    required String label,
-    required IconData icon,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.secondary
-              : AppColors.primary.withValues(alpha: 0.8),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.secondary
-                : AppColors.textTertiary.withValues(alpha: 0.3),
-            width: 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.secondary.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isSelected ? AppColors.white : AppColors.textTertiary,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: isSelected ? AppColors.white : AppColors.textEmphasis,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFloatingControls() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Add button
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.9),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: AppColors.textTertiary.withValues(alpha: 0.3),
-              width: 1,
-            ),
-          ),
-          child: IconButton(
-            icon: const Icon(
-              Icons.add,
-              color: AppColors.white,
-            ),
-            onPressed: () {
-              // Navigate to create event
-            },
-          ),
-        ),
-        const SizedBox(height: 12),
-        // My location button
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.9),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: AppColors.textTertiary.withValues(alpha: 0.3),
-              width: 1,
-            ),
-          ),
-          child: IconButton(
-            icon: Icon(
-              Icons.my_location,
-              color: AppColors.secondary,
-            ),
-            onPressed: () => _centerMapOnLocation(_currentPosition),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBottomCarousel() {
-    return Container(
-      height: 220,
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.95),
-      ),
-      child: Column(
-        children: [
-          const SizedBox(height: 8),
-          // Drag handle
-          Container(
-            width: 40,
-            height: 4,
-            margin: const EdgeInsets.only(bottom: 8),
-            decoration: BoxDecoration(
-              color: AppColors.textTertiary,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          // Event Cards
-          Expanded(
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _filteredEvents.length,
-              itemBuilder: (context, index) {
-                return _buildEventCard(_filteredEvents[index]);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEventCard(Event event) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => EventDetailScreen(event: event),
-          ),
+  void _triggerRankingIfNeeded(PostsLoaded postsState, List<Event> events) {
+    if (!_hasTriggeredRanking) {
+      _hasTriggeredRanking = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _rankedFeedBloc.add(
+          LoadRankedFeed(posts: postsState.posts, events: events),
         );
-      },
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.85,
-        margin: const EdgeInsets.only(right: 12),
-        decoration: BoxDecoration(
-          color: AppColors.cardSurface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: AppColors.secondary,
-            width: 2,
-          ),
-        ),
-        child: Row(
-          children: [
-            // Event Image
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(14),
-                bottomLeft: Radius.circular(14),
-              ),
-              child: Image.network(
-                event.imageUrl ?? 'https://via.placeholder.com/150',
-                width: 100,
-                height: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 100,
-                    color: AppColors.surfaceAlt,
-                    child: Icon(
-                      Icons.event,
-                      color: AppColors.textTertiary,
-                    ),
-                  );
-                },
-              ),
-            ),
+      });
+    }
+  }
 
-            // Event Info
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Category badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.secondary.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        event.category.displayName,
-                        style: AppTextStyles.label.copyWith(
-                          color: AppColors.secondary,
-                        ),
-                      ),
-                    ),
+  void _updateRankedFeedData(RankedFeedState rankedState) {
+    if (rankedState is RankedFeedLoaded && !_hasAppliedRankedResults) {
+      _hasAppliedRankedResults = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final feed = rankedState.rankedFeed;
+        _rankedEventIds = {
+          'trending': feed.trendingEvent,
+          'for_you': feed.forYouEvents,
+          'chill': feed.chillEvents,
+        };
+        setState(_applyModeFilter);
+      });
+    }
+  }
 
-                    // Title
-                    Text(
-                      event.title,
-                      style: AppTextStyles.h3.copyWith(
-                        fontSize: 16,
-                        color: AppColors.white,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+  String _formatDate(DateTime dt) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
+    ];
+    return '${dt.day} ${months[dt.month - 1]}';
+  }
 
-                    // Location
-                    Text(
-                      event.location.name,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textTertiary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    // Distance and Join button
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          _getDistance(event),
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textTertiary,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.secondary,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Text(
-                            'Join',
-                            style: AppTextStyles.button.copyWith(
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  String _formatPrice(Event event) {
+    if (event.isFree || event.price == null || event.price == 0) return 'Gratis';
+    return 'Rp ${event.price!.toStringAsFixed(0)}';
   }
 
   String _getDistance(Event event) {
@@ -889,29 +298,661 @@ class DiscoverScreenState extends State<DiscoverScreen>
     return degrees * (pi / 180.0);
   }
 
-  void _triggerRankingIfNeeded(PostsLoaded postsState, List<Event> events) {
-    if (!_hasTriggeredRanking) {
-      _hasTriggeredRanking = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _rankedFeedBloc.add(
-          LoadRankedFeed(posts: postsState.posts, events: events),
-        );
-      });
-    }
+  // ─── Build ────────────────────────────────────────────────────────────────
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    final userState = context.watch<UserBloc>().state;
+    final locationName =
+        _locationName ??
+        (userState is UserLoaded
+            ? (userState.user.location ?? 'Jakarta Area')
+            : 'Jakarta Area');
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: BlocBuilder<PostsBloc, PostsState>(
+        builder: (context, postsState) {
+          return BlocConsumer<EventsBloc, EventsState>(
+            listener: (context, state) {
+              if (state is EventsLoaded) {
+                setState(() {
+                  _allEvents = state.filteredEvents;
+                });
+
+                if (postsState is PostsLoaded) {
+                  _triggerRankingIfNeeded(postsState, state.events);
+                }
+
+                if (!_hasAppliedInitialFilter) {
+                  _hasAppliedInitialFilter = true;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _applyModeFilter();
+                  });
+                }
+              }
+            },
+            builder: (context, eventsState) {
+              return BlocBuilder<RankedFeedBloc, RankedFeedState>(
+                bloc: _rankedFeedBloc,
+                builder: (context, rankedState) {
+                  _updateRankedFeedData(rankedState);
+                  return _isMapView
+                      ? _buildMapMode(locationName)
+                      : _buildCardsMode(locationName);
+                },
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 
-  void _updateRankedFeedData(RankedFeedState rankedState) {
-    if (rankedState is RankedFeedLoaded && !_hasAppliedRankedResults) {
-      _hasAppliedRankedResults = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final feed = rankedState.rankedFeed;
-        _rankedEventIds = {
-          'trending': feed.trendingEvent,
-          'for_you': feed.forYouEvents,
-          'chill': feed.chillEvents,
-        };
-        setState(_applyModeFilter);
-      });
+  // ─── Map Mode ─────────────────────────────────────────────────────────────
+
+  Widget _buildMapMode(String locationName) {
+    return Stack(
+      children: [
+        // Full-screen map
+        DiscoverMapView(
+          events: _filteredEvents,
+          userLocation: _currentPosition,
+          mapController: _mapController,
+          onEventTap: (event) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => EventDetailScreen(event: event),
+              ),
+            );
+          },
+          onMapReady: () {
+            setState(() {
+              _isMapReady = true;
+            });
+            if (!_hasCenteredMap) {
+              _centerMapOnLocation(_currentPosition);
+            }
+          },
+        ),
+
+        // Top gradient + controls overlay
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: _buildMapTopBar(),
+        ),
+
+        // Location FAB — right side, above bottom of screen
+        Positioned(
+          right: 16,
+          bottom: 120,
+          child: _buildLocationFab(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMapTopBar() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.black.withValues(alpha: 0.5),
+            Colors.black.withValues(alpha: 0.0),
+          ],
+        ),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Search bar + toggle row
+              Row(
+                children: [
+                  Expanded(child: _buildSearchBar(isMapMode: true)),
+                  const SizedBox(width: 10),
+                  _buildViewToggle(),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Filter chips
+              _buildFilterChips(isMapMode: true),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocationFab() {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: IconButton(
+        icon: const Icon(
+          Icons.my_location,
+          color: AppColors.secondary,
+          size: 22,
+        ),
+        onPressed: () => _centerMapOnLocation(_currentPosition),
+        padding: EdgeInsets.zero,
+      ),
+    );
+  }
+
+  // ─── Cards Mode ───────────────────────────────────────────────────────────
+
+  Widget _buildCardsMode(String locationName) {
+    return Column(
+      children: [
+        // Top bar — light style with white bg
+        _buildCardsTopBar(),
+        // Event list
+        Expanded(
+          child: _filteredEvents.isEmpty
+              ? _buildEmptyState()
+              : ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                  itemCount: _filteredEvents.length,
+                  itemBuilder: (context, index) {
+                    return _buildVerticalEventCard(_filteredEvents[index]);
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCardsTopBar() {
+    return Container(
+      color: AppColors.surface,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(child: _buildSearchBar(isMapMode: false)),
+                  const SizedBox(width: 10),
+                  _buildViewToggle(),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _buildFilterChips(isMapMode: false),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─── Shared Widgets ───────────────────────────────────────────────────────
+
+  Widget _buildSearchBar({required bool isMapMode}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isMapMode
+            ? AppColors.primary.withValues(alpha: 0.85)
+            : AppColors.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isMapMode
+              ? AppColors.textTertiary.withValues(alpha: 0.3)
+              : AppColors.border,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 14, right: 10),
+            child: Icon(
+              Icons.search,
+              color: isMapMode ? AppColors.textTertiary : AppColors.textTertiary,
+              size: 20,
+            ),
+          ),
+          Expanded(
+            child: TextField(
+              controller: _searchController,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: isMapMode ? AppColors.white : AppColors.textPrimary,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Cari event di sekitar...',
+                hintStyle: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textTertiary,
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildViewToggle() {
+    return Container(
+      height: 44,
+      decoration: BoxDecoration(
+        color: _isMapView
+            ? AppColors.primary.withValues(alpha: 0.85)
+            : AppColors.surface,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: AppColors.border, width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildToggleButton(
+            icon: Icons.map_outlined,
+            isActive: _isMapView,
+            onTap: () {
+              if (!_isMapView) setState(() => _isMapView = true);
+            },
+          ),
+          _buildToggleButton(
+            icon: Icons.view_list_rounded,
+            isActive: !_isMapView,
+            onTap: () {
+              if (_isMapView) setState(() => _isMapView = false);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleButton({
+    required IconData icon,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 36,
+        height: 36,
+        margin: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.secondary : Colors.transparent,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Icon(
+          icon,
+          size: 18,
+          color: isActive ? AppColors.white : AppColors.textTertiary,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChips({required bool isMapMode}) {
+    final chips = [
+      (label: 'Semua', icon: Icons.auto_awesome, category: 'all'),
+      (label: 'Belajar', icon: Icons.menu_book, category: 'learning'),
+      (label: 'Nongkrong', icon: Icons.coffee, category: 'social'),
+      (label: 'Hangout', icon: Icons.groups, category: 'meetup'),
+    ];
+
+    return SizedBox(
+      height: 40,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: chips.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final chip = chips[index];
+          final isSelected = _selectedCategory == chip.category;
+          return _buildFilterChip(
+            label: chip.label,
+            icon: chip.icon,
+            isSelected: isSelected,
+            isMapMode: isMapMode,
+            onTap: () => _changeCategory(chip.category),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildFilterChip({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required bool isMapMode,
+    required VoidCallback onTap,
+  }) {
+    Color bgColor;
+    Color borderColor;
+    Color iconColor;
+    Color textColor;
+
+    if (isSelected) {
+      bgColor = AppColors.secondary;
+      borderColor = AppColors.secondary;
+      iconColor = AppColors.white;
+      textColor = AppColors.white;
+    } else if (isMapMode) {
+      bgColor = AppColors.primary.withValues(alpha: 0.8);
+      borderColor = AppColors.textTertiary.withValues(alpha: 0.3);
+      iconColor = AppColors.textTertiary;
+      textColor = AppColors.textEmphasis;
+    } else {
+      bgColor = AppColors.surfaceAlt;
+      borderColor = AppColors.border;
+      iconColor = AppColors.textTertiary;
+      textColor = AppColors.textSecondary;
     }
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: borderColor, width: 1),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.secondary.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: iconColor),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: textColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── Vertical Event Card (Cards mode) ─────────────────────────────────────
+
+  Widget _buildVerticalEventCard(Event event) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EventDetailScreen(event: event),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image with badges
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
+                    child: Image.network(
+                      (event.imageUrl?.isNotEmpty ?? false)
+                          ? event.imageUrl!
+                          : 'https://via.placeholder.com/400x225',
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: AppColors.surfaceAlt,
+                          child: const Center(
+                            child: Icon(
+                              Icons.event,
+                              color: AppColors.textTertiary,
+                              size: 40,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  // Category badge
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        event.category.displayName,
+                        style: AppTextStyles.label.copyWith(
+                          color: AppColors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Distance badge
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        _getDistance(event),
+                        style: AppTextStyles.label.copyWith(
+                          color: AppColors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Info section
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title
+                  Text(
+                    event.title,
+                    style: AppTextStyles.h3.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Location row
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on_outlined,
+                        size: 14,
+                        color: AppColors.textTertiary,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          event.location.name,
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textTertiary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  // Date row
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.calendar_today_outlined,
+                        size: 14,
+                        color: AppColors.textTertiary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        _formatDate(event.startTime),
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Price + CTA row
+                  Row(
+                    children: [
+                      Text(
+                        _formatPrice(event),
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.secondary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const Spacer(),
+                      SizedBox(
+                        height: 36,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    EventDetailScreen(event: event),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.secondary,
+                            foregroundColor: AppColors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            'Lihat Detail →',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── Empty State ──────────────────────────────────────────────────────────
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.event_busy,
+            size: 64,
+            color: AppColors.textTertiary,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Belum ada event di sini',
+            style: AppTextStyles.h3.copyWith(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Coba ubah filter atau perluas pencarian',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textTertiary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
   }
 }
