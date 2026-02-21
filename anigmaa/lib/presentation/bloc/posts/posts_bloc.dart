@@ -361,7 +361,7 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
           _handleFailure(
             emit,
             latestState,
-            'Gagal bikin post: ${failure.message}',
+            'Gagal bikin postingan: ${failure.message}',
             isCreatingPost: false,
           );
         }

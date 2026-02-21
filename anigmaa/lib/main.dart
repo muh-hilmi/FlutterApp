@@ -384,7 +384,8 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                         final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const CreateEventConversation(),
+                            builder: (context) =>
+                                const CreateEventConversation(),
                           ),
                         );
                         if (result != null && result is Event) {
@@ -403,7 +404,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                     ),
                     const SizedBox(height: 16),
                     _buildSpeedDialOption(
-                      label: 'Bikin Post',
+                      label: 'Bikin Postingan',
                       icon: LucideIcons.filePlus,
                       onTap: () {
                         _closeSpeedDial();
@@ -460,9 +461,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
     return InkWell(
       key: key,
       onTap: () {
-        AppLogger().info(
-          'Tab changed: $_currentIndex -> $index',
-        );
+        AppLogger().info('Tab changed: $_currentIndex -> $index');
 
         // Reload feed posts when returning to Home tab (index 0)
         // This fixes bug where saved posts from profile pollute home feed

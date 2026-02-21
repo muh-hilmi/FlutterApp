@@ -431,14 +431,14 @@ class _ModernFeedScreenState extends State<ModernFeedScreen> {
                       children: [
                         const Icon(
                           Icons.add_circle_outline_rounded,
-                          size: 24,
+                          size: 18,
                           color: Colors.black,
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Bikin Post baru',
+                          'Bikin Postingan baru',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: Colors.black,
                           ),
@@ -446,7 +446,7 @@ class _ModernFeedScreenState extends State<ModernFeedScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  // const SizedBox(height: 4),
                   TextButton(
                     onPressed: () {
                       context.read<PostsBloc>().add(LoadPosts());
