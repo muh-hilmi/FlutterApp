@@ -1,0 +1,115 @@
+-- ============================================================================
+-- SEED 01: USERS
+-- ============================================================================
+-- 25 sample users for Anigmaa app
+-- Run this first before other seed files
+-- Run seed_reset.sql FIRST to clean old seed data
+-- ============================================================================
+
+-- Clear existing users (optional - comment out if you want to keep existing data)
+-- Note: Use seed_reset.sql instead for full cleanup
+
+-- ============================================================================
+-- INSERT USERS (25 users)
+-- Using UUIDs starting with 11-aa for easy identification
+-- ============================================================================
+
+INSERT INTO users (id, email, name, username, bio, avatar_url, phone, website_url, date_of_birth, gender, location, interests, is_verified, is_email_verified) VALUES
+
+-- User Group 1: Coffee & Food Lovers
+('11000000-0000-0000-0000-000000000001', 'rudi@anigmaa.com', 'Rudi Hartono', 'rudihartono', 'Coffee enthusiast | Event organizer | Jakarta', 'https://i.pravatar.cc/150?img=1', '08123456701', 'https://instagram.com/rudihartono', '1990-03-15', 'Laki-laki', 'Jakarta', ARRAY['Coffee', 'Events'], true, true),
+
+('11000000-0000-0000-0000-000000000002', 'siti@anigmaa.com', 'Siti Nurhaliza', 'sitinurhaliza', 'Foodie & travel lover', 'https://i.pravatar.cc/150?img=2', '08123456702', NULL, '1992-07-20', 'Perempuan', 'Bandung', ARRAY['Food', 'Travel'], true, true),
+
+('11000000-0000-0000-0000-000000000003', 'rizki@anigmaa.com', 'Rizki Maulana', 'rizki.maulana', 'Student | Coffee addict', 'https://i.pravatar.cc/150?img=11', '08123456711', NULL, '2001-09-12', 'Laki-laki', 'Jakarta', ARRAY['Coffee', 'Study'], true, true),
+
+-- User Group 2: Gamers & Tech
+('11000000-0000-0000-0000-000000000004', 'budi@anigmaa.com', 'Budi Santoso', 'budisantoso', 'Gamer | Esports enthusiast', 'https://i.pravatar.cc/150?img=3', '08123456703', NULL, '1998-01-10', 'Laki-laki', 'Jakarta', ARRAY['Gaming', 'Esports'], true, true),
+
+('11000000-0000-0000-0000-000000000005', 'doni@anigmaa.com', 'Doni Rahman', 'donidev', 'Tech enthusiast | Developer', 'https://i.pravatar.cc/150?img=9', '08123456709', 'https://donidev.com', '1994-12-05', 'Laki-laki', 'Jakarta', ARRAY['Technology', 'Programming'], true, true),
+
+('11000000-0000-0000-0000-000000000006', 'tina@anigmaa.com', 'Tina Sari', 'tina.sari', 'Student | Anime lover', 'https://i.pravatar.cc/150?img=16', '08123456716', NULL, '2002-11-03', 'Perempuan', 'Jakarta', ARRAY['Anime', 'Gaming'], true, true),
+
+-- User Group 3: Creative & Arts
+('11000000-0000-0000-0000-000000000007', 'maya@anigmaa.com', 'Maya Wijaya', 'maya.art', 'Artist & designer', 'https://i.pravatar.cc/150?img=4', '08123456704', NULL, '1995-05-25', 'Perempuan', 'Yogyakarta', ARRAY['Art', 'Design'], true, true),
+
+('11000000-0000-0000-0000-000000000008', 'rina@anigmaa.com', 'Rina Kusuma', 'rina.kusuma', 'Photographer | Content creator', 'https://i.pravatar.cc/150?img=8', '08123456708', NULL, '1996-04-18', 'Perempuan', 'Jakarta', ARRAY['Photography', 'Content'], true, true),
+
+('11000000-0000-0000-0000-000000000009', 'irfan@anigmaa.com', 'Irfan Hakim', 'irfanhakim', 'Graphic designer | Illustrator', 'https://i.pravatar.cc/150?img=23', '08123456723', NULL, '1992-01-24', 'Laki-laki', 'Yogyakarta', ARRAY['Design', 'Illustration'], true, true),
+
+-- User Group 4: Sports & Fitness
+('11000000-0000-0000-0000-00000000000a', 'andi@anigmaa.com', 'Andi Pratama', 'andipratama', 'Fitness & sports | Marathon runner', 'https://i.pravatar.cc/150?img=5', '08123456705', NULL, '1988-11-30', 'Laki-laki', 'Surabaya', ARRAY['Sports', 'Fitness'], true, true),
+
+('11000000-0000-0000-0000-00000000000b', 'linda@anigmaa.com', 'Linda Permata', 'linda.yoga', 'Yoga instructor | Wellness coach', 'https://i.pravatar.cc/150?img=10', '08123456710', NULL, '1989-06-22', 'Perempuan', 'Ubud', ARRAY['Yoga', 'Wellness'], true, true),
+
+('11000000-0000-0000-0000-00000000000c', 'ferry@anigmaa.com', 'Ferry Gunawan', 'ferry.cyclist', 'Cyclist | Outdoor enthusiast', 'https://i.pravatar.cc/150?img=17', '08123456717', NULL, '1994-08-26', 'Laki-laki', 'Bandung', ARRAY['Cycling', 'Outdoor'], true, true),
+
+('11000000-0000-0000-0000-00000000000d', 'eko@anigmaa.com', 'Eko Prasetyo', 'ekobasket', 'Basketball player | Sports coach', 'https://i.pravatar.cc/150?img=21', '08123456721', NULL, '1993-07-11', 'Laki-laki', 'Jakarta', ARRAY['Basketball', 'Sports'], true, true),
+
+-- User Group 5: Music & Entertainment
+('11000000-0000-0000-0000-00000000000e', 'agus@anigmaa.com', 'Agus Setiawan', 'agusdj', 'Music producer | DJ', 'https://i.pravatar.cc/150?img=7', '08123456707', NULL, '1991-08-08', 'Laki-laki', 'Bali', ARRAY['Music', 'DJ'], true, true),
+
+('11000000-0000-0000-0000-00000000000f', 'dimas@anigmaa.com', 'Dimas Ardiansyah', 'dimasguitar', 'Musician | Guitarist', 'https://i.pravatar.cc/150?img=25', '08123456725', NULL, '1995-06-17', 'Laki-laki', 'Bali', ARRAY['Music', 'Guitar'], true, true),
+
+-- User Group 6: Books & Education
+('11000000-0000-0000-0000-000000000010', 'dewi@anigmaa.com', 'Dewi Lestari', 'dewilestari', 'Writer | Book lover', 'https://i.pravatar.cc/150?img=6', '08123456706', NULL, '1993-02-14', 'Perempuan', 'Jakarta', ARRAY['Books', 'Writing'], true, true),
+
+('11000000-0000-0000-0000-000000000011', 'yuni@anigmaa.com', 'Yuni Astuti', 'yuniedu', 'Teacher | Education advocate', 'https://i.pravatar.cc/150?img=20', '08123456720', NULL, '1991-04-16', 'Perempuan', 'Surabaya', ARRAY['Education', 'Teaching'], true, true),
+
+-- User Group 7: Business & Networking
+('11000000-0000-0000-0000-000000000012', 'tommy@anigmaa.com', 'Tommy Wijaya', 'tommy.ceo', 'Entrepreneur | Startup founder', 'https://i.pravatar.cc/150?img=13', '08123456713', NULL, '1990-10-15', 'Laki-laki', 'Jakarta', ARRAY['Startup', 'Business'], true, true),
+
+('11000000-0000-0000-0000-000000000013', 'sarah@anigmaa.com', 'Sarah Amelia', 'sarahmarketing', 'Marketing | Social media enthusiast', 'https://i.pravatar.cc/150?img=12', '08123456712', NULL, '1997-03-28', 'Perempuan', 'Jakarta', ARRAY['Marketing', 'Social Media'], true, true),
+
+-- User Group 8: Food & Cooking
+('11000000-0000-0000-0000-000000000014', 'hadi@anigmaa.com', 'Hadi Kurniawan', 'chefhadi', 'Chef | Culinary expert', 'https://i.pravatar.cc/150?img=15', '08123456715', NULL, '1987-05-19', 'Laki-laki', 'Bali', ARRAY['Cooking', 'Food'], true, true),
+
+-- User Group 9: Lifestyle & Fashion
+('11000000-0000-0000-0000-000000000015', 'novi@anigmaa.com', 'Novi Indah', 'novistyle', 'Fashion blogger | Style icon', 'https://i.pravatar.cc/150?img=14', '08123456714', NULL, '1999-01-07', 'Perempuan', 'Jakarta', ARRAY['Fashion', 'Style'], true, true),
+
+('11000000-0000-0000-0000-000000000016', 'lina@anigmaa.com', 'Lina Marlina', 'lina.health', 'Nutritionist | Healthy lifestyle', 'https://i.pravatar.cc/150?img=24', '08123456724', NULL, '1990-09-08', 'Perempuan', 'Jakarta', ARRAY['Health', 'Nutrition'], true, true),
+
+-- User Group 10: Others
+('11000000-0000-0000-0000-000000000017', 'putri@anigmaa.com', 'Putri Maharani', 'putrivlogger', 'Vlogger | Content creator', 'https://i.pravatar.cc/150?img=22', '08123456722', NULL, '1998-10-30', 'Perempuan', 'Jakarta', ARRAY['Vlogging', 'Content'], true, true),
+
+('11000000-0000-0000-0000-000000000018', 'bambang@anigmaa.com', 'Bambang Sutopo', 'bambangfilm', 'Film maker | Cinematographer', 'https://i.pravatar.cc/150?img=19', '08123456719', NULL, '1985-12-21', 'Laki-laki', 'Jakarta', ARRAY['Film', 'Photography'], true, true),
+
+('11000000-0000-0000-0000-000000000019', 'indah@anigmaa.com', 'Indah Sari', 'indahdancer', 'Dancer | Choreographer', 'https://i.pravatar.cc/150?img=18', '08123456718', NULL, '1996-02-09', 'Perempuan', 'Jakarta', ARRAY['Dance', 'Arts'], true, true)
+
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================================
+-- CREATE USER SETTINGS, STATS, PRIVACY (required for each user)
+-- ============================================================================
+
+INSERT INTO user_settings (user_id) SELECT id FROM users WHERE email LIKE '%anigmaa.com' ON CONFLICT (user_id) DO NOTHING;
+INSERT INTO user_stats (user_id) SELECT id FROM users WHERE email LIKE '%anigmaa.com' ON CONFLICT (user_id) DO NOTHING;
+INSERT INTO user_privacy (user_id) SELECT id FROM users WHERE email LIKE '%anigmaa.com' ON CONFLICT (user_id) DO NOTHING;
+
+-- ============================================================================
+-- FOLLOWS (create social network - following each other)
+-- ============================================================================
+
+INSERT INTO follows (follower_id, following_id) VALUES
+-- Rudi follows many
+('11000000-0000-0000-0000-000000000001', '11000000-0000-0000-0000-000000000002'),
+('11000000-0000-0000-0000-000000000001', '11000000-0000-0000-0000-000000000004'),
+('11000000-0000-0000-0000-000000000001', '11000000-0000-0000-0000-000000000007'),
+-- Siti follows
+('11000000-0000-0000-0000-000000000002', '11000000-0000-0000-0000-000000000001'),
+('11000000-0000-0000-0000-000000000002', '11000000-0000-0000-0000-000000000014'),
+-- Budi follows
+('11000000-0000-0000-0000-000000000004', '11000000-0000-0000-0000-000000000005'),
+-- Maya follows
+('11000000-0000-0000-0000-000000000007', '11000000-0000-0000-0000-000000000008')
+ON CONFLICT (follower_id, following_id) DO NOTHING;
+
+-- ============================================================================
+-- SUMMARY
+-- ============================================================================
+-- Total Users: 25
+-- Groups: Coffee, Gaming, Creative, Sports, Music, Books, Business, Food, Lifestyle
+-- All users have: settings, stats, privacy
+-- Some follows created for testing
+-- User IDs start with: 11000000-... (easily identifiable)
+-- ============================================================================

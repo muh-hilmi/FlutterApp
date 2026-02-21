@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 /// Enhanced Image widget with comprehensive error handling
 class EnhancedImage extends StatelessWidget {
@@ -131,7 +132,7 @@ class EnhancedImage extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Center(
@@ -141,14 +142,14 @@ class EnhancedImage extends StatelessWidget {
             Icon(
               Icons.image_outlined,
               size: 32,
-              color: Colors.grey[400],
+              color: AppColors.border,
             ),
             const SizedBox(height: 4),
             Text(
               'Loading...',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey[500],
+                color: AppColors.textDisabled,
               ),
             ),
           ],
@@ -162,9 +163,9 @@ class EnhancedImage extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: AppColors.divider),
       ),
       child: errorWidget ??
           Center(
@@ -174,7 +175,7 @@ class EnhancedImage extends StatelessWidget {
                 Icon(
                   Icons.broken_image_outlined,
                   size: 40,
-                  color: Colors.grey[400],
+                  color: AppColors.border,
                 ),
                 const SizedBox(height: 8),
                 if (height != null && height! > 100)
@@ -183,7 +184,7 @@ class EnhancedImage extends StatelessWidget {
                     child: Text(
                       message,
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: AppColors.textTertiary,
                         fontSize: 12,
                       ),
                       textAlign: TextAlign.center,
@@ -200,7 +201,7 @@ class EnhancedImage extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.red[200]!),
       ),
@@ -220,7 +221,7 @@ class EnhancedImage extends StatelessWidget {
                 child: Text(
                   'Unsupported image format',
                   style: TextStyle(
-                    color: Colors.grey,
+                    color: AppColors.textTertiary,
                     fontSize: 12,
                   ),
                   textAlign: TextAlign.center,

@@ -25,11 +25,11 @@ func NewUserRepository(db *sqlx.DB) user.Repository {
 func (r *userRepository) Create(ctx context.Context, u *user.User) error {
 	query := `
 		INSERT INTO users (
-			id, email, username, name, role, name, bio, avatar_url,
+			id, email, username, name, role, bio, avatar_url,
 			phone, date_of_birth, gender, location, interests,
 			created_at, updated_at, is_verified, is_email_verified
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
 		RETURNING id, created_at, updated_at
 	`
 
@@ -42,7 +42,7 @@ func (r *userRepository) Create(ctx context.Context, u *user.User) error {
     }
 
 	return r.db.QueryRowContext(ctx, query,
-		u.ID, u.Email, u.Username, u.Name, u.Role, u.Name, u.Bio, u.AvatarURL, // Mapping Name to name and name for compat
+		u.ID, u.Email, u.Username, u.Name, u.Role, u.Bio, u.AvatarURL,
 		u.Phone, u.DateOfBirth, u.Gender, u.Location, pq.Array(u.Interests),
 		u.CreatedAt, u.UpdatedAt, u.IsVerified, u.IsEmailVerified,
 	).Scan(&u.ID, &u.CreatedAt, &u.UpdatedAt)

@@ -149,7 +149,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                         ? AppColors.textSecondary
                         : AppColors.textEmphasis,
                     fontWeight: _selectedDate == null
-                        ? FontWeight.w400
+                        ? FontWeight.w500
                         : FontWeight.w600,
                   ),
                 ),
@@ -301,7 +301,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                           ? AppColors.textSecondary
                           : AppColors.textEmphasis,
                       fontWeight: _location == null
-                          ? FontWeight.w400
+                          ? FontWeight.w500
                           : FontWeight.w600,
                     ),
                   ),

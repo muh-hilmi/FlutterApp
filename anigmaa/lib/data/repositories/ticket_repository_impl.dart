@@ -174,22 +174,47 @@ class TicketRepositoryImpl implements TicketRepository {
   @override
   Future<Either<Failure, List<Ticket>>> getUserTickets(String userId) async {
     try {
-      final tickets = await localDataSource.getUserTickets(userId);
+      // Fetch from backend API (source of truth)
+      final tickets = await remoteDataSource.getMyTickets();
       return Right(tickets.map((t) => t.toEntity()).toList());
+    } on Failure catch (f) {
+      return Left(f);
     } catch (e) {
-      // Return empty list instead of error if cache is empty
-      return const Right([]);
+      return Left(ServerFailure(e.toString()));
     }
   }
 
   @override
   Future<Either<Failure, List<Ticket>>> getEventTickets(String eventId) async {
     try {
-      final tickets = await localDataSource.getEventTickets(eventId);
+      final tickets = await remoteDataSource.getEventTickets(eventId);
       return Right(tickets.map((t) => t.toEntity()).toList());
+    } on Failure catch (f) {
+      return Left(f);
     } catch (e) {
-      // Return empty list instead of error if cache is empty
       return const Right([]);
+    }
+  }
+
+  @override
+  Future<Either<Failure, Ticket>> checkInByCode(
+    String eventId,
+    String attendanceCode,
+  ) async {
+    try {
+      final ticketModel = await remoteDataSource.checkInTicket(
+        eventId,
+        attendanceCode,
+      );
+      // Best-effort local cache update
+      try {
+        await localDataSource.updateTicket(ticketModel);
+      } catch (_) {}
+      return Right(ticketModel.toEntity());
+    } on Failure catch (f) {
+      return Left(f);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
     }
   }
 

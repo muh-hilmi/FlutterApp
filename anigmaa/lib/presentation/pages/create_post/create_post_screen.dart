@@ -14,6 +14,7 @@ import '../../bloc/posts/posts_bloc.dart';
 import '../../bloc/posts/posts_event.dart';
 import '../../../core/services/upload_service.dart';
 import '../../../core/utils/app_logger.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 class CreatePostSheet extends StatefulWidget {
   const CreatePostSheet({super.key});
@@ -111,7 +112,7 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Colors.grey[300],
+                          color: AppColors.divider,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -135,7 +136,7 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
                               'Batal',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 16,
-                                fontWeight: FontWeight.w400,
+                                fontWeight: FontWeight.w500,
                                 color: Colors.black,
                               ),
                             ),
@@ -201,7 +202,7 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
                                 children: [
                                   CircleAvatar(
                                     radius: 18,
-                                    backgroundColor: Colors.grey[100],
+                                    backgroundColor: AppColors.cardSurface,
                                     backgroundImage: currentUser?.avatar != null
                                         ? NetworkImage(currentUser!.avatar!)
                                         : null,
@@ -247,7 +248,7 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
                                   hintText: "Apa yang lagi seru?",
                                   hintStyle: GoogleFonts.plusJakartaSans(
                                     fontSize: 16,
-                                    color: Colors.grey[400],
+                                    color: AppColors.border,
                                   ),
                                   border: InputBorder.none,
                                   contentPadding: EdgeInsets.zero,
@@ -265,7 +266,7 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
                                     width: double.infinity,
                                     padding: const EdgeInsets.all(16),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[50],
+                                      color: AppColors.surface,
                                       border: Border.all(
                                         color: const Color(0xFFBBC863),
                                         width: 1.5,
@@ -301,7 +302,7 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
                                               style:
                                                   GoogleFonts.plusJakartaSans(
                                                     fontSize: 12,
-                                                    color: Colors.grey[600],
+                                                    color: AppColors.textTertiary,
                                                   ),
                                             ),
                                           ],
@@ -342,7 +343,7 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey[100]!, width: 1)),
+        border: Border(top: BorderSide(color: AppColors.cardSurface, width: 1)),
       ),
       padding: EdgeInsets.only(
         left: 20,
@@ -358,7 +359,7 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+              color: AppColors.textTertiary,
             ),
           ),
           GestureDetector(
@@ -390,7 +391,7 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.7), // Semi-transparent
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey[200]!),
+            border: Border.all(color: AppColors.surfaceAlt),
             boxShadow: [
               BoxShadow(
                 color: const Color(
@@ -470,7 +471,7 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
                             event.location.name,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
-                              color: Colors.grey[500],
+                              color: AppColors.textDisabled,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -602,7 +603,7 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: AppColors.divider,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -638,13 +639,13 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
                           child: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.grey[50],
+                              color: AppColors.surface,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey[200]!),
+                              border: Border.all(color: AppColors.surfaceAlt),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.event, color: Colors.grey[400]),
+                                Icon(Icons.event, color: AppColors.border),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(

@@ -22,10 +22,10 @@ func NewTicketRepository(db *sqlx.DB) ticket.Repository {
 	return &ticketRepository{db: db}
 }
 
-// generateAttendanceCode generates a random 4-character alphanumeric code
+// generateAttendanceCode generates a random 8-character alphanumeric code
 func generateAttendanceCode() (string, error) {
 	const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789" // Excluded I, O, 0, 1 to avoid confusion
-	code := make([]byte, 4)
+	code := make([]byte, 8)
 	for i := range code {
 		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(chars))))
 		if err != nil {

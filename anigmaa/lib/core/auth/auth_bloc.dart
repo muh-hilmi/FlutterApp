@@ -350,12 +350,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthStateData> {
       return TokenValidationResult.networkError;
     }
 
-    // Auth failures (401, 403)
+    // Auth failures (401, 403, 404)
     if (errorMsg.contains('401') ||
         errorMsg.contains('403') ||
+        errorMsg.contains('404') ||
         errorMsg.contains('unauthorized') ||
         errorMsg.contains('invalid token') ||
-        errorMsg.contains('expired token')) {
+        errorMsg.contains('expired token') ||
+        errorMsg.contains('user not found')) {
       return TokenValidationResult.invalid;
     }
 

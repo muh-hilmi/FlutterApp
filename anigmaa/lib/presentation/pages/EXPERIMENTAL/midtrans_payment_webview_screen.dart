@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../core/utils/app_logger.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 /// Midtrans Payment WebView Screen
 ///
@@ -151,12 +152,12 @@ class _MidtransPaymentWebViewScreenState
                     const SizedBox(height: 16),
                     Text(
                       'Memuat halaman pembayaran...',
-                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      style: TextStyle(fontSize: 14, color: AppColors.textTertiary),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Order: ${widget.orderId}',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                      style: TextStyle(fontSize: 12, color: AppColors.textDisabled),
                     ),
                   ],
                 ),
@@ -202,12 +203,12 @@ class _MidtransPaymentWebViewScreenState
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey[800],
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       Text(
                         'Jangan tutup halaman ini sebelum pembayaran selesai',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
                       ),
                     ],
                   ),

@@ -10,6 +10,7 @@ import '../../../data/services/analytics_service.dart';
 import '../../../injection_container.dart';
 import '../../../domain/entities/event.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 /// 📊 Modern Event Analytics Screen
 ///
@@ -196,7 +197,7 @@ class _EventAnalyticsScreenState extends State<EventAnalyticsScreen> {
             textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 14,
-              color: Colors.grey.shade600,
+              color: AppColors.textTertiary,
             ),
           ),
           const SizedBox(height: 24),
@@ -353,7 +354,7 @@ class _EventAnalyticsScreenState extends State<EventAnalyticsScreen> {
               Icon(
                 Icons.calendar_today_rounded,
                 size: 16,
-                color: Colors.grey.shade600,
+                color: AppColors.textTertiary,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -361,7 +362,7 @@ class _EventAnalyticsScreenState extends State<EventAnalyticsScreen> {
                   '${dateFormat.format(_analytics!.startTime)} - ${dateFormat.format(_analytics!.endTime)}',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
-                    color: Colors.grey.shade600,
+                    color: AppColors.textTertiary,
                   ),
                 ),
               ),
@@ -385,7 +386,7 @@ class _EventAnalyticsScreenState extends State<EventAnalyticsScreen> {
       case 'cancelled':
         return const Color(0xFFEF4444).withValues(alpha: 0.1);
       default:
-        return Colors.grey.withValues(alpha: 0.1);
+        return AppColors.textTertiary.withValues(alpha: 0.1);
     }
   }
 
@@ -401,7 +402,7 @@ class _EventAnalyticsScreenState extends State<EventAnalyticsScreen> {
       case 'cancelled':
         return const Color(0xFFEF4444);
       default:
-        return Colors.grey;
+        return AppColors.textTertiary;
     }
   }
 
@@ -494,7 +495,7 @@ class _EventAnalyticsScreenState extends State<EventAnalyticsScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade600,
+                    color: AppColors.textTertiary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -555,7 +556,7 @@ class _EventAnalyticsScreenState extends State<EventAnalyticsScreen> {
           _buildTransactionRow(
             'Total Transaksi',
             _analytics!.transactions.totalTransactions,
-            Colors.grey,
+            AppColors.textTertiary,
             Icons.receipt_long_rounded,
           ),
           const SizedBox(height: 16),
@@ -626,7 +627,7 @@ class _EventAnalyticsScreenState extends State<EventAnalyticsScreen> {
           decoration: BoxDecoration(
             color: count > 0
                 ? color.withValues(alpha: 0.1)
-                : Colors.grey.shade100,
+                : AppColors.cardSurface,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
@@ -634,7 +635,7 @@ class _EventAnalyticsScreenState extends State<EventAnalyticsScreen> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 14,
               fontWeight: FontWeight.w800,
-              color: count > 0 ? color : Colors.grey.shade500,
+              color: count > 0 ? color : AppColors.textDisabled,
             ),
           ),
         ),
@@ -714,7 +715,7 @@ class _EventAnalyticsScreenState extends State<EventAnalyticsScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: Colors.grey.shade600,
+            color: AppColors.textTertiary,
           ),
         ),
         const SizedBox(height: 12),
@@ -833,7 +834,7 @@ class _EventAnalyticsScreenState extends State<EventAnalyticsScreen> {
                           formatter.format(method.totalAmount),
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
-                            color: Colors.grey.shade600,
+                            color: AppColors.textTertiary,
                           ),
                         ),
                       ],
@@ -902,7 +903,7 @@ class _EventAnalyticsScreenState extends State<EventAnalyticsScreen> {
                             value.toInt().toString(),
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 10,
-                              color: Colors.grey.shade600,
+                              color: AppColors.textTertiary,
                             ),
                           );
                         }
@@ -924,7 +925,7 @@ class _EventAnalyticsScreenState extends State<EventAnalyticsScreen> {
                               DateFormat('dd/MM').format(date),
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 10,
-                                color: Colors.grey.shade600,
+                                color: AppColors.textTertiary,
                               ),
                             ),
                           );
@@ -946,7 +947,7 @@ class _EventAnalyticsScreenState extends State<EventAnalyticsScreen> {
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
-                      color: Colors.grey.shade200,
+                      color: AppColors.surfaceAlt,
                       dashArray: [5, 5],
                       strokeWidth: 1,
                     );
@@ -1049,7 +1050,7 @@ class _EventAnalyticsScreenState extends State<EventAnalyticsScreen> {
                   tip,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
-                    color: Colors.grey.shade700,
+                    color: AppColors.textEmphasis,
                     height: 1.4,
                   ),
                 ),

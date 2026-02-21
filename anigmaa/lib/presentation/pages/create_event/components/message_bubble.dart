@@ -45,7 +45,7 @@ class MessageBubble extends StatelessWidget {
                       fontSize: 15,
                       color: message.isBot ? AppColors.textEmphasis : AppColors.white,
                       height: 1.4,
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
             ),

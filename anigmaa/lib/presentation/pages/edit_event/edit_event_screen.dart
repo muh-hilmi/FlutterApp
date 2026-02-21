@@ -15,6 +15,7 @@ import '../../bloc/events/events_event.dart';
 import '../../bloc/my_events/my_events_bloc.dart';
 import '../../bloc/my_events/my_events_event.dart';
 import '../../widgets/common/location_picker.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 /// ✨ Modern Edit Event Screen - Complete UI/UX Redesign
 ///
@@ -319,7 +320,7 @@ class _EditEventScreenState extends State<EditEventScreen>
                   )
                 : Icon(
                     Icons.check_rounded,
-                    color: _hasChanges ? Colors.white : Colors.grey.shade400,
+                    color: _hasChanges ? Colors.white : AppColors.border,
                   ),
             onPressed: (_hasChanges && !_isSaving) ? _saveChanges : null,
           ),
@@ -501,7 +502,7 @@ class _EditEventScreenState extends State<EditEventScreen>
             'Rekomendasi: 16:9, minimal 1080p',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12,
-              color: Colors.grey.shade500,
+              color: AppColors.textDisabled,
             ),
           ),
         ],
@@ -552,11 +553,11 @@ class _EditEventScreenState extends State<EditEventScreen>
               labelStyle: GoogleFonts.plusJakartaSans(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade600,
+                color: AppColors.textTertiary,
               ),
               hintStyle: GoogleFonts.plusJakartaSans(
                 fontSize: 14,
-                color: Colors.grey.shade400,
+                color: AppColors.border,
               ),
               filled: true,
               fillColor: const Color(0xFFF8F9FA),
@@ -566,7 +567,7 @@ class _EditEventScreenState extends State<EditEventScreen>
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
+                borderSide: BorderSide(color: AppColors.surfaceAlt, width: 1),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -612,11 +613,11 @@ class _EditEventScreenState extends State<EditEventScreen>
               labelStyle: GoogleFonts.plusJakartaSans(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade600,
+                color: AppColors.textTertiary,
               ),
               hintStyle: GoogleFonts.plusJakartaSans(
                 fontSize: 14,
-                color: Colors.grey.shade400,
+                color: AppColors.border,
               ),
               filled: true,
               fillColor: const Color(0xFFF8F9FA),
@@ -626,7 +627,7 @@ class _EditEventScreenState extends State<EditEventScreen>
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
+                borderSide: BorderSide(color: AppColors.surfaceAlt, width: 1),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -727,7 +728,7 @@ class _EditEventScreenState extends State<EditEventScreen>
         decoration: BoxDecoration(
           color: const Color(0xFFF8F9FA),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: AppColors.surfaceAlt),
         ),
         child: Row(
           children: [
@@ -736,7 +737,7 @@ class _EditEventScreenState extends State<EditEventScreen>
               size: 24,
               color: _startDate != null
                   ? const Color(0xFFBBC863)
-                  : Colors.grey.shade400,
+                  : AppColors.border,
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -748,7 +749,7 @@ class _EditEventScreenState extends State<EditEventScreen>
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade500,
+                      color: AppColors.textDisabled,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -764,7 +765,7 @@ class _EditEventScreenState extends State<EditEventScreen>
                       fontWeight: FontWeight.w700,
                       color: _startDate != null
                           ? const Color(0xFF1A1A1A)
-                          : Colors.grey.shade400,
+                          : AppColors.border,
                     ),
                   ),
                 ],
@@ -773,7 +774,7 @@ class _EditEventScreenState extends State<EditEventScreen>
             Icon(
               Icons.arrow_forward_ios_rounded,
               size: 16,
-              color: Colors.grey.shade400,
+              color: AppColors.border,
             ),
           ],
         ),
@@ -793,7 +794,7 @@ class _EditEventScreenState extends State<EditEventScreen>
         decoration: BoxDecoration(
           color: const Color(0xFFF8F9FA),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: AppColors.surfaceAlt),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -803,7 +804,7 @@ class _EditEventScreenState extends State<EditEventScreen>
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade500,
+                color: AppColors.textDisabled,
               ),
             ),
             const SizedBox(height: 8),
@@ -816,7 +817,7 @@ class _EditEventScreenState extends State<EditEventScreen>
                 fontWeight: FontWeight.w800,
                 color: time != null
                     ? const Color(0xFF1A1A1A)
-                    : Colors.grey.shade300,
+                    : AppColors.divider,
               ),
             ),
           ],
@@ -939,7 +940,7 @@ class _EditEventScreenState extends State<EditEventScreen>
                 decoration: BoxDecoration(
                   color: isSelected
                       ? const Color(0xFFBBC863)
-                      : Colors.grey.shade100,
+                      : AppColors.cardSurface,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: isSelected
                       ? [
@@ -975,7 +976,7 @@ class _EditEventScreenState extends State<EditEventScreen>
                           fontWeight: FontWeight.w700,
                           color: isSelected
                               ? Colors.white
-                              : Colors.grey.shade700,
+                              : AppColors.textEmphasis,
                         ),
                       ),
                     ),
@@ -1046,7 +1047,7 @@ class _EditEventScreenState extends State<EditEventScreen>
               border: Border.all(
                 color: _isFree
                     ? const Color(0xFFBBC863).withValues(alpha: 0.3)
-                    : Colors.grey.shade200,
+                    : AppColors.surfaceAlt,
               ),
             ),
             child: Row(
@@ -1058,7 +1059,7 @@ class _EditEventScreenState extends State<EditEventScreen>
                   size: 28,
                   color: _isFree
                       ? const Color(0xFFBBC863)
-                      : Colors.grey.shade600,
+                      : AppColors.textTertiary,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -1080,7 +1081,7 @@ class _EditEventScreenState extends State<EditEventScreen>
                             : 'Peserta perlu membeli tiket',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13,
-                          color: Colors.grey.shade600,
+                          color: AppColors.textTertiary,
                         ),
                       ),
                     ],
@@ -1120,7 +1121,7 @@ class _EditEventScreenState extends State<EditEventScreen>
                 labelStyle: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade600,
+                  color: AppColors.textTertiary,
                 ),
                 prefixText: 'Rp ',
                 prefixStyle: GoogleFonts.plusJakartaSans(
@@ -1136,7 +1137,7 @@ class _EditEventScreenState extends State<EditEventScreen>
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
+                  borderSide: BorderSide(color: AppColors.surfaceAlt, width: 1),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -1175,7 +1176,7 @@ class _EditEventScreenState extends State<EditEventScreen>
               labelStyle: GoogleFonts.plusJakartaSans(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade600,
+                color: AppColors.textTertiary,
               ),
               hintText: 'Jumlah peserta',
               suffixText: 'orang',
@@ -1187,7 +1188,7 @@ class _EditEventScreenState extends State<EditEventScreen>
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
+                borderSide: BorderSide(color: AppColors.surfaceAlt, width: 1),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),

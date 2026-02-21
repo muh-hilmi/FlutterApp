@@ -74,7 +74,8 @@ type PurchaseTicketRequest struct {
 
 // CheckInRequest represents check-in data
 type CheckInRequest struct {
-	AttendanceCode string `json:"attendance_code" binding:"required,len=4"`
+	EventID        string `json:"event_id" binding:"required,uuid"`
+	AttendanceCode string `json:"attendance_code" binding:"required,len=8"`
 }
 
 // PurchaseTicketResponse represents the response after purchasing a ticket

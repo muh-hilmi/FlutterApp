@@ -113,7 +113,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
     try {
       final googleAuthService = di.sl<GoogleAuthService>();
-      final googleAccount = await googleAuthService.signInSilently();
+      final googleAccount = await googleAuthService.signInSilently().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => null,
+      );
 
       if (googleAccount != null) {
         // Silent sign-in succeeded, authenticate with backend
@@ -145,7 +148,18 @@ class _SplashScreenState extends State<SplashScreen> {
           ));
 
           if (mounted) {
-            Navigator.pushReplacementNamed(context, '/home');
+            // Check if user has completed profile
+            final user = authResponse.user;
+            final needsProfileCompletion =
+                user.dateOfBirth == null ||
+                user.location == null ||
+                user.location!.isEmpty;
+
+            if (needsProfileCompletion) {
+              Navigator.pushReplacementNamed(context, '/complete-profile');
+            } else {
+              Navigator.pushReplacementNamed(context, '/home');
+            }
           }
           return;
         }

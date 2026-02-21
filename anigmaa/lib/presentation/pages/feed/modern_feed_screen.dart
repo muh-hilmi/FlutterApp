@@ -19,6 +19,7 @@ import '../../widgets/posts/modern_post_card.dart';
 import '../create_post/create_post_screen.dart';
 import '../../../injection_container.dart';
 import '../../../core/utils/image_optimizer.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 class ModernFeedScreen extends StatefulWidget {
   const ModernFeedScreen({super.key});
@@ -451,7 +452,7 @@ class _ModernFeedScreenState extends State<ModernFeedScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey[500],
+                        color: AppColors.textDisabled,
                       ),
                     ),
                   ),

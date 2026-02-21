@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 enum PaymentStatus { paid, pending, failed, refunded, waitlist }
 
@@ -156,7 +157,7 @@ class _HostParticipantListScreenState extends State<HostParticipantListScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+        border: Border(bottom: BorderSide(color: AppColors.surfaceAlt)),
       ),
       child: Row(
         children: [
@@ -174,7 +175,7 @@ class _HostParticipantListScreenState extends State<HostParticipantListScreen> {
                 ),
                 Text(
                   widget.eventName,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -212,7 +213,7 @@ class _HostParticipantListScreenState extends State<HostParticipantListScreen> {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          _buildStatCard('Total', '$total', LucideIcons.users, Colors.grey),
+          _buildStatCard('Total', '$total', LucideIcons.users, AppColors.textTertiary),
           const SizedBox(width: 8),
           _buildStatCard(
             'Paid',
@@ -266,7 +267,7 @@ class _HostParticipantListScreenState extends State<HostParticipantListScreen> {
             ),
             Text(
               label,
-              style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 10, color: AppColors.textTertiary),
             ),
           ],
         ),
@@ -282,7 +283,7 @@ class _HostParticipantListScreenState extends State<HostParticipantListScreen> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: AppColors.cardSurface,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: TextField(
@@ -307,7 +308,7 @@ class _HostParticipantListScreenState extends State<HostParticipantListScreen> {
           IconButton(
             icon: const Icon(LucideIcons.slidersHorizontal),
             onPressed: _showFilterBottomSheet,
-            style: IconButton.styleFrom(backgroundColor: Colors.grey[100]),
+            style: IconButton.styleFrom(backgroundColor: AppColors.cardSurface),
           ),
         ],
       ),
@@ -339,7 +340,7 @@ class _HostParticipantListScreenState extends State<HostParticipantListScreen> {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: Colors.grey[200],
+                backgroundColor: AppColors.surfaceAlt,
                 child: Text(
                   participant.name.substring(0, 1).toUpperCase(),
                   style: const TextStyle(fontWeight: FontWeight.bold),
@@ -389,14 +390,14 @@ class _HostParticipantListScreenState extends State<HostParticipantListScreen> {
                         Icon(
                           LucideIcons.calendar,
                           size: 10,
-                          color: Colors.grey[500],
+                          color: AppColors.textDisabled,
                         ),
                         const SizedBox(width: 2),
                         Text(
                           participant.joinDate,
                           style: TextStyle(
                             fontSize: 11,
-                            color: Colors.grey[600],
+                            color: AppColors.textTertiary,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -406,7 +407,7 @@ class _HostParticipantListScreenState extends State<HostParticipantListScreen> {
                   ],
                 ),
               ),
-              Icon(LucideIcons.chevronRight, size: 18, color: Colors.grey[400]),
+              Icon(LucideIcons.chevronRight, size: 18, color: AppColors.border),
             ],
           ),
         ),
@@ -501,14 +502,14 @@ class _HostParticipantListScreenState extends State<HostParticipantListScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(LucideIcons.users, size: 48, color: Colors.grey[300]),
+          Icon(LucideIcons.users, size: 48, color: AppColors.divider),
           const SizedBox(height: 16),
           Text(
             'Tidak Ada Peserta',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: Colors.grey[700],
+              color: AppColors.textEmphasis,
             ),
           ),
           const SizedBox(height: 4),
@@ -516,7 +517,7 @@ class _HostParticipantListScreenState extends State<HostParticipantListScreen> {
             _filterStatus != null || _filterCheckIn != null
                 ? 'Coba ubah filter pencarian'
                 : 'Belum ada yang bergabung',
-            style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 13, color: AppColors.textTertiary),
           ),
         ],
       ),
@@ -653,10 +654,10 @@ class _HostParticipantListScreenState extends State<HostParticipantListScreen> {
       selectedColor: const Color(0xFFBBC863).withValues(alpha: 0.2),
       checkmarkColor: const Color(0xFFBBC863),
       labelStyle: TextStyle(
-        color: isSelected ? const Color(0xFFBBC863) : Colors.grey[700],
+        color: isSelected ? const Color(0xFFBBC863) : AppColors.textEmphasis,
       ),
       side: BorderSide(
-        color: isSelected ? const Color(0xFFBBC863) : Colors.grey[300]!,
+        color: isSelected ? const Color(0xFFBBC863) : AppColors.divider,
       ),
     );
   }
@@ -672,7 +673,7 @@ class _HostParticipantListScreenState extends State<HostParticipantListScreen> {
           children: [
             CircleAvatar(
               radius: 36,
-              backgroundColor: Colors.grey[200],
+              backgroundColor: AppColors.surfaceAlt,
               child: Text(
                 participant.name.substring(0, 1).toUpperCase(),
                 style: const TextStyle(
@@ -688,13 +689,13 @@ class _HostParticipantListScreenState extends State<HostParticipantListScreen> {
             ),
             Text(
               participant.email,
-              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 13, color: AppColors.textTertiary),
             ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: AppColors.cardSurface,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -749,7 +750,7 @@ class _HostParticipantListScreenState extends State<HostParticipantListScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+          Text(label, style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
           Text(
             value,
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),

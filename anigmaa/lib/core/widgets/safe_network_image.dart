@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 /// A safe network image widget that handles decoding errors gracefully
 class SafeNetworkImage extends StatefulWidget {
@@ -101,7 +102,7 @@ class _SafeNetworkImageState extends State<SafeNetworkImage>
       width: widget.width,
       height: widget.height,
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Center(
@@ -110,7 +111,7 @@ class _SafeNetworkImageState extends State<SafeNetworkImage>
           height: 24,
           child: CircularProgressIndicator(
             strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.grey[400]!),
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.border),
           ),
         ),
       ),
@@ -122,21 +123,21 @@ class _SafeNetworkImageState extends State<SafeNetworkImage>
       width: widget.width,
       height: widget.height,
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.broken_image_outlined, size: 40, color: Colors.grey[400]),
+          Icon(Icons.broken_image_outlined, size: 40, color: AppColors.border),
           const SizedBox(height: 8),
           if (widget.height != null && widget.height! > 100)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'Failed to load image',
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -150,7 +151,7 @@ class _SafeNetworkImageState extends State<SafeNetworkImage>
       width: widget.width,
       height: widget.height,
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.red[200]!),
       ),
@@ -168,7 +169,7 @@ class _SafeNetworkImageState extends State<SafeNetworkImage>
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'Unsupported image format',
-                style: TextStyle(color: Colors.grey, fontSize: 12),
+                style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
                 textAlign: TextAlign.center,
               ),
             ),

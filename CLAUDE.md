@@ -107,26 +107,50 @@ PostgreSQL + PostGIS
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| Frontend | 🟡 In Progress | Core screens exist, needs keys |
-| Backend | 🟡 In Progress | API defined, not running |
-| Tests | 🔴 Not Started | Appium setup done, need tests |
+| Frontend | 🟢 ~85% | All V1 screens built, design system enforced, BLoCs wired |
+| Backend | 🟡 ~90% | All handlers exist, not running (needs docker-compose up) |
+| Tests | 🔴 0% | Appium setup done, zero tests written — P0 blocker |
 | Docs | 🟢 Complete | BLUEPRINT folder complete |
+| Design System | 🟢 Complete | AppColors + AppTextStyles enforced across all screens |
+| DI / Architecture | 🟢 Complete | 13 BLoCs, 30+ UseCases, all repos wired in injection_container |
+
+### Screen Completion
+
+| Screen | Status |
+|--------|--------|
+| splash_screen | 🟡 Partial — auth flow logic done, timeout bug fixed 2025-02 |
+| login_screen | 🟢 Complete |
+| complete_profile_screen | 🟢 Complete |
+| discover_screen | 🟢 Complete — map + ranked feed + filters |
+| event_detail_screen | 🟢 Complete — QnA, attendees, ticket purchase |
+| profile_screen | 🟢 Complete — reference UI style |
+| edit_profile_screen | 🟡 Partial |
+| my_tickets_screen | 🟡 Partial — EXPERIMENTAL flag |
+| qr_checkin_screen | 🟢 Complete |
+| midtrans_payment_screen | 🟢 Complete |
+| home_screen | 🟡 Partial — TabController stub |
+| onboarding_screen | 🔴 Stub |
+| search_screen | 🔴 Stub |
 
 ### Immediate Tasks
 
 | Priority | Task | Owner | Status |
 |----------|------|-------|--------|
-| P0 | Add test keys to all screens | Agent | 🔴 Todo |
-| P0 | Implement Appium tests | Agent | 🔴 Todo |
-| P0 | Fix profile completion bug | Agent | 🟡 Done |
-| P1 | Start backend server | DevOps | 🔴 Todo |
-| P1 | Implement photo upload | Agent | 🔴 Todo |
+| P0 | Implement Appium tests (auth + event + ticket flows) | Agent | 🔴 Todo |
+| P0 | Start backend server (`docker compose up`) | DevOps | 🔴 Todo |
+| P1 | Implement photo upload (profile + events) | Agent | 🔴 Todo |
+| P1 | Complete home_screen tabs | Agent | 🔴 Todo |
+| P1 | E2E test: frontend ↔ backend integration | Agent | 🔴 Todo |
+| P2 | Complete onboarding flow | Agent | 🔴 Todo |
+| Done | Fix profile completion bug | Agent | 🟢 Done |
+| Done | Enforce design system tokens across all screens | Agent | 🟢 Done |
+| Done | Fix splash screen Google sign-in silent timeout hang | Agent | 🟢 Done 2025-02 |
 
 ### This Week's Focus
 
-1. **Complete Auth Flow** → Appium tests pass
-2. **Complete Event Flow** → Appium tests pass
-3. **Backend Running** → Can do E2E tests
+1. **Start Backend** → `docker compose up` → API live
+2. **Write Appium Tests** → auth flow → event flow → ticket purchase
+3. **E2E Verification** → frontend ↔ backend working together
 
 ---
 

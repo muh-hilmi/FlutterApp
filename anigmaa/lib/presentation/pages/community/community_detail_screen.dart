@@ -6,6 +6,7 @@ import '../profile/profile_screen.dart';
 import 'community_utils.dart';
 import 'community_cards.dart';
 import '../profile/sticky_tab_bar.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 class CommunityDetailScreen extends StatefulWidget {
   final Community community;
@@ -56,7 +57,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen>
               TabBar(
                 controller: _tabController,
                 labelColor: Colors.black,
-                unselectedLabelColor: Colors.grey,
+                unselectedLabelColor: AppColors.textTertiary,
                 indicatorColor: const Color(0xFFBBC863),
                 indicatorWeight: 3,
                 labelStyle: const TextStyle(
@@ -154,24 +155,24 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen>
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.people, size: 16, color: Colors.grey[600]),
+              Icon(Icons.people, size: 16, color: AppColors.textTertiary),
               const SizedBox(width: 4),
               Text(
                 '${widget.community.memberCount} members',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[600],
+                  color: AppColors.textTertiary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(width: 16),
-              Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+              Icon(Icons.location_on, size: 16, color: AppColors.textTertiary),
               const SizedBox(width: 4),
               Text(
                 widget.community.location,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[600],
+                  color: AppColors.textTertiary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -182,7 +183,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen>
             widget.community.description,
             style: TextStyle(
               fontSize: 15,
-              color: Colors.grey[700],
+              color: AppColors.textEmphasis,
               height: 1.5,
             ),
           ),
@@ -197,7 +198,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen>
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: _isJoined
-                    ? Colors.grey[200]
+                    ? AppColors.surfaceAlt
                     : const Color(0xFFBBC863),
                 foregroundColor: _isJoined ? Colors.black87 : Colors.white,
                 elevation: 0,
@@ -226,13 +227,13 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.lock_outline, size: 64, color: Colors.grey),
+            const Icon(Icons.lock_outline, size: 64, color: AppColors.textTertiary),
             const SizedBox(height: 16),
             Text(
               'Join community untuk lihat feed',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey[600],
+                color: AppColors.textTertiary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -245,20 +246,20 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey),
+          const Icon(Icons.chat_bubble_outline, size: 64, color: AppColors.textTertiary),
           const SizedBox(height: 16),
           Text(
             'Belum ada postingan',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey[600],
+              color: AppColors.textTertiary,
               fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Jadilah yang pertama posting!',
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            style: TextStyle(fontSize: 14, color: AppColors.textDisabled),
           ),
         ],
       ),
@@ -270,13 +271,13 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.event_busy, size: 64, color: Colors.grey),
+          const Icon(Icons.event_busy, size: 64, color: AppColors.textTertiary),
           const SizedBox(height: 16),
           Text(
             'Belum ada event',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey[600],
+              color: AppColors.textTertiary,
               fontWeight: FontWeight.w500,
             ),
           ),

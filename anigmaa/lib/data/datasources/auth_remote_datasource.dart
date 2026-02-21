@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import '../../core/api/dio_client.dart';
 import '../../core/errors/failures.dart';
@@ -62,10 +63,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<AuthResponse> loginWithGoogle(String idToken) async {
     try {
+      // Wrap with explicit timeout to prevent infinite loading when retry queue traps the request
+      // This ensures we get an exception even if the RetryInterceptor queues the request
       final response = await dioClient.post(
         '/auth/google',
         data: {
           'idToken': idToken,
+        },
+      ).timeout(
+        const Duration(seconds: 20),
+        onTimeout: () {
+          throw TimeoutException('Login request timeout - server unreachable');
         },
       );
 
@@ -80,6 +88,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       } else {
         throw ServerFailure('Failed to authenticate with Google');
       }
+    } on TimeoutException catch (_) {
+      // Explicit timeout from .timeout() wrapper - backend is unreachable after all retries
+      // This is different from Dio's timeout - it means the retry queue also timed out
+      throw NetworkFailure('Server lagi sibuk atau mati 😴\n\n'
+          'Coba:\n'
+          '• Cek koneksi internet\n'
+          '• Tunggu bentar, coba lagi');
     } on DioException catch (e) {
       throw _handleDioException(e);
     }
@@ -164,11 +179,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   Failure _handleDioException(DioException e) {
+    final errorMsg = e.message?.toLowerCase() ?? '';
+    final errorStr = e.error?.toString().toLowerCase() ?? '';
+
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return NetworkFailure('Connection timeout');
+        return _classifyTimeoutError(errorMsg, errorStr);
+
       case DioExceptionType.badResponse:
         final statusCode = e.response?.statusCode;
         final message = e.response?.data['message'] ?? 'Server error';
@@ -181,12 +200,73 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         } else {
           return ServerFailure(message);
         }
+
       case DioExceptionType.cancel:
-        return NetworkFailure('Request cancelled');
+        return NetworkFailure('Request dibatalkan');
+
       case DioExceptionType.connectionError:
-        return NetworkFailure('No internet connection');
+      case DioExceptionType.unknown:
+        return _classifyConnectionError(errorMsg, errorStr, e);
+
+      case DioExceptionType.badCertificate:
+        return NetworkFailure('SSL-nya bermasalah 🔒\n\n'
+            'Cek jam/tanggal di HP lo.');
+
       default:
-        return ServerFailure('Unexpected error occurred');
+        return ServerFailure('Error bingung 🤔\n\nCoba lagi ya.');
     }
+  }
+
+  /// Classify timeout errors more specifically
+  Failure _classifyTimeoutError(String errorMsg, String errorStr) {
+    if (errorMsg.contains('connection') || errorMsg.contains('connect')) {
+      return NetworkFailure('Server gabisa dihubungi 😵‍💫\n\n'
+          'Coba:\n'
+          '• Cek internet lo\n'
+          '• Tunggu bentar, coba lagi');
+    }
+    if (errorMsg.contains('receive') || errorMsg.contains('response')) {
+      return NetworkFailure('Server lagi lemot banget 🐌\n\n'
+          'Sabar ya, coba lagi bentar.');
+    }
+    return NetworkFailure('Waktunya habis 🕐\n\nCoba lagi deh.');
+  }
+
+  /// Classify connection errors to identify specific issues
+  Failure _classifyConnectionError(String errorMsg, String errorStr, DioException e) {
+    // Connection refused = backend not running OR wrong port
+    if (errorMsg.contains('connection refused') ||
+        errorMsg.contains('errno') ||
+        errorStr.contains('connection refused')) {
+      return NetworkFailure('Server lagi mati 🔴\n\n'
+          'Backend-nya belum dinyalain.\n'
+          'Hubungi admin buat nyalain server.');
+    }
+
+    // Failed host lookup = DNS issue (no internet OR wrong URL)
+    if (errorMsg.contains('failed host lookup') ||
+        errorMsg.contains('nodename') ||
+        errorMsg.contains('servname')) {
+      return NetworkFailure('Ilang koneksi 📡\n\n'
+          'Wifi / data lo mati. Cek dulu deh.');
+    }
+
+    // Network unreachable = no internet at all
+    if (errorMsg.contains('network is unreachable') ||
+        errorMsg.contains('no internet') ||
+        errorMsg.contains('offline')) {
+      return NetworkFailure('Ga ada internet 📵\n\n'
+          'Nyalain wifi / data dulu ya.');
+    }
+
+    // Socket error = various network issues
+    if (errorMsg.contains('socket') || errorMsg.contains('broken pipe')) {
+      return NetworkFailure('Koneksi putus 🔌\n\n'
+          'Wifi ilang kali. Cek lagi deh.');
+    }
+
+    // Default connection error
+    return NetworkFailure('Server gabisa dihubungi 😢\n\n'
+        'Cek internet lo ya.');
   }
 }

@@ -181,7 +181,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           TextSpan(
                             text: ' ${notification.message}',
                             style: const TextStyle(
-                              fontWeight: FontWeight.w400,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],

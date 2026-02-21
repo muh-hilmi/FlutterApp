@@ -113,7 +113,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: AppColors.secondary.withValues(alpha: 0.15),
+                              color: AppColors.secondary.withValues(
+                                alpha: 0.15,
+                              ),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Icon(
@@ -169,10 +171,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           children: [
                             Text(
                               'Gas Mulai!',
-                              style: AppTextStyles.bodyLargeBold,
+                              style: AppTextStyles.bodyLargeBold.copyWith(
+                                color: AppColors.white,
+                              ),
                             ),
                             const SizedBox(width: 8),
-                            const Icon(Icons.arrow_forward_rounded, size: 20),
+                            const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 20,
+                              color: AppColors.white,
+                            ),
                           ],
                         ),
                       ),

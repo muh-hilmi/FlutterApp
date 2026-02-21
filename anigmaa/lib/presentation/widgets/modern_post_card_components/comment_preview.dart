@@ -165,7 +165,7 @@ class _CommentPreviewState extends State<CommentPreview> {
                       TextSpan(
                         text: comment['content'],
                         style: AppTextStyles.bodySmall.copyWith(
-                          fontWeight: FontWeight.w400,
+                          fontWeight: FontWeight.w500,
                           fontSize: 13,
                           color: AppColors.textPrimary,
                         ),

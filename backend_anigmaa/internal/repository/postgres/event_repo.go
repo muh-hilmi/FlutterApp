@@ -131,7 +131,9 @@ func (r *eventRepository) List(ctx context.Context, filter *event.EventFilter, u
 			(SELECT COUNT(*) FROM event_interests WHERE event_id = e.id) as interests_count,
 			u.name as host_name, u.avatar_url as host_avatar_url,
 			(SELECT COUNT(*) FROM event_attendees WHERE event_id = e.id AND status = 'confirmed') as attendees_count,
-			EXISTS(SELECT 1 FROM event_interests WHERE event_id = e.id AND user_id = $1) as is_user_interested
+			EXISTS(SELECT 1 FROM event_interests WHERE event_id = e.id AND user_id = $1) as is_user_interested,
+		EXISTS(SELECT 1 FROM event_attendees WHERE event_id = e.id AND user_id = $1 AND status = 'confirmed') as is_user_attending,
+		(e.host_id = $1) as is_user_host
 		FROM events e
 		INNER JOIN users u ON e.host_id = u.id
 		WHERE 1=1

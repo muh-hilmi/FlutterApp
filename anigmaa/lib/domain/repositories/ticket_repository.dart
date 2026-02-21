@@ -31,8 +31,11 @@ abstract class TicketRepository {
   /// Get ticket by attendance code
   Future<Either<Failure, Ticket>> getTicketByCode(String attendanceCode);
 
-  /// Check in a ticket
+  /// Check in a ticket by ID (attendee flow)
   Future<Either<Failure, Ticket>> checkInTicket(String ticketId);
+
+  /// Check in by attendance code for a specific event (host flow)
+  Future<Either<Failure, Ticket>> checkInByCode(String eventId, String attendanceCode);
 
   /// Cancel a ticket
   Future<Either<Failure, Ticket>> cancelTicket(String ticketId);

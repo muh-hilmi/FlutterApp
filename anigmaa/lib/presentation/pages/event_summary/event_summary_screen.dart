@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../domain/entities/event.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 /// Screen displaying comprehensive analytics summary for completed events
 /// Features:
@@ -305,10 +306,10 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
       key: key,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.grey[200]!,
+          color: AppColors.surfaceAlt,
           width: 1,
         ),
       ),
@@ -339,7 +340,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
+                        color: AppColors.textEmphasis,
                       ),
                     ),
                   ],
@@ -360,7 +361,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
             subtitle,
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey[600],
+              color: AppColors.textTertiary,
             ),
           ),
           const SizedBox(height: 12),
@@ -368,7 +369,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
               value: progress.clamp(0.0, 1.0),
-              backgroundColor: Colors.grey[200],
+              backgroundColor: AppColors.surfaceAlt,
               valueColor: AlwaysStoppedAnimation<Color>(progressColor),
               minHeight: 8,
             ),
@@ -396,12 +397,12 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isFree
-            ? Colors.grey[100]
+            ? AppColors.cardSurface
             : const Color(0xFFBBC863).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isFree
-              ? Colors.grey[200]!
+              ? AppColors.surfaceAlt
               : const Color(0xFFBBC863).withValues(alpha: 0.3),
           width: 1,
         ),
@@ -415,14 +416,14 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: isFree
-                      ? Colors.grey[300]
+                      ? AppColors.divider
                       : const Color(0xFFBBC863).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   isFree ? Icons.money_off_rounded : Icons.payments_rounded,
                   size: 20,
-                  color: isFree ? Colors.grey[600] : const Color(0xFFBBC863),
+                  color: isFree ? AppColors.textTertiary : const Color(0xFFBBC863),
                 ),
               ),
               const SizedBox(width: 12),
@@ -435,7 +436,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
+                        color: AppColors.textEmphasis,
                       ),
                     ),
                     if (!isFree && pricePerTicket != null)
@@ -443,7 +444,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
                         'Harga tiket: ${formatter.format(pricePerTicket)}',
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.grey[600],
+                          color: AppColors.textTertiary,
                         ),
                       ),
                   ],
@@ -454,7 +455,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: isFree ? Colors.grey[700] : const Color(0xFFBBC863),
+                  color: isFree ? AppColors.textEmphasis : const Color(0xFFBBC863),
                 ),
               ),
             ],
@@ -465,7 +466,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
               'Pendapatan kotor dari penjualan tiket. Belum dipotong biaya platform.',
               style: TextStyle(
                 fontSize: 11,
-                color: Colors.grey[600],
+                color: AppColors.textTertiary,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -553,7 +554,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.grey[200]!,
+          color: AppColors.surfaceAlt,
           width: 1,
         ),
       ),
@@ -581,7 +582,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey[700],
+                    color: AppColors.textEmphasis,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -599,7 +600,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
           Icon(
             Icons.info_outline_rounded,
             size: 16,
-            color: Colors.grey[400],
+            color: AppColors.border,
           ),
         ],
       ),
@@ -655,10 +656,10 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
             key: Key('event_summary_doc_empty_${widget.event.id}'),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.grey[200]!,
+                color: AppColors.surfaceAlt,
                 width: 1,
               ),
             ),
@@ -667,7 +668,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
                 Icon(
                   Icons.photo_library_outlined,
                   size: 40,
-                  color: Colors.grey[400],
+                  color: AppColors.border,
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -675,7 +676,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: Colors.grey[700],
+                    color: AppColors.textEmphasis,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -683,7 +684,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
                   'Upload foto & video momen seru event ini',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: AppColors.textTertiary,
                   ),
                 ),
               ],
@@ -730,10 +731,10 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
             key: Key('event_summary_feedback_empty_${widget.event.id}'),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.grey[200]!,
+                color: AppColors.surfaceAlt,
                 width: 1,
               ),
             ),
@@ -742,7 +743,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
                 Icon(
                   Icons.rate_review_outlined,
                   size: 40,
-                  color: Colors.grey[400],
+                  color: AppColors.border,
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -750,7 +751,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: Colors.grey[700],
+                    color: AppColors.textEmphasis,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -758,7 +759,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
                   'Review dari peserta akan muncul di sini',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: AppColors.textTertiary,
                   ),
                 ),
               ],
@@ -793,10 +794,10 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
             key: Key('event_summary_posts_empty_${widget.event.id}'),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.grey[200]!,
+                color: AppColors.surfaceAlt,
                 width: 1,
               ),
             ),
@@ -805,7 +806,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
                 Icon(
                   Icons.article_outlined,
                   size: 40,
-                  color: Colors.grey[400],
+                  color: AppColors.border,
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -813,7 +814,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: Colors.grey[700],
+                    color: AppColors.textEmphasis,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -821,7 +822,7 @@ class _EventSummaryScreenState extends State<EventSummaryScreen> {
                   'Postingan terkait event ini akan muncul di sini',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: AppColors.textTertiary,
                   ),
                 ),
               ],

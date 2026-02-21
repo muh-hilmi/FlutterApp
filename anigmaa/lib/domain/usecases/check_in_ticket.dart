@@ -15,7 +15,15 @@ class CheckInTicket implements UseCase<Ticket, CheckInTicketParams> {
 
   @override
   Future<Either<Failure, Ticket>> call(CheckInTicketParams params) async {
-    // If attendance code provided, find ticket first
+    // Host flow: event_id + attendance_code → call backend directly
+    if (params.eventId != null && params.attendanceCode != null) {
+      return await repository.checkInByCode(
+        params.eventId!,
+        params.attendanceCode!,
+      );
+    }
+
+    // If attendance code provided (no eventId), find ticket locally first
     if (params.attendanceCode != null) {
       final ticketResult = await repository.getTicketByCode(
         params.attendanceCode!,
@@ -35,10 +43,12 @@ class CheckInTicket implements UseCase<Ticket, CheckInTicketParams> {
 class CheckInTicketParams extends Equatable {
   final String? ticketId;
   final String? attendanceCode;
+  final String? eventId;
 
   const CheckInTicketParams({
     this.ticketId,
     this.attendanceCode,
+    this.eventId,
   }) : assert(
           ticketId != null || attendanceCode != null,
           'Either ticketId or attendanceCode must be provided',
@@ -46,12 +56,14 @@ class CheckInTicketParams extends Equatable {
 
   const CheckInTicketParams.byId(String id)
       : ticketId = id,
-        attendanceCode = null;
+        attendanceCode = null,
+        eventId = null;
 
   const CheckInTicketParams.byCode(String code)
       : ticketId = null,
-        attendanceCode = code;
+        attendanceCode = code,
+        eventId = null;
 
   @override
-  List<Object?> get props => [ticketId, attendanceCode];
+  List<Object?> get props => [ticketId, attendanceCode, eventId];
 }

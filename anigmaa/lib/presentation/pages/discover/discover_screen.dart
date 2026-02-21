@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:anigmaa/domain/entities/event.dart';
-import 'package:anigmaa/domain/entities/event_category.dart'; // Contains EventStatus & displayName extension
+import 'package:anigmaa/domain/entities/event_category.dart';
 import 'package:anigmaa/presentation/bloc/events/events_bloc.dart';
 import 'package:anigmaa/presentation/bloc/events/events_event.dart';
 import 'package:anigmaa/presentation/bloc/events/events_state.dart';
@@ -17,14 +18,10 @@ import 'package:anigmaa/presentation/pages/event_detail/event_detail_screen.dart
 import '../../bloc/ranked_feed/ranked_feed_bloc.dart';
 import '../../bloc/ranked_feed/ranked_feed_event.dart';
 import '../../bloc/ranked_feed/ranked_feed_state.dart';
-import 'components/discover_search_bar.dart';
-import 'widgets/discover_header_new.dart';
-import 'widgets/discover_map_view.dart';
-import 'widgets/event_card.dart';
 import '../../../injection_container.dart';
-import '../../widgets/common/empty_state_widget.dart';
-import '../../widgets/common/error_state_widget.dart';
-import '../../widgets/common/loading_widget.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
+import 'dart:math';
 
 class DiscoverScreen extends StatefulWidget {
   const DiscoverScreen({super.key});
@@ -34,23 +31,149 @@ class DiscoverScreen extends StatefulWidget {
 }
 
 class DiscoverScreenState extends State<DiscoverScreen>
-    with AutomaticKeepAliveClientMixin {
-  final ScrollController _scrollController = ScrollController();
+    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   final TextEditingController _searchController = TextEditingController();
   late RankedFeedBloc _rankedFeedBloc;
+  final Completer<GoogleMapController> _mapController =
+      Completer<GoogleMapController>();
 
   List<Event> _allEvents = [];
   List<Event> _filteredEvents = [];
   Map<String, List<String>> _rankedEventIds = {};
-  String _selectedMode = 'trending';
-  bool _isMapView = false;
-  LatLng _currentPosition = const LatLng(-6.2088, 106.8456); // Default: Jakarta
+  final String _selectedMode = 'trending';
+  String _selectedCategory = 'all';
+  LatLng _currentPosition = const LatLng(-6.2088, 106.8456);
   String? _locationName;
 
   // Flags
   bool _hasTriggeredRanking = false;
   bool _hasAppliedRankedResults = false;
   bool _hasAppliedInitialFilter = false;
+  bool _hasCenteredMap = false;
+  bool _isMapReady = false;
+
+  // Map style for dark theme
+  final String _mapStyle = '''
+  [
+    {
+      "featureType": "all",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#242f3e"
+        }
+      ]
+    },
+    {
+      "featureType": "all",
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        {
+          "lightness": -80
+        }
+      ]
+    },
+    {
+      "featureType": "all",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#746855"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "visibility": "off"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative.locality",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#d59563"
+        }
+      ]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#d59563"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#263c3f"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#6b9a76"
+        }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "geometry.fill",
+      "stylers": [
+        {
+          "color": "#38414e"
+        }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#98a0b0"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#17263c"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#515c6d"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        {
+          "lightness": -20
+        }
+      ]
+    }
+  ]
+  ''';
 
   @override
   bool get wantKeepAlive => true;
@@ -58,10 +181,19 @@ class DiscoverScreenState extends State<DiscoverScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _rankedFeedBloc = sl<RankedFeedBloc>();
     _searchController.addListener(_filterEvents);
     _loadInitialData();
     _determinePosition();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed && _isMapReady) {
+      _centerMapOnLocation(_currentPosition);
+    }
   }
 
   void _loadInitialData() {
@@ -69,69 +201,22 @@ class DiscoverScreenState extends State<DiscoverScreen>
     context.read<PostsBloc>().add(LoadPosts());
   }
 
-  // Basic Geolocator implementation with better accuracy and feedback
   Future<void> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // 1. Check Service
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Location services are disabled. Please enable GPS.'),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-      return;
-    }
+    if (!serviceEnabled) return;
 
-    // 2. Check Permissions
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Location permissions are denied'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-        return;
-      }
+      if (permission == LocationPermission.denied) return;
     }
 
-    if (permission == LocationPermission.deniedForever) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Location permissions are permanently denied. Please check settings.',
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-      return;
-    }
+    if (permission == LocationPermission.deniedForever) return;
 
-    // 3. Get Position
     try {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Updating location...'),
-            duration: Duration(seconds: 1),
-            backgroundColor: Color(0xFFBBC863),
-          ),
-        );
-      }
-
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
@@ -140,11 +225,15 @@ class DiscoverScreenState extends State<DiscoverScreen>
       );
 
       if (mounted) {
+        final newPosition = LatLng(position.latitude, position.longitude);
         setState(() {
-          _currentPosition = LatLng(position.latitude, position.longitude);
+          _currentPosition = newPosition;
         });
 
-        // 4. Reverse Geocode to get address name
+        if (!_hasCenteredMap && _mapController.isCompleted) {
+          _centerMapOnLocation(newPosition);
+        }
+
         try {
           List<Placemark> placemarks = await placemarkFromCoordinates(
             position.latitude,
@@ -153,11 +242,9 @@ class DiscoverScreenState extends State<DiscoverScreen>
 
           if (placemarks.isNotEmpty) {
             final place = placemarks.first;
-            // Construct a readable name e.g. "Kebayoran Baru, Jakarta Selatan"
             final name = [
               place.subLocality,
               place.locality,
-              // place.subAdministrativeArea,
             ].where((e) => e != null && e.isNotEmpty).join(', ');
 
             if (mounted) {
@@ -166,41 +253,42 @@ class DiscoverScreenState extends State<DiscoverScreen>
               });
             }
           }
-        } catch (geocodeError) {
-          debugPrint('Geocoding error: $geocodeError');
-        }
-
-        // Optional: Call BLOC here to update user location in backend/state if needed
-        // context.read<UserBloc>().add(UpdateUserLocation(lat: position.latitude, lng: position.longitude));
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Location updated: ${_locationName ?? 'Jakarta'}'),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 2),
-            ),
-          );
+        } catch (e) {
+          debugPrint('Geocoding error: $e');
         }
       }
     } catch (e) {
       debugPrint('Error getting location: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to get location: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
+    }
+  }
+
+  Future<void> _centerMapOnLocation(LatLng position) async {
+    try {
+      final controller = await _mapController.future;
+      await controller.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: position,
+            zoom: 14.0,
           ),
-        );
-      }
+        ),
+      );
+      setState(() {
+        _hasCenteredMap = true;
+        _isMapReady = true;
+      });
+    } catch (e) {
+      debugPrint('Error centering map: $e');
+      setState(() {
+        _isMapReady = true;
+      });
     }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
-    _scrollController.dispose();
     _rankedFeedBloc.close();
     super.dispose();
   }
@@ -209,25 +297,32 @@ class DiscoverScreenState extends State<DiscoverScreen>
     _applyModeFilter();
   }
 
-  void _changeMode(String mode) {
+  void _changeCategory(String category) {
     setState(() {
-      _selectedMode = mode;
-      // Reset flags when mode changes? Maybe not for ranking if we want to keep it.
+      _selectedCategory = category;
     });
     _applyModeFilter();
   }
 
   void _applyModeFilter() {
     final searchQuery = _searchController.text.toLowerCase();
-    var filtered = _allEvents;
+    var filtered = List<Event>.from(_allEvents);
 
-    // Status filter
+    // Filter by status
     filtered = filtered.where((event) {
       return event.status == EventStatus.upcoming ||
           event.status == EventStatus.ongoing;
     }).toList();
 
-    // Search filter
+    // Filter by category
+    if (_selectedCategory != 'all') {
+      filtered = filtered.where((event) {
+        final categoryLower = event.category.displayName.toLowerCase();
+        return categoryLower == _selectedCategory.toLowerCase();
+      }).toList();
+    }
+
+    // Filter by search query
     if (searchQuery.isNotEmpty) {
       filtered = filtered.where((event) {
         return event.title.toLowerCase().contains(searchQuery) ||
@@ -237,7 +332,7 @@ class DiscoverScreenState extends State<DiscoverScreen>
       }).toList();
     }
 
-    // Ranking Logic
+    // Apply ranking if available
     if (_rankedEventIds.isNotEmpty &&
         _rankedEventIds.containsKey(_selectedMode)) {
       final rankedIds = _rankedEventIds[_selectedMode]!;
@@ -256,53 +351,10 @@ class DiscoverScreenState extends State<DiscoverScreen>
     });
   }
 
-  Future<void> _refreshData() async {
-    context.read<EventsBloc>().add(LoadEventsByMode(mode: _selectedMode));
-    context.read<PostsBloc>().add(LoadPosts());
-    _determinePosition();
-    await Future.delayed(const Duration(seconds: 1));
-  }
-
-  void _refreshLocation() {
-    _determinePosition();
-  }
-
-  String _getUserFriendlyError(String technicalError) {
-    final lowerError = technicalError.toLowerCase();
-
-    if (lowerError.contains('network') ||
-        lowerError.contains('connection') ||
-        lowerError.contains('socket')) {
-      return 'Koneksi internet bermasalah.\nCek koneksi kamu ya! 📡';
-    } else if (lowerError.contains('timeout')) {
-      return 'Server lagi lelet nih.\nCoba lagi yuk! ⏱️';
-    } else if (lowerError.contains('404') || lowerError.contains('not found')) {
-      return 'Data ga ketemu.\nMungkin udah dihapus 🤔';
-    } else if (lowerError.contains('500') ||
-        lowerError.contains('server') ||
-        lowerError.contains('unexpected')) {
-      return 'Server lagi bermasalah.\nTunggu sebentar ya! 🔧';
-    } else if (lowerError.contains('unauthorized') ||
-        lowerError.contains('401')) {
-      return 'Sesi kamu habis.\nYuk login lagi! 🔐';
-    } else {
-      return 'Ada kendala nih.\nCoba lagi ya! 😅';
-    }
-  }
-
-  // Public method called by main.dart or other widgets to add a newly created event
-  void addNewEvent(Event newEvent) {
-    setState(() {
-      _allEvents.insert(0, newEvent);
-    });
-    _applyModeFilter();
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
-    // Use local geocoded name as priority, then UserBloc, then generic
     final userState = context.watch<UserBloc>().state;
     final locationName =
         _locationName ??
@@ -311,85 +363,530 @@ class DiscoverScreenState extends State<DiscoverScreen>
             : 'Jakarta Area');
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: BlocBuilder<PostsBloc, PostsState>(
-          builder: (context, postsState) {
-            return BlocConsumer<EventsBloc, EventsState>(
-              listener: (context, state) {
-                if (state is EventsLoaded) {
-                  setState(() {
-                    _allEvents = state.filteredEvents;
-                  });
-
-                  if (postsState is PostsLoaded) {
-                    _triggerRankingIfNeeded(postsState, state.events);
-                  }
-
-                  if (!_hasAppliedInitialFilter) {
-                    _hasAppliedInitialFilter = true;
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      _applyModeFilter();
+      backgroundColor: AppColors.background,
+      body: Stack(
+        children: [
+          // Map Background
+          BlocBuilder<PostsBloc, PostsState>(
+            builder: (context, postsState) {
+              return BlocConsumer<EventsBloc, EventsState>(
+                listener: (context, state) {
+                  if (state is EventsLoaded) {
+                    setState(() {
+                      _allEvents = state.filteredEvents;
                     });
+
+                    if (postsState is PostsLoaded) {
+                      _triggerRankingIfNeeded(postsState, state.events);
+                    }
+
+                    if (!_hasAppliedInitialFilter) {
+                      _hasAppliedInitialFilter = true;
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        _applyModeFilter();
+                      });
+                    }
                   }
-                }
-              },
-              builder: (context, eventsState) {
-                return BlocBuilder<RankedFeedBloc, RankedFeedState>(
-                  bloc: _rankedFeedBloc,
-                  builder: (context, rankedState) {
-                    _updateRankedFeedData(rankedState);
+                },
+                builder: (context, eventsState) {
+                  return BlocBuilder<RankedFeedBloc, RankedFeedState>(
+                    bloc: _rankedFeedBloc,
+                    builder: (context, rankedState) {
+                      _updateRankedFeedData(rankedState);
+                      return _buildMapContent(eventsState);
+                    },
+                  );
+                },
+              );
+            },
+          ),
 
-                    return RefreshIndicator(
-                      onRefresh: _refreshData,
-                      color: const Color(0xFFBBC863),
-                      child: CustomScrollView(
-                        controller: _scrollController,
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        slivers: [
-                          // 1. Header & Search Area
-                          SliverToBoxAdapter(
-                            child: Column(
-                              children: [
-                                DiscoverHeader(
-                                  location: locationName,
-                                  onRefreshLocation: _refreshLocation,
-                                  onToggleView: () =>
-                                      setState(() => _isMapView = !_isMapView),
-                                  isMapView: _isMapView,
-                                ),
-                                DiscoverSearchBar(
-                                  controller: _searchController,
-                                ),
-                                _buildRankingFilter(),
-                              ],
-                            ),
-                          ),
+          // Top UI Overlays
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _buildTopOverlays(locationName),
+          ),
 
-                          // 2. Main Content (Map or List Slivers)
-                          if (_isMapView)
-                            SliverToBoxAdapter(
-                              child: SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.7,
-                                child: _buildMapView(),
-                              ),
-                            )
-                          else
-                            ..._buildContentListSlivers(eventsState),
+          // Middle Controls (Floating buttons)
+          Positioned(
+            right: 16,
+            bottom: 280,
+            child: _buildFloatingControls(),
+          ),
 
-                          const SliverToBoxAdapter(child: SizedBox(height: 80)),
-                        ],
+          // Bottom Event Carousel
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _buildBottomCarousel(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMapContent(EventsState eventsState) {
+    return GoogleMap(
+      initialCameraPosition: CameraPosition(
+        target: _currentPosition,
+        zoom: 14.0,
+      ),
+      onMapCreated: (GoogleMapController controller) {
+        _mapController.complete(controller);
+        setState(() {
+          _isMapReady = true;
+        });
+        if (!_hasCenteredMap) {
+          _centerMapOnLocation(_currentPosition);
+        }
+      },
+      style: _mapStyle,
+      myLocationEnabled: false,
+      myLocationButtonEnabled: false,
+      zoomControlsEnabled: false,
+      compassEnabled: false,
+      mapToolbarEnabled: false,
+      markers: _buildMarkers(),
+    );
+  }
+
+  Set<Marker> _buildMarkers() {
+    return _filteredEvents.map((event) {
+      return Marker(
+        markerId: MarkerId(event.id),
+        position: LatLng(event.location.latitude, event.location.longitude),
+        onTap: () {
+          // Navigate to event detail
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EventDetailScreen(event: event),
+            ),
+          );
+        },
+        icon: _getMarkerIcon(event.category),
+      );
+    }).toSet();
+  }
+
+  BitmapDescriptor _getMarkerIcon(EventCategory category) {
+    // Use default marker for now - can be customized
+    return BitmapDescriptor.defaultMarkerWithHue(
+      BitmapDescriptor.hueGreen,
+    );
+  }
+
+  Widget _buildTopOverlays(String locationName) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          children: [
+            // Search Bar
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.8),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: AppColors.textTertiary.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(left: 16, right: 12),
+                    child: Icon(
+                      Icons.search,
+                      color: AppColors.textTertiary,
+                      size: 22,
+                    ),
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.white,
                       ),
-                    );
-                  },
-                );
-              },
-            );
-          },
+                      decoration: InputDecoration(
+                        hintText: 'Cari event di sekitar...',
+                        hintStyle: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Filter button
+                  Container(
+                    margin: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.tune,
+                        color: AppColors.secondary,
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        // Show advanced filter
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 36,
+                        minHeight: 36,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // Filter Pills
+            SizedBox(
+              height: 40,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _buildFilterChip(
+                    label: 'Semua',
+                    icon: Icons.auto_awesome,
+                    isSelected: _selectedCategory == 'all',
+                    onTap: () => _changeCategory('all'),
+                  ),
+                  const SizedBox(width: 8),
+                  _buildFilterChip(
+                    label: 'Belajar',
+                    icon: Icons.menu_book,
+                    isSelected: _selectedCategory == 'learning',
+                    onTap: () => _changeCategory('learning'),
+                  ),
+                  const SizedBox(width: 8),
+                  _buildFilterChip(
+                    label: 'Nongkrong',
+                    icon: Icons.coffee,
+                    isSelected: _selectedCategory == 'social',
+                    onTap: () => _changeCategory('social'),
+                  ),
+                  const SizedBox(width: 8),
+                  _buildFilterChip(
+                    label: 'Hangout',
+                    icon: Icons.groups,
+                    isSelected: _selectedCategory == 'meetup',
+                    onTap: () => _changeCategory('meetup'),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildFilterChip({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.secondary
+              : AppColors.primary.withValues(alpha: 0.8),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.secondary
+                : AppColors.textTertiary.withValues(alpha: 0.3),
+            width: 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.secondary.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: isSelected ? AppColors.white : AppColors.textTertiary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: isSelected ? AppColors.white : AppColors.textEmphasis,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFloatingControls() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Add button
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.9),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: AppColors.textTertiary.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          child: IconButton(
+            icon: const Icon(
+              Icons.add,
+              color: AppColors.white,
+            ),
+            onPressed: () {
+              // Navigate to create event
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+        // My location button
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.9),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: AppColors.textTertiary.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          child: IconButton(
+            icon: Icon(
+              Icons.my_location,
+              color: AppColors.secondary,
+            ),
+            onPressed: () => _centerMapOnLocation(_currentPosition),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBottomCarousel() {
+    return Container(
+      height: 220,
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.95),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 8),
+          // Drag handle
+          Container(
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 8),
+            decoration: BoxDecoration(
+              color: AppColors.textTertiary,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          // Event Cards
+          Expanded(
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: _filteredEvents.length,
+              itemBuilder: (context, index) {
+                return _buildEventCard(_filteredEvents[index]);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEventCard(Event event) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EventDetailScreen(event: event),
+          ),
+        );
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.85,
+        margin: const EdgeInsets.only(right: 12),
+        decoration: BoxDecoration(
+          color: AppColors.cardSurface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.secondary,
+            width: 2,
+          ),
+        ),
+        child: Row(
+          children: [
+            // Event Image
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(14),
+                bottomLeft: Radius.circular(14),
+              ),
+              child: Image.network(
+                event.imageUrl ?? 'https://via.placeholder.com/150',
+                width: 100,
+                height: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: 100,
+                    color: AppColors.surfaceAlt,
+                    child: Icon(
+                      Icons.event,
+                      color: AppColors.textTertiary,
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // Event Info
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Category badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        event.category.displayName,
+                        style: AppTextStyles.label.copyWith(
+                          color: AppColors.secondary,
+                        ),
+                      ),
+                    ),
+
+                    // Title
+                    Text(
+                      event.title,
+                      style: AppTextStyles.h3.copyWith(
+                        fontSize: 16,
+                        color: AppColors.white,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+
+                    // Location
+                    Text(
+                      event.location.name,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+
+                    // Distance and Join button
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _getDistance(event),
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textTertiary,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.secondary,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            'Join',
+                            style: AppTextStyles.button.copyWith(
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getDistance(Event event) {
+    const double earthRadiusKm = 6371.0;
+    final double dLat = _degreesToRadians(
+      event.location.latitude - _currentPosition.latitude,
+    );
+    final double dLon = _degreesToRadians(
+      event.location.longitude - _currentPosition.longitude,
+    );
+    final double a = (sin(dLat / 2) * sin(dLat / 2)) +
+        (cos(_degreesToRadians(_currentPosition.latitude)) *
+            cos(_degreesToRadians(event.location.latitude)) *
+            sin(dLon / 2) *
+            sin(dLon / 2));
+    final double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    final double distance = earthRadiusKm * c;
+
+    if (distance < 1) {
+      return '${(distance * 1000).toStringAsFixed(0)}m';
+    } else {
+      return '${distance.toStringAsFixed(1)}km';
+    }
+  }
+
+  double _degreesToRadians(double degrees) {
+    return degrees * (pi / 180.0);
   }
 
   void _triggerRankingIfNeeded(PostsLoaded postsState, List<Event> events) {
@@ -416,169 +913,5 @@ class DiscoverScreenState extends State<DiscoverScreen>
         setState(_applyModeFilter);
       });
     }
-  }
-
-  Widget _buildMapView() {
-    return DiscoverMapView(
-      events: _filteredEvents,
-      userLocation: _currentPosition,
-      onEventTap: (event) {
-        // Show simplified review or navigate?
-        // Let's navigate to detail
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => EventDetailScreen(event: event),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildRankingFilter() {
-    return Container(
-      height: 48, // Reduced from 60
-      margin: const EdgeInsets.only(top: 4, bottom: 8),
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        children: [
-          _buildIconicChip(
-            id: 'trending',
-            label: 'Trending',
-            icon: '🔥',
-            isSelected: _selectedMode == 'trending',
-          ),
-          const SizedBox(width: 10),
-          _buildIconicChip(
-            id: 'for_you',
-            label: 'For You',
-            icon: '✨',
-            isSelected: _selectedMode == 'for_you',
-          ),
-          const SizedBox(width: 10),
-          _buildIconicChip(
-            id: 'matches',
-            label: 'Matches',
-            icon: '🤝',
-            isSelected: _selectedMode == 'matches',
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildIconicChip({
-    required String id,
-    required String label,
-    required String icon,
-    required bool isSelected,
-  }) {
-    return GestureDetector(
-      onTap: () => _changeMode(id),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFBBC863) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected
-                ? const Color(0xFFBBC863)
-                : const Color(0xFFF1F1F1),
-            width: 1.2,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: const Color(0xFFBBC863).withValues(alpha: 0.2),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(icon, style: const TextStyle(fontSize: 14)),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.black : Colors.grey[700],
-                fontWeight: FontWeight.w700,
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildContentListSlivers(EventsState state) {
-    if (state is EventsLoading) {
-      return [
-        const SliverFillRemaining(
-          child: LoadingWidget(message: 'Loading events...'),
-        ),
-      ];
-    }
-
-    if (state is EventsError) {
-      return [
-        SliverFillRemaining(
-          child: ErrorStateWidget(
-            message: _getUserFriendlyError(state.message),
-            onRetry: _refreshData,
-          ),
-        ),
-      ];
-    }
-
-    if (_filteredEvents.isEmpty) {
-      return [
-        SliverFillRemaining(
-          child: EmptyStateWidget(
-            icon: Icons.event_outlined,
-            title: 'No events found',
-            subtitle: _searchController.text.isNotEmpty
-                ? 'Try adjusting your search or filters'
-                : 'Check back later for new events',
-            iconColor: Colors.grey[400],
-          ),
-        ),
-      ];
-    }
-
-    return [
-      const SliverToBoxAdapter(child: SizedBox(height: 16)),
-      SliverPadding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        sliver: SliverGrid(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.62,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-          ),
-          delegate: SliverChildBuilderDelegate((context, index) {
-            return EventCard(
-              event: _filteredEvents[index],
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        EventDetailScreen(event: _filteredEvents[index]),
-                  ),
-                );
-              },
-            );
-          }, childCount: _filteredEvents.length),
-        ),
-      ),
-    ];
   }
 }

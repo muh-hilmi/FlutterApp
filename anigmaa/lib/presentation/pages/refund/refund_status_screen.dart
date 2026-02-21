@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 enum RefundStatus { processing, approved, rejected, completed, pendingInfo }
 
@@ -88,7 +89,7 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+        border: Border(bottom: BorderSide(color: AppColors.surfaceAlt)),
       ),
       child: Row(
         children: [
@@ -175,13 +176,13 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: AppColors.cardSurface,
               shape: BoxShape.circle,
             ),
             child: Icon(
               LucideIcons.refreshCw,
               size: 48,
-              color: Colors.grey[400],
+              color: AppColors.border,
             ),
           ),
           const SizedBox(height: 20),
@@ -190,13 +191,13 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
+              color: AppColors.textEmphasis,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Refund akan muncul di sini jika ada pembatalan',
-            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 14, color: AppColors.textTertiary),
           ),
         ],
       ),
@@ -241,7 +242,7 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
                       const SizedBox(height: 4),
                       Text(
                         'Rp ${_formatAmount(refund.amount)}',
-                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 13, color: AppColors.textTertiary),
                       ),
                     ],
                   ),
@@ -250,7 +251,7 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            Container(height: 1, color: Colors.grey[200]),
+            Container(height: 1, color: AppColors.surfaceAlt),
             const SizedBox(height: 12),
             _buildRefundDetails(refund),
             if (refund.status == RefundStatus.rejected ||
@@ -364,12 +365,12 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
           Icon(
             icon,
             size: 14,
-            color: isNegative ? Colors.red[400] : Colors.grey[500],
+            color: isNegative ? Colors.red[400] : AppColors.textDisabled,
           ),
           const SizedBox(width: 8),
           Text(
             '$label: ',
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
           ),
           Expanded(
             child: Text(
@@ -377,7 +378,7 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: isNegative ? Colors.red[600] : Colors.grey[800],
+                color: isNegative ? Colors.red[600] : AppColors.textPrimary,
               ),
             ),
           ),
@@ -393,7 +394,7 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
           child: OutlinedButton(
             onPressed: () => _showDetailModal(refund),
             style: OutlinedButton.styleFrom(
-              side: BorderSide(color: Colors.grey[300]!),
+              side: BorderSide(color: AppColors.divider),
               padding: const EdgeInsets.symmetric(vertical: 10),
             ),
             child: const Text('Detail', style: TextStyle(fontSize: 13)),
@@ -485,7 +486,7 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+          Text(label, style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
           const SizedBox(height: 2),
           Text(
             value,
@@ -571,7 +572,7 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
                 ),
                 Text(
                   description,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
                 ),
               ],
             ),

@@ -2,20 +2,20 @@ import 'dart:math';
 
 /// Utility for generating unique attendance codes
 ///
-/// Generates 4-character alphanumeric codes (e.g., "A3F7", "K9M2")
+/// Generates 8-character alphanumeric codes (e.g., "A3F7K9M2")
 /// Excludes ambiguous characters: 0, O, 1, I, L
 class AttendanceCodeGenerator {
   // Alphanumeric characters excluding ambiguous ones
   static const String _chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
   static final Random _random = Random();
 
-  /// Generate a random 4-character attendance code
+  /// Generate a random 8-character attendance code
   ///
-  /// Returns codes like: "A3F7", "K9M2", "P7R4"
+  /// Returns codes like: "A3F7K9M2", "P7R4N2KH"
   static String generate() {
     final buffer = StringBuffer();
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 8; i++) {
       buffer.write(_chars[_random.nextInt(_chars.length)]);
     }
 
@@ -44,21 +44,21 @@ class AttendanceCodeGenerator {
   /// Validate if a code matches the expected format
   ///
   /// Valid formats:
-  /// - 4 uppercase alphanumeric characters (e.g., "A3F7")
-  /// - 4 characters + timestamp suffix (e.g., "A3F7-123")
+  /// - 8 uppercase alphanumeric characters (e.g., "A3F7K9M2")
+  /// - 8 characters + timestamp suffix (e.g., "A3F7K9M2-123")
   static bool isValid(String code) {
     if (code.isEmpty) return false;
 
-    // Check basic 4-character format
-    if (code.length == 4) {
-      return RegExp(r'^[A-Z0-9]{4}$').hasMatch(code);
+    // Check basic 8-character format
+    if (code.length == 8) {
+      return RegExp(r'^[A-Z0-9]{8}$').hasMatch(code);
     }
 
     // Check format with timestamp suffix
     if (code.contains('-')) {
       final parts = code.split('-');
-      if (parts.length == 2 && parts[0].length == 4) {
-        return RegExp(r'^[A-Z0-9]{4}$').hasMatch(parts[0]) &&
+      if (parts.length == 2 && parts[0].length == 8) {
+        return RegExp(r'^[A-Z0-9]{8}$').hasMatch(parts[0]) &&
             RegExp(r'^\d+$').hasMatch(parts[1]);
       }
     }

@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 enum PaymentErrorType {
   insufficient,
@@ -125,7 +126,7 @@ class _PaymentErrorRecoveryScreenState
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+        border: Border(bottom: BorderSide(color: AppColors.surfaceAlt)),
       ),
       child: Row(
         children: [
@@ -171,7 +172,7 @@ class _PaymentErrorRecoveryScreenState
         break;
       case PaymentErrorType.system:
         icon = LucideIcons.server;
-        color = Colors.grey;
+        color = AppColors.textTertiary;
         break;
     }
 
@@ -237,7 +238,7 @@ class _PaymentErrorRecoveryScreenState
 
     return Text(
       message,
-      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+      style: TextStyle(fontSize: 14, color: AppColors.textTertiary),
       textAlign: TextAlign.center,
     );
   }
@@ -263,7 +264,7 @@ class _PaymentErrorRecoveryScreenState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -291,7 +292,7 @@ class _PaymentErrorRecoveryScreenState
           label,
           style: TextStyle(
             fontSize: 13,
-            color: Colors.grey[700],
+            color: AppColors.textEmphasis,
             fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
@@ -332,7 +333,7 @@ class _PaymentErrorRecoveryScreenState
                 border: Border.all(
                   color: isSelected
                       ? const Color(0xFFBBC863)
-                      : Colors.grey[300]!,
+                      : AppColors.divider,
                 ),
                 borderRadius: BorderRadius.circular(12),
                 color: isSelected
@@ -345,7 +346,7 @@ class _PaymentErrorRecoveryScreenState
                     isSelected ? LucideIcons.checkCircle : LucideIcons.circle,
                     color: isSelected
                         ? const Color(0xFFBBC863)
-                        : Colors.grey[400],
+                        : AppColors.border,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -365,7 +366,7 @@ class _PaymentErrorRecoveryScreenState
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.grey[200],
+                        color: AppColors.surfaceAlt,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: const Text(
@@ -391,7 +392,7 @@ class _PaymentErrorRecoveryScreenState
             onPressed: _isRetrying ? null : _retryPayment,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFBBC863),
-              disabledBackgroundColor: Colors.grey[300],
+              disabledBackgroundColor: AppColors.divider,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -418,7 +419,7 @@ class _PaymentErrorRecoveryScreenState
           child: OutlinedButton(
             onPressed: _contactSupport,
             style: OutlinedButton.styleFrom(
-              side: BorderSide(color: Colors.grey[300]!),
+              side: BorderSide(color: AppColors.divider),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -426,7 +427,7 @@ class _PaymentErrorRecoveryScreenState
             ),
             child: Text(
               'Hubungi Support',
-              style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+              style: TextStyle(fontSize: 16, color: AppColors.textEmphasis),
             ),
           ),
         ),
@@ -435,7 +436,7 @@ class _PaymentErrorRecoveryScreenState
           onPressed: () => Navigator.pop(context),
           child: Text(
             'Kembali ke Event',
-            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 14, color: AppColors.textTertiary),
           ),
         ),
       ],
@@ -485,7 +486,7 @@ class _PaymentErrorRecoveryScreenState
             const SizedBox(height: 8),
             Text(
               'Mohon tunggu sebentar...',
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 14, color: AppColors.textTertiary),
             ),
             const SizedBox(height: 16),
             const CircularProgressIndicator(color: Color(0xFFBBC863)),
@@ -561,7 +562,7 @@ class _PaymentErrorRecoveryScreenState
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
       subtitle: Text(
         subtitle,
-        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+        style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
       ),
       trailing: const Icon(LucideIcons.chevronRight),
       onTap: onTap,

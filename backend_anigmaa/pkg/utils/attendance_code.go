@@ -9,11 +9,11 @@ const (
 	// CodeChars are the characters used in attendance codes
 	CodeChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789" // Excluding similar looking characters
 	// CodeLength is the length of attendance codes
-	CodeLength = 4
+	CodeLength = 8
 )
 
-// GenerateAttendanceCode generates a random 4-character attendance code
-// Example: "A3F7", "K9P2"
+// GenerateAttendanceCode generates a random 8-character attendance code
+// Example: "A3F7K9P2", "K9M2P4R7"
 func GenerateAttendanceCode() (string, error) {
 	code := make([]byte, CodeLength)
 	charsLen := big.NewInt(int64(len(CodeChars)))

@@ -7,6 +7,7 @@ import '../../bloc/event_participants/event_participants_event.dart';
 import '../../bloc/event_participants/event_participants_state.dart';
 import '../../widgets/checkin_dialog.dart';
 import '../qr_checkin/qr_checkin_screen.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 /// Screen for event hosts to view and manage event attendees
 /// Features: attendee list, search, filter, manual check-in, QR scan
@@ -203,12 +204,12 @@ class _EventParticipantsScreenState extends State<EventParticipantsScreen> {
               decoration: InputDecoration(
                 hintText: 'Cari nama peserta...',
                 hintStyle: TextStyle(
-                  color: Colors.grey[400],
+                  color: AppColors.border,
                   fontSize: 15,
                 ),
                 prefixIcon: Icon(
                   Icons.search,
-                  color: Colors.grey[400],
+                  color: AppColors.border,
                 ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
@@ -285,7 +286,7 @@ class _EventParticipantsScreenState extends State<EventParticipantsScreen> {
           vertical: 8,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFBBC863) : Colors.grey[200],
+          color: isSelected ? const Color(0xFFBBC863) : AppColors.surfaceAlt,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -293,7 +294,7 @@ class _EventParticipantsScreenState extends State<EventParticipantsScreen> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : Colors.grey[700],
+            color: isSelected ? Colors.white : AppColors.textEmphasis,
           ),
         ),
       ),
@@ -321,14 +322,14 @@ class _EventParticipantsScreenState extends State<EventParticipantsScreen> {
                 Icon(
                   Icons.error_outline,
                   size: 64,
-                  color: Colors.grey[400],
+                  color: AppColors.border,
                 ),
                 const SizedBox(height: 16),
                 Text(
                   state.message,
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.grey[600],
+                    color: AppColors.textTertiary,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -362,7 +363,7 @@ class _EventParticipantsScreenState extends State<EventParticipantsScreen> {
                   Icon(
                     Icons.people_outline,
                     size: 64,
-                    color: Colors.grey[400],
+                    color: AppColors.border,
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -371,7 +372,7 @@ class _EventParticipantsScreenState extends State<EventParticipantsScreen> {
                         : 'Belum ada peserta',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.grey[600],
+                      color: AppColors.textTertiary,
                     ),
                   ),
                 ],
@@ -471,7 +472,7 @@ class _EventParticipantsScreenState extends State<EventParticipantsScreen> {
                     Icon(
                       Icons.confirmation_number,
                       size: 14,
-                      color: Colors.grey[600],
+                      color: AppColors.textTertiary,
                     ),
                     const SizedBox(width: 4),
                     Expanded(
@@ -480,7 +481,7 @@ class _EventParticipantsScreenState extends State<EventParticipantsScreen> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: Colors.grey[600],
+                          color: AppColors.textTertiary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

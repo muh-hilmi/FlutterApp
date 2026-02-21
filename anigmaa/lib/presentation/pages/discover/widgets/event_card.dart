@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../../../domain/entities/event.dart';
 import '../../../../core/utils/app_logger.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 class EventCard extends StatelessWidget {
   final Event event;
@@ -88,7 +89,7 @@ class EventCard extends StatelessWidget {
                       Icon(
                         Icons.access_time_filled_rounded,
                         size: 12,
-                        color: Colors.grey[800],
+                        color: AppColors.textPrimary,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -96,7 +97,7 @@ class EventCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
-                          color: Colors.grey[800],
+                          color: AppColors.textPrimary,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -154,7 +155,7 @@ class EventCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
-                              color: Colors.grey[700],
+                              color: AppColors.textEmphasis,
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -169,7 +170,7 @@ class EventCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
-                              color: Colors.grey[700],
+                              color: AppColors.textEmphasis,
                             ),
                           ),
                         ],
@@ -180,7 +181,7 @@ class EventCard extends StatelessWidget {
                   Divider(
                     height: 1,
                     thickness: 1,
-                    color: Colors.grey.withValues(alpha: 0.2),
+                    color: AppColors.textTertiary.withValues(alpha: 0.2),
                   ),
                   const SizedBox(height: 10),
                   // 4. Category & Price Row (Moved to bottom)

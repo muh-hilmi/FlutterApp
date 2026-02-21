@@ -10,6 +10,7 @@ import '../edit_event/edit_event_screen.dart';
 import 'host_qna_screen.dart';
 import '../event_participants/event_participants_screen.dart';
 import '../../../injection_container.dart' as di;
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 /// Event Management Dashboard - Tab-based interface for event hosts
 ///
@@ -111,7 +112,7 @@ class _EventManagementDashboardState extends State<EventManagementDashboard>
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: Colors.grey[600],
+                    color: AppColors.textTertiary,
                   ),
                   maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -125,7 +126,7 @@ class _EventManagementDashboardState extends State<EventManagementDashboard>
           bottom: TabBar(
             controller: _tabController,
             labelColor: const Color(0xFFBBC863),
-            unselectedLabelColor: Colors.grey[600],
+            unselectedLabelColor: AppColors.textTertiary,
             labelStyle: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
@@ -220,7 +221,7 @@ class _EventManagementDashboardState extends State<EventManagementDashboard>
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: Colors.grey[800],
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -228,7 +229,7 @@ class _EventManagementDashboardState extends State<EventManagementDashboard>
               state.message,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: AppColors.textTertiary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -301,7 +302,7 @@ class _EventManagementDashboardState extends State<EventManagementDashboard>
               '${_event!.attendeeIds.length} Tiket Terjual',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: AppColors.textTertiary,
               ),
             ),
             if (_event!.price != null && _event!.price! > 0)
@@ -318,7 +319,7 @@ class _EventManagementDashboardState extends State<EventManagementDashboard>
               'Fitur analitik lengkap akan segera hadir!',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey[500],
+                color: AppColors.textDisabled,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -343,7 +344,7 @@ class _EventManagementDashboardState extends State<EventManagementDashboard>
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: Colors.grey[800],
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -351,7 +352,7 @@ class _EventManagementDashboardState extends State<EventManagementDashboard>
               state.message,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: AppColors.textTertiary,
               ),
               textAlign: TextAlign.center,
             ),

@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS tickets (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL,  -- References users(id) from user service
     event_id UUID NOT NULL,  -- References events(id) from event service
-    attendance_code VARCHAR(4) UNIQUE NOT NULL,
+    attendance_code VARCHAR(8) UNIQUE NOT NULL,
     price_paid DECIMAL(10, 2) NOT NULL DEFAULT 0 CHECK (price_paid >= 0),
     purchased_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     is_checked_in BOOLEAN DEFAULT FALSE,

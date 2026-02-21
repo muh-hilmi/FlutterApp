@@ -98,13 +98,31 @@ class RetryInterceptor extends Interceptor {
       return;
     }
 
+    // Check if this is an auth/login request - use faster retry strategy
+    final path = err.requestOptions.path.toLowerCase();
+    final isAuthRequest = path.contains('/auth/') || path.contains('/login');
+
+    // For auth requests, max 1 retry with 1s delay (total ~2s instead of ~14s)
+    final effectiveMaxRetries = isAuthRequest ? 1 : maxRetries;
+
     // Check if we've exceeded max retries
     if (currentRetry >= maxRetries) {
       _logger.warning(
         '[Retry] Max retries ($maxRetries) exceeded for ${err.requestOptions.path}',
       );
 
-      // Queue for later retry if it's a network error
+      // Don't queue auth/login requests - let them fail immediately
+      // This prevents slow "try again" experience on login
+      final path = err.requestOptions.path.toLowerCase();
+      final isAuthRequest = path.contains('/auth/') || path.contains('/login');
+
+      if (isAuthRequest) {
+        _logger.info('[Retry] Auth request failed, not queuing - let user retry manually');
+        handler.next(err);
+        return;
+      }
+
+      // Queue for later retry if it's a network error (only for non-auth requests)
       if (networkError.type == ErrorType.network ||
           networkError.type == ErrorType.timeout) {
         _logger.info('[Retry] Queueing request for ${err.requestOptions.path}');

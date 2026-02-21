@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 enum SearchFilterType { all, events, users, communities, posts }
 
@@ -82,7 +83,7 @@ class _SearchScreenState extends State<SearchScreen>
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+        border: Border(bottom: BorderSide(color: AppColors.surfaceAlt)),
       ),
       child: Row(
         children: [
@@ -93,7 +94,7 @@ class _SearchScreenState extends State<SearchScreen>
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: AppColors.cardSurface,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TextField(
@@ -126,7 +127,7 @@ class _SearchScreenState extends State<SearchScreen>
           const SizedBox(width: 8),
           // Filter Chips
           PopupMenuButton<SearchFilterType>(
-            icon: Icon(LucideIcons.sliders, color: Colors.grey[700]),
+            icon: Icon(LucideIcons.sliders, color: AppColors.textEmphasis),
             onSelected: (filter) {
               setState(() {
                 _selectedFilter = filter;
@@ -159,7 +160,7 @@ class _SearchScreenState extends State<SearchScreen>
           Icon(
             _selectedFilter == type ? LucideIcons.check : LucideIcons.circle,
             size: 16,
-            color: _selectedFilter == type ? const Color(0xFFBBC863) : Colors.grey,
+            color: _selectedFilter == type ? const Color(0xFFBBC863) : AppColors.textTertiary,
           ),
           const SizedBox(width: 12),
           Text(label),
@@ -214,10 +215,10 @@ class _SearchScreenState extends State<SearchScreen>
 
   Widget _buildRecentSearchItem(String query, int index) {
     return ListTile(
-      leading: Icon(LucideIcons.clock, size: 18, color: Colors.grey[600]),
+      leading: Icon(LucideIcons.clock, size: 18, color: AppColors.textTertiary),
       title: Text(query, style: const TextStyle(fontSize: 14)),
       trailing: IconButton(
-        icon: Icon(LucideIcons.x, size: 16, color: Colors.grey[400]),
+        icon: Icon(LucideIcons.x, size: 16, color: AppColors.border),
         onPressed: () => _removeRecentSearch(index),
       ),
       contentPadding: EdgeInsets.zero,
@@ -232,7 +233,7 @@ class _SearchScreenState extends State<SearchScreen>
         style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.bold,
-          color: rank <= 3 ? const Color(0xFFBBC863) : Colors.grey[400],
+          color: rank <= 3 ? const Color(0xFFBBC863) : AppColors.border,
         ),
       ),
       title: Text(query, style: const TextStyle(fontSize: 14)),
@@ -248,11 +249,11 @@ class _SearchScreenState extends State<SearchScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(LucideIcons.search, size: 48, color: Colors.grey[300]),
+          Icon(LucideIcons.search, size: 48, color: AppColors.divider),
           const SizedBox(height: 16),
           Text(
             'Mencari "${_searchController.text}"',
-            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 14, color: AppColors.textTertiary),
           ),
         ],
       ),

@@ -1,0 +1,150 @@
+-- ============================================================================
+-- SEED 03: POSTS
+-- ============================================================================
+-- 20 sample posts for Anigmaa app
+-- Run seed_01_users.sql and seed_02_events.sql FIRST before this file
+-- Post IDs start with: 33000000-... (easily identifiable)
+-- ============================================================================
+
+-- ============================================================================
+-- INSERT POSTS (20 posts - all with attached events)
+-- ============================================================================
+
+INSERT INTO posts (id, author_id, content, type, attached_event_id, visibility, created_at, updated_at) VALUES
+
+-- Posts about Event 1: Coffee Meetup
+('33000000-0000-0000-0000-000000000001', '11000000-0000-0000-0000-000000000001',
+'Weekend Coffee Meetup minggu ini! Yuk join bareng. Kopi enak + temen baru = perfect weekend!',
+'text_with_event', '22000000-0000-0000-0000-000000000001', 'public',
+NOW() - INTERVAL '2 days', NOW()),
+
+('33000000-0000-0000-0000-000000000002', '11000000-0000-0000-0000-000000000002',
+'Gas ikut coffee meetup besok! Sambil kenalan sama coffee lovers lain.',
+'text_with_event', '22000000-0000-0000-0000-000000000001', 'public',
+NOW() - INTERVAL '1 day', NOW()),
+
+-- Posts about Event 2: Gaming
+('33000000-0000-0000-0000-000000000003', '11000000-0000-0000-0000-000000000004',
+'Mobile Legends Workshop! Belajar strategi pro langsung dari player Mythic. Ranked naik terus!',
+'text_with_event', '22000000-0000-0000-0000-000000000002', 'public',
+NOW() - INTERVAL '3 days', NOW()),
+
+('33000000-0000-0000-0000-000000000004', '11000000-0000-0000-0000-000000000006',
+'Finally ada workshop ML! Mau belajar biar gak jadi feed terus 😅',
+'text_with_event', '22000000-0000-0000-0000-000000000002', 'public',
+NOW() - INTERVAL '2 days', NOW()),
+
+-- Posts about Event 3: Street Food
+('33000000-0000-0000-0000-000000000005', '11000000-0000-0000-0000-000000000002',
+'Street Food Hunting Pecenongan - sate, soto, martabak! Buka puasa sekalian lah ini 😋',
+'text_with_event', '22000000-0000-0000-0000-000000000003', 'public',
+NOW() - INTERVAL '4 days', NOW()),
+
+-- Posts about Event 4: React Workshop
+('33000000-0000-0000-0000-000000000006', '11000000-0000-0000-0000-000000000005',
+'React 19 + Next.js 15 Workshop. Server Components, App Router - modern web dev is here!',
+'text_with_event', '22000000-0000-0000-0000-000000000004', 'public',
+NOW() - INTERVAL '5 days', NOW()),
+
+('33000000-0000-0000-0000-000000000007', '11000000-0000-0000-0000-000000000003',
+'Ada yang ikut React workshop? Belajar bareh lebih seru! 🚀',
+'text_with_event', '22000000-0000-0000-0000-000000000004', 'public',
+NOW() - INTERVAL '3 days', NOW()),
+
+-- Posts about Event 5: Running
+('33000000-0000-0000-0000-000000000008', '11000000-0000-0000-0000-00000000000a',
+'Sunday Morning Run Club di GBK! 5K atau 10K, your choice. All levels welcome!',
+'text_with_event', '22000000-0000-0000-0000-000000000005', 'public',
+NOW() - INTERVAL '6 days', NOW()),
+
+('33000000-0000-0000-0000-000000000009', '11000000-0000-0000-0000-00000000000b',
+'Morning run + good vibes = perfect Sunday. Join us!',
+'text_with_event', '22000000-0000-0000-0000-000000000005', 'public',
+NOW() - INTERVAL '4 days', NOW()),
+
+-- Posts about Event 6: Photography
+('33000000-0000-0000-0000-00000000000a', '11000000-0000-0000-0000-000000000008',
+'Golden Hour Photography di Kota Tua. Learn composition & lighting dari pro! 📸',
+'text_with_event', '22000000-0000-0000-0000-000000000006', 'public',
+NOW() - INTERVAL '7 days', NOW()),
+
+-- Posts about Event 7: Indie Music
+('33000000-0000-0000-0000-00000000000b', '11000000-0000-0000-0000-00000000000e',
+'Indie Music Night coming up! 5 local bands siap perform. Good music + good vibes!',
+'text_with_event', '22000000-0000-0000-0000-000000000007', 'public',
+NOW() - INTERVAL '8 days', NOW()),
+
+-- Posts about Event 8: KBBQ
+('33000000-0000-0000-0000-00000000000c', '11000000-0000-0000-0000-000000000002',
+'K-BBB UNLIMITED! Korean BBQ Night gathering. Siapa yang mau join?',
+'text_with_event', '22000000-0000-0000-0000-000000000008', 'public',
+NOW() - INTERVAL '5 days', NOW()),
+
+('33000000-0000-0000-0000-00000000000d', '11000000-0000-0000-0000-000000000007',
+'Meat overload 🥩 KBBQ night, letsgooo!',
+'text_with_event', '22000000-0000-0000-0000-000000000008', 'public',
+NOW() - INTERVAL '3 days', NOW()),
+
+-- Posts about Event 9: Yoga
+('33000000-0000-0000-0000-00000000000e', '11000000-0000-0000-0000-00000000000b',
+'Yoga & Meditation Morning di GBK. Start your day dengan zen vibes 🧘‍♀️',
+'text_with_event', '22000000-0000-0000-0000-000000000009', 'public',
+NOW() - INTERVAL '6 days', NOW()),
+
+-- Posts about Event 10: Basketball
+('33000000-0000-0000-0000-00000000000f', '11000000-0000-0000-0000-00000000000d',
+'Basketball 3x3 Tournament! Prize pool 2 juta. Register your team now! 🏀',
+'text_with_event', '22000000-0000-0000-0000-00000000000a', 'public',
+NOW() - INTERVAL '10 days', NOW()),
+
+('33000000-0000-0000-0000-000000000010', '11000000-0000-0000-0000-00000000000a',
+'3v3 basketball siap tempur! Siapa yang mau join tim saya?',
+'text_with_event', '22000000-0000-0000-0000-00000000000a', 'public',
+NOW() - INTERVAL '7 days', NOW()),
+
+-- General posts (with events attached)
+('33000000-0000-0000-0000-000000000011', '11000000-0000-0000-0000-000000000001',
+'Tips: Datang 15 menit lebih awal ke event networking. First impression matters!',
+'text_with_event', '22000000-0000-0000-0000-000000000001', 'public',
+NOW() - INTERVAL '1 day', NOW()),
+
+('33000000-0000-0000-0000-000000000012', '11000000-0000-0000-0000-000000000004',
+'Semangat buat yang ikut workshop minggu ini! Learning is earning 💪',
+'text_with_event', '22000000-0000-0000-0000-000000000004', 'public',
+NOW() - INTERVAL '12 hours', NOW()),
+
+('33000000-0000-0000-0000-000000000013', '11000000-0000-0000-0000-000000000010',
+'Baca buku itu jalan hidup. Ada yang mau book club meetup?',
+'text_with_event', '22000000-0000-0000-0000-000000000001', 'public',
+NOW() - INTERVAL '6 hours', NOW()),
+
+('33000000-0000-0000-0000-000000000014', '11000000-0000-0000-0000-000000000016',
+'Jangan lupa jaga kesehatan ya guys! Self-care is important 🌱',
+'text_with_event', '22000000-0000-0000-0000-000000000009', 'public',
+NOW() - INTERVAL '3 hours', NOW())
+
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================================
+-- ADD SOME IMAGES TO POSTS (5 posts with images)
+-- Image IDs start with: 44000000-...
+-- ============================================================================
+
+INSERT INTO post_images (id, post_id, image_url, order_index) VALUES
+('44000000-0000-0000-0000-000000000001', '33000000-0000-0000-0000-000000000001', 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600', 0),
+('44000000-0000-0000-0000-000000000002', '33000000-0000-0000-0000-000000000005', 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600', 0),
+('44000000-0000-0000-0000-000000000003', '33000000-0000-0000-0000-00000000000a', 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=600', 0),
+('44000000-0000-0000-0000-000000000004', '33000000-0000-0000-0000-00000000000c', 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=600', 0),
+('44000000-0000-0000-0000-000000000005', '33000000-0000-0000-0000-000000000008', 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=600', 0)
+ON CONFLICT DO NOTHING;
+
+-- ============================================================================
+-- SUMMARY
+-- ============================================================================
+-- Total Posts: 20
+-- All posts have attached_event_id (required by schema)
+-- 5 posts have images
+-- Posts distributed across all 10 events
+-- Post IDs start with: 33000000-...
+-- Image IDs start with: 44000000-...
+-- ============================================================================

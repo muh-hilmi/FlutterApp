@@ -6,6 +6,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/services/google_places_service.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 class LocationData {
   final String name;
@@ -596,7 +597,7 @@ class _LocationPickerState extends State<LocationPicker> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+              border: Border(bottom: BorderSide(color: AppColors.surfaceAlt)),
             ),
             child: Row(
               children: [
@@ -609,7 +610,7 @@ class _LocationPickerState extends State<LocationPicker> {
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Icons.close),
                   style: IconButton.styleFrom(
-                    backgroundColor: Colors.grey[100],
+                    backgroundColor: AppColors.cardSurface,
                   ),
                 ),
               ],
@@ -638,10 +639,10 @@ class _LocationPickerState extends State<LocationPicker> {
                     : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
+                  borderSide: BorderSide(color: AppColors.divider),
                 ),
                 filled: true,
-                fillColor: Colors.grey[50],
+                fillColor: AppColors.surface,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 12,
@@ -708,7 +709,7 @@ class _LocationPickerState extends State<LocationPicker> {
                                       'Memuat alamat...',
                                       style: TextStyle(
                                         fontSize: 14,
-                                        color: Colors.grey[600],
+                                        color: AppColors.textTertiary,
                                       ),
                                     ),
                                   ],
@@ -730,7 +731,7 @@ class _LocationPickerState extends State<LocationPicker> {
                                       _currentAddress,
                                       style: TextStyle(
                                         fontSize: 13,
-                                        color: Colors.grey[600],
+                                        color: AppColors.textTertiary,
                                       ),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
@@ -758,7 +759,7 @@ class _LocationPickerState extends State<LocationPicker> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          disabledBackgroundColor: Colors.grey[300],
+                          disabledBackgroundColor: AppColors.divider,
                         ),
                         child: Text(
                           _isLoadingAddress
@@ -768,7 +769,7 @@ class _LocationPickerState extends State<LocationPicker> {
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: (_isLoadingAddress || _locationName.isEmpty)
-                                ? Colors.grey[600]
+                                ? AppColors.textTertiary
                                 : Colors.white,
                           ),
                         ),
@@ -795,11 +796,11 @@ class _LocationPickerState extends State<LocationPicker> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
+            Icon(Icons.search_off, size: 64, color: AppColors.border),
             const SizedBox(height: 16),
             Text(
               'Tidak ada hasil',
-              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 16, color: AppColors.textTertiary),
             ),
           ],
         ),
@@ -846,7 +847,7 @@ class _LocationPickerState extends State<LocationPicker> {
             const SizedBox(height: 16),
             Text(
               'Mendapatkan lokasi Anda...',
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 14, color: AppColors.textTertiary),
             ),
           ],
         ),
@@ -946,7 +947,7 @@ class _LocationPickerState extends State<LocationPicker> {
                       onPressed: () {
                         setState(() => _lastSelectedPlaceName = null);
                       },
-                      color: Colors.grey[600],
+                      color: AppColors.textTertiary,
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),

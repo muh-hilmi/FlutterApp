@@ -2,6 +2,7 @@
 // Allows users to edit their profile data and sync with backend
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
@@ -141,10 +142,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       },
       child: BlocBuilder<UserBloc, UserState>(
         builder: (context, state) {
-          // Get user name from current user or bloc state
-          final userName = _currentUser?.name ??
-              (state is UserLoaded ? state.user.name : 'User');
-
           return Scaffold(
             backgroundColor: AppColors.white,
             appBar: _buildAppBar(),
@@ -155,77 +152,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 : Form(
                     key: _formKey,
                     child: ListView(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       children: [
+                        const SizedBox(height: 12),
+                        _buildCompletionCard(),
                         const SizedBox(height: 20),
-                        _buildProfilePhoto(),
-                        const SizedBox(height: 8),
-                        _buildChangePhotoButton(),
-                        const SizedBox(height: 32),
-                        _buildDivider(),
-                        _buildTextField(
-                          label: 'Name',
-                          value: userName,
-                          readOnly: true,
-                          onTap: () {},
-                          trailing: const Icon(
-                            Icons.lock_outline,
-                            size: 20,
-                            color: AppColors.textTertiary,
-                          ),
-                        ),
-                        _buildDivider(),
-                        _buildTextField(
-                          label: 'Bio',
-                          value: _bioController.text.isEmpty
-                              ? 'Add bio'
-                              : _bioController.text,
-                          onTap: () => _editBio(),
-                        ),
-                        _buildDivider(),
-                        _buildTextField(
-                          label: 'Phone',
-                          value: _phoneController.text.isEmpty
-                              ? 'Add phone number'
-                              : _phoneController.text,
-                          onTap: () => _editPhone(),
-                        ),
-                        _buildDivider(),
-                        _buildTextField(
-                          label: 'Gender',
-                          value: _selectedGender ?? 'Select gender',
-                          onTap: () => _selectGender(),
-                        ),
-                        _buildDivider(),
-                        _buildTextField(
-                          label: 'Date of Birth',
-                          value: _selectedDateOfBirth != null
-                              ? _formatDate(_selectedDateOfBirth!)
-                              : 'Select date',
-                          onTap: () => _selectDate(),
-                        ),
-                        _buildDivider(),
-                        _buildTextField(
-                          label: 'Location',
-                          value: _locationController.text.isEmpty
-                              ? 'Add location'
-                              : _locationController.text,
-                          onTap: () => _editLocation(),
-                          trailing: _isLoadingLocation
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.secondary,
-                                  ),
-                                )
-                              : null,
-                        ),
-                        _buildDivider(),
-                        const SizedBox(height: 24),
-                        _buildSectionHeader('Interests'),
-                        const SizedBox(height: 16),
-                        _buildInterests(),
+                        _buildProfilePhotoSection(),
+                        const SizedBox(height: 28),
+                        _buildPersonalInfoSection(),
+                        const SizedBox(height: 20),
+                        _buildAboutSection(),
+                        const SizedBox(height: 20),
+                        _buildInterestsSection(),
                         const SizedBox(height: 40),
                       ],
                     ),
@@ -253,46 +191,95 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         TextButton(
           onPressed: _saveProfile,
           child: Text(
-            'Done',
-            style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.secondary),
+            'Save',
+            style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.secondary),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildProfilePhoto() {
-    return Center(
-      child: Stack(
+  // ==================== NEW DESIGNED WIDGETS ====================
+
+  /// Profile completion card with progress
+  Widget _buildCompletionCard() {
+    final completion = _calculateProfileCompletion();
+    final isComplete = completion == 100;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isComplete
+              ? [AppColors.secondary, AppColors.secondary.withValues(alpha: 0.8)]
+              : [AppColors.surface, AppColors.cardSurface],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isComplete ? AppColors.secondary : AppColors.border,
+          width: 1,
+        ),
+      ),
+      child: Row(
         children: [
           Container(
-            width: 100,
-            height: 100,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
+              color: isComplete ? AppColors.white.withValues(alpha: 0.2) : AppColors.surfaceAlt,
               shape: BoxShape.circle,
-              border: Border.all(color: AppColors.border, width: 1),
             ),
-            child: ClipOval(
-              child: _selectedImageFile != null
-                  ? Image.file(_selectedImageFile!, fit: BoxFit.cover)
-                  : (_selectedAvatarUrl != null &&
-                        _selectedAvatarUrl!.isNotEmpty)
-                  ? CachedNetworkImage(
-                      imageUrl: _selectedAvatarUrl!,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: AppColors.surfaceAlt,
-                        child: const Center(
+            child: Center(
+              child: isComplete
+                  ? const Icon(Icons.check_circle, color: AppColors.white, size: 24)
+                  : Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          width: 40,
+                          height: 40,
                           child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.secondary,
+                            value: completion / 100,
+                            strokeWidth: 3,
+                            backgroundColor: AppColors.border,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              isComplete ? AppColors.white : AppColors.secondary,
+                            ),
                           ),
                         ),
-                      ),
-                      errorWidget: (context, url, error) =>
-                          _buildDefaultAvatar(),
-                    )
-                  : _buildDefaultAvatar(),
+                        Text(
+                          '$completion%',
+                          style: AppTextStyles.label.copyWith(
+                            color: isComplete ? AppColors.white : AppColors.secondary,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isComplete ? 'Profile Complete! 🎉' : 'Complete Your Profile',
+                  style: AppTextStyles.bodyMediumBold.copyWith(
+                    color: isComplete ? AppColors.white : AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isComplete
+                      ? 'Your profile is looking great!'
+                      : 'Add more info to help others discover you',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: isComplete ? AppColors.white.withValues(alpha: 0.9) : AppColors.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -300,75 +287,462 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  /// Calculate profile completion percentage
+  int _calculateProfileCompletion() {
+    int filled = 0;
+    int total = 5; // bio, phone, gender, dob, location
+
+    if (_bioController.text.isNotEmpty) filled++;
+    if (_phoneController.text.isNotEmpty) filled++;
+    if (_selectedGender != null) filled++;
+    if (_selectedDateOfBirth != null) filled++;
+    if (_locationController.text.isNotEmpty) filled++;
+
+    return ((filled / total) * 100).round();
+  }
+
+  /// Profile photo section with camera button
+  Widget _buildProfilePhotoSection() {
+    final userName = _currentUser?.name ?? 'User';
+
+    return Center(
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.secondary.withValues(alpha: 0.1),
+                      AppColors.secondary.withValues(alpha: 0.05),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  border: Border.all(color: AppColors.secondary.withValues(alpha: 0.3), width: 2),
+                ),
+                child: ClipOval(
+                  child: _selectedImageFile != null
+                      ? Image.file(_selectedImageFile!, fit: BoxFit.cover)
+                      : (_selectedAvatarUrl != null && _selectedAvatarUrl!.isNotEmpty)
+                          ? CachedNetworkImage(
+                              imageUrl: _selectedAvatarUrl!,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                color: AppColors.surfaceAlt,
+                                child: const Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.secondary,
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => _buildDefaultAvatar(),
+                            )
+                          : _buildDefaultAvatar(),
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: _changeProfilePicture,
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppColors.secondary, Color(0xFFA8B556)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.white, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.secondary.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt_rounded,
+                      size: 18,
+                      color: AppColors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            userName,
+            style: AppTextStyles.h3.copyWith(color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Tap camera to change photo',
+            style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Default avatar with user initial - styled
   Widget _buildDefaultAvatar() {
     final userName = _currentUser?.name ?? 'User';
+    final initial = userName.isNotEmpty ? userName[0].toUpperCase() : 'U';
+
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceAlt,
-        shape: BoxShape.circle,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.secondary.withValues(alpha: 0.2),
+            AppColors.secondary.withValues(alpha: 0.1),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
       child: Center(
         child: Text(
-          userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-          style: AppTextStyles.display.copyWith(color: AppColors.textTertiary),
+          initial,
+          style: AppTextStyles.display.copyWith(
+            color: AppColors.secondary,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildChangePhotoButton() {
-    return Center(
-      child: TextButton(
-        onPressed: _changeProfilePicture,
-        child: Text(
-          'Change photo',
-          style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.secondary),
-        ),
+  /// Personal info section card (Phone, Gender, DOB, Location) - Redesigned
+  Widget _buildPersonalInfoSection() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border, width: 1),
       ),
-    );
-  }
-
-  Widget _buildDivider() {
-    return const Divider(height: 1, thickness: 1, color: AppColors.border);
-  }
-
-  Widget _buildTextField({
-    required String label,
-    required String value,
-    required VoidCallback onTap,
-    bool readOnly = false,
-    Widget? trailing,
-  }) {
-    return InkWell(
-      onTap: readOnly ? null : onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 100,
-              child: Text(
-                label,
-                style: AppTextStyles.button.copyWith(color: AppColors.textPrimary),
-              ),
-            ),
-            Expanded(
-              child: Text(
-                value.isEmpty ? 'Add $label' : value,
-                style: AppTextStyles.button.copyWith(
-                  color: value.isEmpty || readOnly
-                      ? AppColors.textSecondary
-                      : AppColors.textPrimary,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 16, 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.person_outline_rounded,
+                    size: 18,
+                    color: AppColors.secondary,
+                  ),
                 ),
-                textAlign: TextAlign.right,
+                const SizedBox(width: 12),
+                Text(
+                  'Personal Info',
+                  style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.textPrimary),
+                ),
+              ],
+            ),
+          ),
+          _buildStyledFieldTile(
+            icon: Icons.phone_iphone_rounded,
+            label: 'Phone',
+            value: _phoneController.text.isEmpty ? null : _phoneController.text,
+            placeholder: 'Add phone number',
+            onTap: _editPhone,
+          ),
+          _buildFieldDivider(),
+          _buildStyledFieldTile(
+            icon: Icons.wc_rounded,
+            label: 'Gender',
+            value: _selectedGender,
+            placeholder: 'Select gender',
+            onTap: _selectGender,
+          ),
+          _buildFieldDivider(),
+          _buildStyledFieldTile(
+            icon: Icons.cake_rounded,
+            label: 'Birthday',
+            value: _selectedDateOfBirth != null ? _formatDate(_selectedDateOfBirth!) : null,
+            placeholder: 'Add birthday',
+            onTap: _selectDate,
+          ),
+          _buildFieldDivider(),
+          _buildStyledFieldTile(
+            icon: Icons.location_on_rounded,
+            label: 'Location',
+            value: _locationController.text.isEmpty ? null : _locationController.text,
+            placeholder: 'Add location',
+            onTap: _editLocation,
+            trailing: _isLoadingLocation
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.secondary),
+                  )
+                : null,
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
+  /// About section card (Bio) - Redesigned
+  Widget _buildAboutSection() {
+    final bioText = _bioController.text;
+    final isEmpty = bioText.isEmpty;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 16, 4),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.format_quote_rounded,
+                    size: 18,
+                    color: AppColors.secondary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'About Me',
+                  style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.textPrimary),
+                ),
+              ],
+            ),
+          ),
+          InkWell(
+            onTap: _editBio,
+            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 16, 16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (isEmpty) ...[
+                          Text(
+                            'Tell others about yourself...',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.textTertiary,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: AppColors.secondary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.add, size: 16, color: AppColors.secondary),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Add bio',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: AppColors.secondary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ] else ...[
+                          Text(
+                            bioText,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.textPrimary,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 22,
+                    color: isEmpty ? AppColors.secondary : AppColors.textTertiary,
+                  ),
+                ],
               ),
             ),
-            if (trailing != null) ...[
-              const SizedBox(width: 8),
-              trailing,
-            ] else if (!readOnly) ...[
-              const SizedBox(width: 8),
-              const Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 20),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Interests section card - Redesigned
+  Widget _buildInterestsSection() {
+    final selectedCount = _selectedInterests.length;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 16, 4),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.interests_rounded,
+                    size: 18,
+                    color: AppColors.secondary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Interests',
+                  style: AppTextStyles.bodyLargeBold.copyWith(color: AppColors.textPrimary),
+                ),
+                const Spacer(),
+                if (selectedCount > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '$selectedCount selected',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.secondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _availableInterests.map((interest) {
+                final isSelected = _selectedInterests.contains(interest);
+                return _buildInterestChip(interest, isSelected);
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Styled interest chip with emoji
+  Widget _buildInterestChip(String interest, bool isSelected) {
+    // Get emoji for each interest
+    final emoji = _getInterestEmoji(interest);
+
+    return InkWell(
+      onTap: () {
+        setState(() {
+          if (isSelected) {
+            _selectedInterests.remove(interest);
+          } else {
+            _selectedInterests.add(interest);
+          }
+        });
+      },
+      borderRadius: BorderRadius.circular(24),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          gradient: isSelected
+              ? const LinearGradient(
+                  colors: [AppColors.secondary, Color(0xFFA8B556)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: isSelected ? null : AppColors.cardSurface,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isSelected ? AppColors.secondary : AppColors.border,
+            width: isSelected ? 1.5 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.secondary.withValues(alpha: 0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              emoji,
+              style: TextStyle(
+                fontSize: 16,
+                color: isSelected ? AppColors.white : AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              interest,
+              style: AppTextStyles.bodySmall.copyWith(
+                fontWeight: FontWeight.w600,
+                color: isSelected ? AppColors.white : AppColors.textSecondary,
+              ),
+            ),
+            if (isSelected) ...[
+              const SizedBox(width: 4),
+              const Icon(Icons.close_rounded, size: 14, color: AppColors.white),
             ],
           ],
         ),
@@ -376,226 +750,526 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Text(
-        title.toUpperCase(),
-        style: AppTextStyles.caption.copyWith(
-          color: AppColors.textSecondary,
-          letterSpacing: 0.5,
+  /// Get emoji for interest category
+  String _getInterestEmoji(String interest) {
+    switch (interest.toLowerCase()) {
+      case 'meetup':
+        return '👥';
+      case 'sports':
+        return '⚽';
+      case 'workshop':
+        return '🛠️';
+      case 'networking':
+        return '🤝';
+      case 'food':
+        return '🍕';
+      case 'creative':
+        return '🎨';
+      case 'outdoor':
+        return '🌳';
+      case 'fitness':
+        return '💪';
+      case 'learning':
+        return '📚';
+      case 'social':
+        return '🎉';
+      default:
+        return '✨';
+    }
+  }
+
+  /// Styled field tile for personal info
+  Widget _buildStyledFieldTile({
+    required IconData icon,
+    required String label,
+    required String? value,
+    required String placeholder,
+    required VoidCallback onTap,
+    Widget? trailing,
+  }) {
+    final isEmpty = value == null || value.isEmpty;
+
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: isEmpty
+                    ? AppColors.surfaceAlt
+                    : AppColors.secondary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                icon,
+                size: 20,
+                color: isEmpty ? AppColors.textTertiary : AppColors.secondary,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    isEmpty ? placeholder : value!,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: isEmpty ? AppColors.textTertiary : AppColors.textPrimary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (trailing != null) ...[
+              const SizedBox(width: 8),
+              trailing,
+            ] else ...[
+              const SizedBox(width: 4),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: isEmpty ? AppColors.textTertiary : AppColors.secondary,
+              ),
+            ],
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildInterests() {
+  /// Divider for field tiles
+  Widget _buildFieldDivider() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: _availableInterests.map((interest) {
-          final isSelected = _selectedInterests.contains(interest);
-          return InkWell(
-            onTap: () {
-              setState(() {
-                if (isSelected) {
-                  _selectedInterests.remove(interest);
-                } else {
-                  _selectedInterests.add(interest);
-                }
-              });
-            },
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.secondary : AppColors.surfaceAlt,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected ? AppColors.secondary : AppColors.border,
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                interest,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: isSelected ? AppColors.white : AppColors.textSecondary,
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
+      padding: const EdgeInsets.only(left: 74),
+      child: Divider(height: 1, thickness: 1, color: AppColors.divider),
     );
   }
 
-  // Edit dialogs
+  // ==================== EDIT DIALOGS ====================
 
   Future<void> _editBio() async {
     final controller = TextEditingController(text: _bioController.text);
 
-    await showDialog(
+    await showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Bio'),
-        content: TextField(
-          controller: controller,
-          maxLines: 4,
-          maxLength: 150,
-          decoration: const InputDecoration(
-            hintText: 'Tell us about yourself...',
-            border: OutlineInputBorder(),
-          ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _bioController.text = controller.text;
-              });
-              Navigator.pop(context);
-            },
-            child: Text(
-              'Save',
-              style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.secondary),
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Text(
+                    'About',
+                    style: AppTextStyles.h3.copyWith(color: AppColors.textPrimary),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close, color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            // Content
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: TextField(
+                controller: controller,
+                maxLines: 5,
+                maxLength: 150,
+                autofocus: true,
+                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  hintText: 'Tell us about yourself...',
+                  hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
+                  filled: true,
+                  fillColor: AppColors.surfaceAlt,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.all(16),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Save button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _bioController.text = controller.text;
+                    });
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: AppColors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Save',
+                    style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.white),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
-    controller.dispose();
   }
 
   Future<void> _editPhone() async {
     final controller = TextEditingController(text: _phoneController.text);
 
-    await showDialog(
+    await showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Phone'),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(
-            hintText: '+62 ...',
-            border: OutlineInputBorder(),
-          ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _phoneController.text = controller.text;
-              });
-              Navigator.pop(context);
-            },
-            child: Text(
-              'Save',
-              style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.secondary),
-            ),
-          ),
-        ],
-      ),
-    );
-    controller.dispose();
-  }
-
-  Future<void> _editLocation() async {
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Location'),
-        content: Column(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
-              controller: _locationController,
-              decoration: const InputDecoration(
-                hintText: 'Enter city name',
-                border: OutlineInputBorder(),
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Text(
+                    'Phone Number',
+                    style: AppTextStyles.h3.copyWith(color: AppColors.textPrimary),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close, color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: TextField(
+                controller: controller,
+                keyboardType: TextInputType.phone,
+                autofocus: true,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
+                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  hintText: '812 3456 7890',
+                  hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
+                  prefixText: '+62 ',
+                  prefixStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                  filled: true,
+                  fillColor: AppColors.surfaceAlt,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.all(16),
+                ),
               ),
             ),
             const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: () {
-                Navigator.pop(context);
-                _requestLocation();
-              },
-              icon: const Icon(Icons.my_location, size: 18),
-              label: const Text('Use current location'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.secondary,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _phoneController.text = controller.text;
+                    });
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: AppColors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Save',
+                    style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.white),
+                  ),
+                ),
               ),
             ),
+            const SizedBox(height: 20),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+      ),
+    );
+  }
+
+  Future<void> _editLocation() async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {});
-              Navigator.pop(context);
-            },
-            child: Text(
-              'Save',
-              style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.secondary),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Text(
+                    'Location',
+                    style: AppTextStyles.h3.copyWith(color: AppColors.textPrimary),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close, color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: TextField(
+                controller: _locationController,
+                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  hintText: 'Enter city name',
+                  hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
+                  prefixIcon: const Icon(Icons.location_on_outlined, color: AppColors.textSecondary),
+                  filled: true,
+                  fillColor: AppColors.surfaceAlt,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.all(16),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Use current location button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                  _requestLocation();
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.secondary.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.my_location,
+                          size: 18,
+                          color: AppColors.secondary,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Use current location',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: AppColors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Save',
+                    style: AppTextStyles.bodyMediumBold.copyWith(color: AppColors.white),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }
 
   Future<void> _selectGender() async {
-    await showDialog(
+    await showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Gender'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: _genderOptions.map((gender) {
-            return RadioListTile<String>(
-              title: Text(gender),
-              value: gender,
-              groupValue: _selectedGender,
-              fillColor: WidgetStateProperty.resolveWith<Color>((states) {
-                if (states.contains(WidgetState.selected)) {
-                  return AppColors.secondary;
-                }
-                return AppColors.textSecondary;
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    Text(
+                      'Gender',
+                      style: AppTextStyles.h3.copyWith(color: AppColors.textPrimary),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close, color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              ..._genderOptions.map((gender) {
+                final isSelected = _selectedGender == gender;
+                return InkWell(
+                  onTap: () {
+                    setState(() {
+                      _selectedGender = gender;
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    color: isSelected ? AppColors.secondary.withValues(alpha: 0.1) : Colors.transparent,
+                    child: Row(
+                      children: [
+                        Text(
+                          gender,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: isSelected ? AppColors.secondary : AppColors.textPrimary,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                          ),
+                        ),
+                        const Spacer(),
+                        if (isSelected)
+                          Icon(Icons.check, color: AppColors.secondary, size: 20),
+                      ],
+                    ),
+                  ),
+                );
               }),
-              onChanged: (value) {
-                setState(() {
-                  _selectedGender = value;
-                });
-                Navigator.pop(context);
-              },
-            );
-          }).toList(),
+              const SizedBox(height: 12),
+            ],
+          ),
         ),
       ),
     );

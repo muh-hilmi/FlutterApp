@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../domain/entities/user.dart';
 import '../../../core/services/api_service.dart';
 import '../../pages/profile/profile_screen.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 class FindMatchesModal extends StatelessWidget {
   final String eventId;
@@ -32,7 +33,7 @@ class FindMatchesModal extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey.shade300,
+              color: AppColors.divider,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -73,7 +74,7 @@ class FindMatchesModal extends StatelessWidget {
                             'People also joining "$eventTitle"',
                             style: TextStyle(
                               fontSize: 13,
-                              color: Colors.grey.shade600,
+                              color: AppColors.textTertiary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -143,7 +144,7 @@ class FindMatchesModal extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.surfaceAlt),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -227,7 +228,7 @@ class FindMatchesModal extends StatelessWidget {
                         match.reason,
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade700,
+                          color: AppColors.textEmphasis,
                           fontWeight: FontWeight.w500,
                         ),
                         maxLines: 2,
@@ -275,7 +276,7 @@ class FindMatchesModal extends StatelessWidget {
                   'View Profile',
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.grey.shade600,
+                    color: AppColors.textTertiary,
                   ),
                 ),
               ),

@@ -220,14 +220,6 @@ func (h *TicketHandler) GetTicketByID(c *gin.Context) {
 // @Failure 500 {object} response.Response
 // @Router /tickets/events/{event_id}/checkin [post]
 func (h *TicketHandler) CheckIn(c *gin.Context) {
-	// Parse event ID from path
-	eventIDStr := c.Param("event_id")
-	eventID, err := uuid.Parse(eventIDStr)
-	if err != nil {
-		response.BadRequest(c, "Invalid event ID", err.Error())
-		return
-	}
-
 	var req ticket.CheckInRequest
 
 	// Parse request body
@@ -239,6 +231,13 @@ func (h *TicketHandler) CheckIn(c *gin.Context) {
 	// Validate request
 	if err := h.validator.Validate(&req); err != nil {
 		response.BadRequest(c, "Validation failed", err.Error())
+		return
+	}
+
+	// Parse event ID from request body
+	eventID, err := uuid.Parse(req.EventID)
+	if err != nil {
+		response.BadRequest(c, "Invalid event ID", err.Error())
 		return
 	}
 

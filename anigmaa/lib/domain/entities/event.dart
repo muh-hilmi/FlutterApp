@@ -42,6 +42,9 @@ class Event {
   final List<String>
   interestedUserIds; // Users who are interested in this event
 
+  // User-specific state from backend (populated via is_user_attending)
+  final bool isUserAttending; // True if the current user has an active ticket
+
   const Event({
     required this.id,
     required this.title,
@@ -66,6 +69,7 @@ class Event {
     this.ticketsSold = 0,
     this.waitlistIds = const [],
     this.interestedUserIds = const [],
+    this.isUserAttending = false,
   });
 
   // Business logic getters
@@ -107,6 +111,8 @@ class Event {
   // Attendance getters - Check if current user has joined/attended this event
   int get attendeeCount => attendeeIds.length;
   bool get hasJoined {
+    // Prefer backend-provided flag (is_user_attending) over client-side check
+    if (isUserAttending) return true;
     try {
       final authService = di.sl<AuthService>();
       final currentUserId = authService.userId;
@@ -115,7 +121,19 @@ class Event {
       return false;
     }
   }
-  bool get canJoin => !hasEnded && !isFull && !hasJoined && status != EventStatus.cancelled;
+
+  // True if the current user is the host of this event
+  bool get isUserHost {
+    try {
+      final authService = di.sl<AuthService>();
+      final currentUserId = authService.userId;
+      return currentUserId != null && host.id == currentUserId;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  bool get canJoin => !hasEnded && !isFull && !hasJoined && !isUserHost && status != EventStatus.cancelled;
 
   // Image URL helpers
   /// Get full image URLs with base URL prepended
@@ -154,6 +172,7 @@ class Event {
     int? ticketsSold,
     List<String>? waitlistIds,
     List<String>? interestedUserIds,
+    bool? isUserAttending,
   }) {
     return Event(
       id: id ?? this.id,
@@ -178,6 +197,7 @@ class Event {
       ticketsSold: ticketsSold ?? this.ticketsSold,
       waitlistIds: waitlistIds ?? this.waitlistIds,
       interestedUserIds: interestedUserIds ?? this.interestedUserIds,
+      isUserAttending: isUserAttending ?? this.isUserAttending,
     );
   }
 }

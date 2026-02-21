@@ -54,8 +54,8 @@ type Event struct {
 	EndTime          time.Time     `json:"end_time" db:"end_time"`
 	LocationName     string        `json:"location_name" db:"location_name"`
 	LocationAddress  string        `json:"location_address" db:"location_address"`
-	LocationLat      float64       `json:"location_lat" db:"-"` // Handled by PostGIS query
-	LocationLng      float64       `json:"location_lng" db:"-"` // Handled by PostGIS query
+	LocationLat      float64       `json:"location_lat" db:"location_lat"`
+	LocationLng      float64       `json:"location_lng" db:"location_lng"`
 	MaxAttendees     int           `json:"max_attendees" db:"max_attendees"`
 	Price            *float64      `json:"price,omitempty" db:"price"`
 	PriceMin         int64         `json:"price_min,omitempty" db:"price_min"` // For filtering

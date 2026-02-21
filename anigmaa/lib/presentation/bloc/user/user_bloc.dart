@@ -255,8 +255,10 @@ class UserBloc extends Bloc<UserEvent, UserState> with NetworkResilienceBloc {
       if (event.interests != null) {
         updateData['interests'] = event.interests;
       }
-      if (event.phone != null) {
-        updateData['phone'] = event.phone;
+      if (event.phone != null && event.phone!.isNotEmpty) {
+        // Strip all non-numeric characters for backend validation
+        final cleanPhone = event.phone!.replaceAll(RegExp(r'[^\d]'), '');
+        updateData['phone'] = cleanPhone;
       }
       if (event.dateOfBirth != null) {
         updateData['date_of_birth'] = event.dateOfBirth!.toIso8601String();

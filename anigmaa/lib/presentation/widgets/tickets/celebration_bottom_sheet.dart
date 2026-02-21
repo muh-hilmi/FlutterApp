@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:confetti/confetti.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 class CelebrationBottomSheet extends StatefulWidget {
   final String eventName;
@@ -166,7 +167,7 @@ class _CelebrationBottomSheetState extends State<CelebrationBottomSheet>
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: AppColors.divider,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -347,7 +348,7 @@ class _CelebrationBottomSheetState extends State<CelebrationBottomSheet>
                   Expanded(
                     child: LinearProgressIndicator(
                       value: 1.0 - _progressController.value,
-                      backgroundColor: Colors.grey[200],
+                      backgroundColor: AppColors.surfaceAlt,
                       valueColor: const AlwaysStoppedAnimation<Color>(
                         Color(0xFFBBC863),
                       ),
@@ -359,7 +360,7 @@ class _CelebrationBottomSheetState extends State<CelebrationBottomSheet>
                     'Auto-close in $_countdown',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
-                      color: Colors.grey[500],
+                      color: AppColors.textDisabled,
                     ),
                   ),
                 ],

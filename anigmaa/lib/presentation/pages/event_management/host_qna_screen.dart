@@ -5,6 +5,7 @@ import '../../bloc/qna/qna_bloc.dart';
 import '../../bloc/qna/qna_event.dart';
 import '../../bloc/qna/qna_state.dart';
 import '../profile/profile_screen.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 /// Screen for event hosts/organizers to manage Q&A
 /// Features:
@@ -60,7 +61,7 @@ class _HostQnAScreenState extends State<HostQnAScreen>
           child: TabBar(
             controller: _tabController,
             labelColor: const Color(0xFFBBC863),
-            unselectedLabelColor: Colors.grey[600],
+            unselectedLabelColor: AppColors.textTertiary,
             labelStyle: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
@@ -221,7 +222,7 @@ class _HostQnAScreenState extends State<HostQnAScreen>
                         text: TextSpan(
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            color: AppColors.textTertiary,
                             fontWeight: FontWeight.w500,
                           ),
                           children: [
@@ -252,7 +253,7 @@ class _HostQnAScreenState extends State<HostQnAScreen>
               decoration: BoxDecoration(
                 color: const Color(0xFFFCFCFC),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[200]!, width: 1),
+                border: Border.all(color: AppColors.surfaceAlt, width: 1),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,7 +280,7 @@ class _HostQnAScreenState extends State<HostQnAScreen>
                           _formatTime(qna.answeredAt!),
                           style: TextStyle(
                             fontSize: 11,
-                            color: Colors.grey[600],
+                            color: AppColors.textTertiary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -306,14 +307,14 @@ class _HostQnAScreenState extends State<HostQnAScreen>
               Icon(
                 Icons.thumb_up_outlined,
                 size: 14,
-                color: Colors.grey[600],
+                color: AppColors.textTertiary,
               ),
               const SizedBox(width: 6),
               Text(
                 '${qna.upvotes} ${qna.upvotes == 1 ? 'orang' : 'orang'}',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey[600],
+                  color: AppColors.textTertiary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -389,7 +390,7 @@ class _HostQnAScreenState extends State<HostQnAScreen>
           Icon(
             isUnanswered ? Icons.inbox_outlined : Icons.check_circle_outline,
             size: 64,
-            color: Colors.grey[400],
+            color: AppColors.border,
           ),
           const SizedBox(height: 16),
           Text(
@@ -406,7 +407,7 @@ class _HostQnAScreenState extends State<HostQnAScreen>
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: AppColors.textTertiary,
             ),
           ),
         ],

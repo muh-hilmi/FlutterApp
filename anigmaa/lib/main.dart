@@ -14,8 +14,10 @@ import 'core/theme/app_theme.dart';
 import 'injection_container.dart' as di;
 import 'presentation/pages/discover/discover_screen.dart';
 import 'presentation/pages/home/home_screen.dart';
-import 'presentation/pages/create_event/create_event_screen.dart';
+import 'presentation/pages/create_event/create_event_conversation.dart';
+import 'core/auth/auth_bloc.dart';
 import 'presentation/bloc/events/events_bloc.dart';
+import 'presentation/bloc/events/events_event.dart';
 import 'presentation/bloc/user/user_bloc.dart';
 import 'presentation/bloc/user/user_event.dart';
 import 'presentation/bloc/posts/posts_bloc.dart';
@@ -142,6 +144,7 @@ class NotionSocialApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider<AuthBloc>(create: (context) => di.sl<AuthBloc>()),
         BlocProvider<EventsBloc>(create: (context) => di.sl<EventsBloc>()),
         BlocProvider<UserBloc>(
           create: (context) => di.sl<UserBloc>()..add(LoadUserProfile()),
@@ -381,11 +384,17 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                         final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const CreateEventScreen(),
+                            builder: (context) => const CreateEventConversation(),
                           ),
                         );
                         if (result != null && result is Event) {
-                          _discoverKey.currentState?.addNewEvent(result);
+                          // Refresh events list via bloc instead of manual insert
+                          // This prevents duplicate events
+                          if (mounted) {
+                            context.read<EventsBloc>().add(
+                              const LoadEventsByMode(mode: 'for_you'),
+                            );
+                          }
                           setState(() {
                             _currentIndex = 0;
                           });

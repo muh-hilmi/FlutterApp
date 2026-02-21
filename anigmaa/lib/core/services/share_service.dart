@@ -6,6 +6,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../domain/entities/post.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 class ShareService {
   static const String _appBaseUrl = 'https://flyerr.app';
@@ -241,7 +242,7 @@ class ShareService {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[300]!),
+                  border: Border.all(color: AppColors.divider),
                 ),
                 child: QrImageView(
                   data: postUrl,

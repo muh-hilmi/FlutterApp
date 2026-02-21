@@ -8,7 +8,7 @@ class Ticket extends Equatable {
   final String id;
   final String userId;
   final String eventId;
-  final String attendanceCode; // 4-character code (e.g., "A3F7")
+  final String attendanceCode; // 8-character code (e.g., "A3F7K9M2")
   final double pricePaid; // 0 for free events
   final DateTime purchasedAt;
   final bool isCheckedIn;

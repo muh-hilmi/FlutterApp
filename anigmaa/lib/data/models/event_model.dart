@@ -22,6 +22,7 @@ class EventModel extends Event {
     super.status = EventStatus.upcoming,
     super.requirements,
     super.interestedUserIds = const [],
+    super.isUserAttending = false,
   });
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
@@ -138,6 +139,7 @@ class EventModel extends Event {
                     (i) => 'interested_$i',
                   )
                 : <String>[]),
+      isUserAttending: json['is_user_attending'] as bool? ?? false,
     );
   }
 
@@ -161,6 +163,7 @@ class EventModel extends Event {
       'requirements': requirements,
       'ticketing_enabled': false,
       'image_urls': imageUrls,
+      'privacy': 'public',
     };
   }
 
@@ -183,6 +186,7 @@ class EventModel extends Event {
       status: event.status,
       requirements: event.requirements,
       interestedUserIds: event.interestedUserIds,
+      isUserAttending: event.isUserAttending,
     );
   }
 

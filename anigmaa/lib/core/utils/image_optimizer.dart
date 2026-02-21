@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:cached_network_image/cached_network_image.dart';
 import '../widgets/safe_network_image.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 /// Image optimization utilities for better performance
 class ImageOptimizer {
@@ -42,11 +43,11 @@ class ImageOptimizer {
   /// Build default placeholder widget
   static Widget _buildDefaultPlaceholder() {
     return Container(
-      color: Colors.grey[200],
+      color: AppColors.surfaceAlt,
       child: const Center(
         child: CircularProgressIndicator(
           strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.textTertiary),
         ),
       ),
     );
@@ -55,9 +56,9 @@ class ImageOptimizer {
   /// Build default error widget
   static Widget _buildDefaultError() {
     return Container(
-      color: Colors.grey[200],
+      color: AppColors.surfaceAlt,
       child: const Center(
-        child: Icon(Icons.broken_image, color: Colors.grey, size: 40),
+        child: Icon(Icons.broken_image, color: AppColors.textTertiary, size: 40),
       ),
     );
   }

@@ -52,7 +52,7 @@ class AppTextStyles {
   /// Primary content text (posts, descriptions)
   static TextStyle get bodyLarge => GoogleFonts.plusJakartaSans(
     fontSize: 16,
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.w500,
     color: AppColors.textPrimary,
     height: 1.5,
   );
@@ -69,7 +69,7 @@ class AppTextStyles {
   /// Standard body text (list items, secondary content)
   static TextStyle get bodyMedium => GoogleFonts.plusJakartaSans(
     fontSize: 14,
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.w500,
     color: AppColors.textPrimary,
     height: 1.5,
   );
@@ -85,7 +85,7 @@ class AppTextStyles {
   /// Small body — tertiary content, supporting text
   static TextStyle get bodySmall => GoogleFonts.plusJakartaSans(
     fontSize: 12,
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.w500,
     color: AppColors.textSecondary,
     height: 1.5,
   );

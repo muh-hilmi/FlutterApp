@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 enum WaitlistStatus { waiting, movedUp, spotAvailable, expired }
 
@@ -91,7 +92,7 @@ class _EventWaitlistScreenState extends State<EventWaitlistScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+        border: Border(bottom: BorderSide(color: AppColors.surfaceAlt)),
       ),
       child: Row(
         children: [
@@ -126,10 +127,10 @@ class _EventWaitlistScreenState extends State<EventWaitlistScreen> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: AppColors.cardSurface,
               shape: BoxShape.circle,
             ),
-            child: Icon(LucideIcons.userX2, size: 48, color: Colors.grey[400]),
+            child: Icon(LucideIcons.userX2, size: 48, color: AppColors.border),
           ),
           const SizedBox(height: 20),
           Text(
@@ -137,13 +138,13 @@ class _EventWaitlistScreenState extends State<EventWaitlistScreen> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
+              color: AppColors.textEmphasis,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Event yang penuh akan muncul di sini',
-            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 14, color: AppColors.textTertiary),
           ),
         ],
       ),
@@ -177,8 +178,8 @@ class _EventWaitlistScreenState extends State<EventWaitlistScreen> {
                   child: Container(
                     width: 80,
                     height: 80,
-                    color: Colors.grey[200],
-                    child: Icon(LucideIcons.calendar, color: Colors.grey[400]),
+                    color: AppColors.surfaceAlt,
+                    child: Icon(LucideIcons.calendar, color: AppColors.border),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -201,14 +202,14 @@ class _EventWaitlistScreenState extends State<EventWaitlistScreen> {
                           Icon(
                             LucideIcons.calendar,
                             size: 14,
-                            color: Colors.grey[500],
+                            color: AppColors.textDisabled,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             item.eventDate,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[600],
+                              color: AppColors.textTertiary,
                             ),
                           ),
                         ],
@@ -305,7 +306,7 @@ class _EventWaitlistScreenState extends State<EventWaitlistScreen> {
             ),
             Text(
               '$remaining orang di depan Anda',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
             ),
           ],
         ),
@@ -314,7 +315,7 @@ class _EventWaitlistScreenState extends State<EventWaitlistScreen> {
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: 1 - progress,
-            backgroundColor: Colors.grey[200],
+            backgroundColor: AppColors.surfaceAlt,
             valueColor: AlwaysStoppedAnimation<Color>(
               item.status == WaitlistStatus.spotAvailable
                   ? const Color(0xFFBBC863)
@@ -373,7 +374,7 @@ class _EventWaitlistScreenState extends State<EventWaitlistScreen> {
             const SizedBox(height: 8),
             Text(
               'Satu tiket untuk "${item.eventName}" telah tersedia. Anda memiliki 24 jam untuk klaim.',
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 14, color: AppColors.textTertiary),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
@@ -383,7 +384,7 @@ class _EventWaitlistScreenState extends State<EventWaitlistScreen> {
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.grey[300]!),
+                      side: BorderSide(color: AppColors.divider),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     child: const Text('Lewati'),
@@ -485,7 +486,7 @@ class _EventWaitlistScreenState extends State<EventWaitlistScreen> {
                 const SizedBox(height: 2),
                 Text(
                   description,
-                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 13, color: AppColors.textTertiary),
                 ),
               ],
             ),

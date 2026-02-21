@@ -47,6 +47,7 @@ import 'domain/usecases/get_bookmarked_posts.dart';
 import 'domain/usecases/purchase_ticket.dart';
 import 'domain/usecases/get_user_tickets.dart';
 import 'domain/usecases/check_in_ticket.dart';
+import 'domain/usecases/get_event_tickets.dart';
 import 'domain/usecases/get_communities.dart';
 import 'domain/usecases/get_joined_communities.dart';
 import 'domain/usecases/join_community.dart';
@@ -202,6 +203,7 @@ Future<void> init() async {
       purchaseTicket: sl(),
       getUserTickets: sl(),
       checkInTicket: sl(),
+      getEventTickets: sl(),
     ),
   );
 
@@ -290,6 +292,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => PurchaseTicket(sl()));
   sl.registerLazySingleton(() => GetUserTickets(sl()));
   sl.registerLazySingleton(() => CheckInTicket(sl()));
+  sl.registerLazySingleton(() => GetEventTickets(sl()));
 
   // Use cases - Communities
   sl.registerLazySingleton(() => GetCommunities(sl()));

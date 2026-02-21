@@ -35,7 +35,7 @@ class EventDescriptionCard extends StatelessWidget {
             event.description,
             style: AppTextStyles.button.copyWith(
               color: AppColors.textSecondary,
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.w500,
               height: 1.6,
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 class ProfileUtils {
   static String formatNumber(int number) {
@@ -57,7 +58,7 @@ class ProfileButtons {
                 : null,
             color: isPrimary ? null : Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: !isPrimary ? Border.all(color: Colors.grey[300]!) : null,
+            border: !isPrimary ? Border.all(color: AppColors.divider) : null,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.05),
@@ -73,7 +74,7 @@ class ProfileButtons {
               Icon(
                 icon,
                 size: 18,
-                color: isPrimary ? Colors.white : Colors.grey[800],
+                color: isPrimary ? Colors.white : AppColors.textPrimary,
               ),
               const SizedBox(width: 8),
               Text(
@@ -116,7 +117,7 @@ class ProfileButtons {
               label,
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.grey[600],
+                color: AppColors.textTertiary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -136,7 +137,7 @@ class ProfileMenuHelpers {
     Color? textColor,
   }) {
     return ListTile(
-      leading: Icon(icon, color: iconColor ?? Colors.grey[800], size: 24),
+      leading: Icon(icon, color: iconColor ?? AppColors.textPrimary, size: 24),
       title: Text(
         title,
         style: TextStyle(
@@ -159,7 +160,7 @@ class ProfileMenuHelpers {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text('Batal', style: TextStyle(color: Colors.grey[600])),
+            child: Text('Batal', style: TextStyle(color: AppColors.textTertiary)),
           ),
           TextButton(
             onPressed: () async {

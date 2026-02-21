@@ -75,11 +75,11 @@ class AppColors {
   /// #3D3D3D — slightly softer text (descriptions, secondary headings)
   static const Color textEmphasis = Color(0xFF3D3D3D);
 
-  /// #666666 — labels, captions, meta info
-  static const Color textSecondary = Color(0xFF666666);
+  /// #4A4A4A — labels, captions, meta info
+  static const Color textSecondary = Color(0xFF4A4A4A);
 
-  /// #999999 — timestamps, hints, placeholders
-  static const Color textTertiary = Color(0xFF999999);
+  /// #666666 — timestamps, hints, placeholders
+  static const Color textTertiary = Color(0xFF666666);
 
   /// #CCCCCC — disabled state text
   static const Color textDisabled = Color(0xFFCCCCCC);

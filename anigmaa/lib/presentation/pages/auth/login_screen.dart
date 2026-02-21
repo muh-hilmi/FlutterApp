@@ -41,11 +41,11 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
                 _buildHeader(),
-                const SizedBox(height: 60),
+                const SizedBox(height: 30),
                 _buildGoogleSignInButton(),
-                const SizedBox(height: 32),
+                const SizedBox(height: 20),
                 _buildPrivacyText(),
                 const SizedBox(height: 40),
               ],
@@ -98,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
         onPressed: _isLoading ? null : _handleGoogleSignIn,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.secondary,
-          foregroundColor: AppColors.white,
+          // foregroundColor: AppColors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -119,18 +119,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Image.asset(
                     'assets/google_logo.png',
-                    height: 24,
-                    width: 24,
+                    // height: 24,
+                    // width: 24,
                     errorBuilder: (context, error, stackTrace) {
                       // Fallback to icon if image not found
                       return const Icon(
                         Icons.g_mobiledata,
                         size: 32,
-                        color: AppColors.white,
+                        color: AppColors.primary,
                       );
                     },
                   ),
-                  const SizedBox(width: 12),
+                  // const SizedBox(width: 8),
                   Text(
                     'Lanjut pake Google',
                     style: AppTextStyles.bodyLargeBold,
@@ -215,23 +215,22 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       if (mounted) {
-        // Check if this is a new user (account just created)
-        // New users have no dateOfBirth AND createdAt is very recent (within last minute)
-        final accountAge = DateTime.now().difference(
-          authResponse.user.createdAt,
-        );
-        final isNewUser =
-            authResponse.user.dateOfBirth == null && accountAge.inMinutes < 1;
+        // Check if user needs to complete profile
+        // Required: dateOfBirth AND location
+        final needsProfileCompletion =
+            authResponse.user.dateOfBirth == null ||
+            (authResponse.user.location == null ||
+                authResponse.user.location!.isEmpty);
 
-        if (isNewUser) {
-          // First-time user - show complete profile screen once
+        if (needsProfileCompletion) {
+          // User needs to complete profile - redirect to complete profile screen
           Navigator.pushNamedAndRemoveUntil(
             context,
             '/complete-profile',
             (route) => false,
           );
         } else {
-          // Returning user - go directly to home
+          // Profile complete - go to home
           Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
 
           // Show success message
@@ -251,33 +250,25 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       if (mounted) {
-        String errorMessage = 'Waduh, gagal login nih';
+        String errorMessage = 'Yah, gagal login 😢';
 
-        // Better error messages
-        if (e.toString().contains('timeout') ||
-            e.toString().contains('connectTimeout')) {
-          errorMessage =
-              'Koneksi timeout. Cek ya:\n'
-              '1. Koneksi internet lo\n'
-              '2. Backend server nyala ga\n'
-              '3. API URL udah bener';
+        // Better error messages - Gen Z friendly
+        if (e.toString().contains('timeout') || e.toString().contains('connectTimeout')) {
+          // Timeout errors are already handled in datasource with good messages
+          errorMessage = e.toString().replaceFirst('NetworkFailure: ', '');
         } else if (e.toString().contains('401')) {
-          errorMessage = 'Authentication gagal. Coba lagi ya!';
+          errorMessage = 'Login gagal. Coba lagi ya!';
         } else if (e.toString().contains('404')) {
-          errorMessage = 'Login endpoint ga ketemu. Cek backend API';
+          errorMessage = 'Server-nya ilang. Hubungi admin.';
         } else if (e.toString().contains('500')) {
-          errorMessage = 'Server error. Coba lagi nanti ya';
-        } else if (e.toString().contains('network')) {
-          errorMessage = 'Error jaringan. Cek koneksi internet lo dulu';
-        } else if (e.toString().contains('PlatformException') ||
-            e.toString().contains('channel-error')) {
-          errorMessage =
-              'Google Sign-In belum dikonfigurasi.\n\n'
-              'App ini butuh Google OAuth setup:\n'
-              '1. Setup OAuth Client ID di Google Cloud Console\n'
-              '2. Tambahin SHA-1 fingerprint\n'
-              '3. Enable Google Sign-In API\n\n'
-              'Cek GOOGLE_AUTH_SETUP.md buat step-by-step guide';
+          errorMessage = 'Server lagi error. Sabar ya, coba lagi nanti.';
+        } else if (e.toString().contains('network') || e.toString().contains('wifi')) {
+          errorMessage = e.toString().replaceFirst('NetworkFailure: ', '');
+        } else if (e.toString().contains('PlatformException') || e.toString().contains('channel-error')) {
+          errorMessage = 'Google Sign-In error. Coba lagi ya.';
+        } else if (e.toString().contains('NetworkFailure:')) {
+          // Extract the message from NetworkFailure
+          errorMessage = e.toString().replaceFirst('NetworkFailure: ', '');
         } else {
           errorMessage = 'Error: ${e.toString()}';
         }

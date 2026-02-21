@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../domain/entities/event.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 class EventLocationCard extends StatelessWidget {
   final Event event;
@@ -79,7 +80,7 @@ class EventLocationCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               event.location.address,
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 14, color: AppColors.textTertiary),
             ),
           ],
         ],

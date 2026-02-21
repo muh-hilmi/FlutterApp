@@ -46,7 +46,7 @@ dependencies:
   go_router: ^14.2.0
   cached_network_image: ^3.3.1
   flutter_cache_manager: ^3.3.1
-  google_fonts: ^6.1.0
+  google_fonts: ^8.0.2
   table_calendar: ^3.0.9
   fl_chart: ^0.69.0
   lucide_icons: ^0.257.0
@@ -60,7 +60,6 @@ dependencies:
   url_launcher: ^6.3.2
   confetti: ^0.7.0
   qr_flutter: ^4.1.0
-  mobile_scanner: ^5.0.0
   # sentry_flutter: ^8.0.0
 
   # Location
@@ -71,7 +70,7 @@ dependencies:
 
   # Authentication
   google_sign_in: ^6.2.1
-  flutter_secure_storage: ^9.0.0
+  flutter_secure_storage: ^10.0.0
 
   # Payment
   midtrans_sdk: ^1.1.0
@@ -107,7 +106,11 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
 
-  # Appium & E2E Testing
+  # BLoC Testing
+  bloc_test: ^10.0.0
+  mocktail: ^1.0.4
+
+  # E2E Testing
   flutter_driver:
     sdk: flutter
   test: ^1.24.0
@@ -155,6 +158,3 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 
-# Dependency overrides to fix compatibility issues
-dependency_overrides:
-  google_fonts: 6.1.0

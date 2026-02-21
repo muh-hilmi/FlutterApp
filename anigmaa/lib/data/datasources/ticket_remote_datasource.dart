@@ -16,9 +16,9 @@ abstract class TicketRemoteDataSource {
     required String eventId,
     String? paymentMethod,
   });
-  Future<List<TicketTransactionModel>> getUserTickets();
+  Future<List<TicketModel>> getMyTickets();
   Future<TicketTransactionModel> getTicketTransactionById(String transactionId);
-  Future<void> checkInTicket(String transactionId, String attendanceCode);
+  Future<TicketModel> checkInTicket(String eventId, String attendanceCode);
   Future<TicketModel> createTicket(Map<String, dynamic> ticketData);
   Future<TicketModel> updateTicket(String id, Map<String, dynamic> ticketData);
   Future<void> deleteTicket(String id);
@@ -118,13 +118,13 @@ class TicketRemoteDataSourceImpl implements TicketRemoteDataSource {
   }
 
   @override
-  Future<List<TicketTransactionModel>> getUserTickets() async {
+  Future<List<TicketModel>> getMyTickets() async {
     try {
       final response = await dioClient.get('/tickets/my-tickets');
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data['data'] ?? response.data;
-        return data.map((json) => TicketTransactionModel.fromJson(json)).toList();
+        final List<dynamic> data = response.data['data'] ?? [];
+        return data.map((json) => TicketModel.fromJson(json as Map<String, dynamic>)).toList();
       } else {
         throw ServerFailure('Failed to fetch user tickets');
       }
@@ -150,14 +150,20 @@ class TicketRemoteDataSourceImpl implements TicketRemoteDataSource {
   }
 
   @override
-  Future<void> checkInTicket(String transactionId, String attendanceCode) async {
+  Future<TicketModel> checkInTicket(String eventId, String attendanceCode) async {
     try {
       final response = await dioClient.post(
         '/tickets/check-in',
-        data: {'attendance_code': attendanceCode},
+        data: {
+          'attendance_code': attendanceCode,
+          'event_id': eventId,
+        },
       );
 
-      if (response.statusCode != 200 && response.statusCode != 201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data['data'] ?? response.data;
+        return TicketModel.fromJson(data as Map<String, dynamic>);
+      } else {
         throw ServerFailure('Failed to check in ticket');
       }
     } on DioException catch (e) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../domain/entities/event.dart';
+import 'package:anigmaa/core/theme/app_colors.dart';
 
 class EventDateTimeCard extends StatelessWidget {
   final Event event;
@@ -73,7 +74,7 @@ class EventDateTimeCard extends StatelessWidget {
                   '${DateFormat('HH:mm').format(event.startTime.toLocal())} - ${DateFormat('HH:mm').format(event.endTime.toLocal())}',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: AppColors.textTertiary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
