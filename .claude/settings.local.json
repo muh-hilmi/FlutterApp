@@ -25,7 +25,12 @@
       "Bash(git -C /c/Users/mailh/OneDrive/Desktop/FlutterApp/anigmaa diff HEAD -- lib/presentation/pages/profile/edit_profile_screen.dart)",
       "Bash(git stash pop:*)",
       "Bash(git stash drop:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(head:*)",
+      "Bash(cd:*)",
+      "Bash(cmd:*)",
+      "Bash(powershell:*)",
+      "Bash(docker ps:*)"
     ]
   },
   "prefersReducedMotion": true

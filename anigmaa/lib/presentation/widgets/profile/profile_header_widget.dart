@@ -242,8 +242,8 @@ class ProfileInfoWidget extends StatelessWidget {
             // Actions
             _buildActionButton(),
 
-            // Events Hosted Section (Own profile only)
-            if (isOwnProfile) ...[
+            // Events Hosted Section (Own profile only, only if has active events)
+            if (isOwnProfile && activeEventsCount > 0) ...[
               const SizedBox(height: 16),
               _buildEventsHostedSection(),
             ],

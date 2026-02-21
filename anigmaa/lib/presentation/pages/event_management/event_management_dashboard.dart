@@ -10,15 +10,12 @@ import '../edit_event/edit_event_screen.dart';
 import 'host_qna_screen.dart';
 import '../event_participants/event_participants_screen.dart';
 import '../../../injection_container.dart' as di;
-import 'package:anigmaa/core/theme/app_colors.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
-/// Event Management Dashboard - Tab-based interface for event hosts
+/// Event Management Dashboard — Tab-based interface for event hosts.
 ///
-/// Features:
-/// - Overview Tab: Event info + quick edit
-/// - Q&A Tab: Manage questions (answer, delete)
-/// - Attendees Tab: View attendees + check-in
-/// - Analytics Tab: Revenue, transactions, charts
+/// Tabs: Edit · Peserta · Q&A · Analitik
 class EventManagementDashboard extends StatefulWidget {
   final String eventId;
 
@@ -42,7 +39,6 @@ class _EventManagementDashboardState extends State<EventManagementDashboard>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    // Get bloc instance once and reuse it
     _eventsBloc = di.sl<EventsBloc>();
     _loadEventData();
   }
@@ -54,142 +50,53 @@ class _EventManagementDashboardState extends State<EventManagementDashboard>
   }
 
   Future<void> _loadEventData() async {
-    debugPrint('[EventManagementDashboard] _loadEventData called for eventId: ${widget.eventId}');
-
-    // Try to get event from MyEventsBloc first (faster, cached)
+    // Try cache first (faster)
     final myEventsState = di.sl<MyEventsBloc>().state;
-    debugPrint('[EventManagementDashboard] MyEventsBloc state type: ${myEventsState.runtimeType}');
-
     if (myEventsState is MyEventsLoaded) {
-      debugPrint('[EventManagementDashboard] MyEventsBloc has ${myEventsState.events.length} events');
       try {
         final event = myEventsState.events.firstWhere(
           (e) => e.id == widget.eventId,
         );
-        debugPrint('[EventManagementDashboard] Found event in MyEventsBloc cache: ${event.title}');
-        if (mounted) {
-          setState(() {
-            _event = event;
-          });
-        }
-        return; // Found in cache, no need to load from EventsBloc
-      } catch (_) {
-        debugPrint('[EventManagementDashboard] Event not found in MyEventsBloc cache');
-        // Event not found in cache, will load from EventsBloc
-      }
+        if (mounted) setState(() => _event = event);
+        return;
+      } catch (_) {}
     }
-
-    // Load from EventsBloc for fresh data
-    debugPrint('[EventManagementDashboard] Loading from EventsBloc...');
     _eventsBloc.add(LoadEventById(widget.eventId));
   }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-      providers: [
-        BlocProvider.value(value: _eventsBloc),
-      ],
+      providers: [BlocProvider.value(value: _eventsBloc)],
       child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Kelola Event',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1A1A1A),
-                ),
-              ),
-              if (_event?.title != null)
-                Text(
-                  _event!.title,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textTertiary,
-                  ),
-                  maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                ),
-            ],
-          ),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF1A1A1A)),
-            onPressed: () => Navigator.pop(context),
-          ),
-          bottom: TabBar(
-            controller: _tabController,
-            labelColor: const Color(0xFFBBC863),
-            unselectedLabelColor: AppColors.textTertiary,
-            labelStyle: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-            ),
-            unselectedLabelStyle: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-            indicatorColor: const Color(0xFFBBC863),
-            indicatorSize: TabBarIndicatorSize.label,
-            tabs: const [
-              Tab(text: 'EDIT', icon: Icon(Icons.edit_outlined, size: 20)),
-              Tab(text: 'Q&A', icon: Icon(Icons.question_answer, size: 20)),
-              Tab(text: 'PESERTA', icon: Icon(Icons.people_outline, size: 20)),
-              Tab(text: 'ANALITIK', icon: Icon(Icons.analytics_outlined, size: 20)),
-            ],
-          ),
-        ),
+        backgroundColor: AppColors.background,
+        appBar: _buildAppBar(),
         body: BlocBuilder<EventsBloc, EventsState>(
           builder: (context, state) {
-            debugPrint('[EventManagementDashboard] BlocBuilder - state type: ${state.runtimeType}');
-
-            // Update _event from state
             if (state is EventsLoaded) {
-              debugPrint('[EventManagementDashboard] EventsLoaded - events count: ${state.events.length}');
-              debugPrint('[EventManagementDashboard] EventsLoaded - event IDs: ${state.events.map((e) => e.id).toList()}');
-              debugPrint('[EventManagementDashboard] Looking for eventId: ${widget.eventId}');
-
               try {
                 final event = state.events.firstWhere(
                   (e) => e.id == widget.eventId,
                 );
-                debugPrint('[EventManagementDashboard] FOUND event: ${event.title}');
-
                 if (_event == null || _event!.id != event.id) {
-                  debugPrint('[EventManagementDashboard] Setting _event to: ${event.title}');
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) {
-                      setState(() {
-                        _event = event;
-                      });
-                      debugPrint('[EventManagementDashboard] _event is now set: ${_event?.title}');
-                    }
+                    if (mounted) setState(() => _event = event);
                   });
                 }
-              } catch (_) {
-                debugPrint('[EventManagementDashboard] Event ${widget.eventId} not found in EventsLoaded state');
-              }
-            } else if (state is EventsError) {
-              debugPrint('[EventManagementDashboard] EventsError: ${state.message}');
+              } catch (_) {}
             }
 
             return TabBarView(
               controller: _tabController,
               children: [
                 _buildEditTab(state),
-                HostQnAScreen(
-                  eventId: widget.eventId,
-                  eventTitle: _event?.title,
-                ),
                 EventParticipantsScreen(
                   eventId: widget.eventId,
                   maxAttendees: _event?.maxAttendees,
+                ),
+                HostQnAScreen(
+                  eventId: widget.eventId,
+                  eventTitle: _event?.title,
                 ),
                 _buildAnalyticsTab(state),
               ],
@@ -200,185 +107,444 @@ class _EventManagementDashboardState extends State<EventManagementDashboard>
     );
   }
 
-  Widget _buildEditTab(EventsState state) {
-    if (_event != null) {
-      return EditEventScreen(event: _event!);
-    }
+  // ─── App Bar ──────────────────────────────────────────────────────────────
 
-    if (state is EventsError) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red,
-            ),
-            const SizedBox(height: 16),
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      backgroundColor: AppColors.surface,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
+        onPressed: () => Navigator.pop(context),
+      ),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Kelola Event', style: AppTextStyles.h3),
+          if (_event?.title != null)
             Text(
-              'Gagal memuat event',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              state.message,
-              style: TextStyle(
-                fontSize: 14,
+              _event!.title,
+              style: AppTextStyles.caption.copyWith(
                 color: AppColors.textTertiary,
               ),
-              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () {
-                _eventsBloc.add(LoadEventById(widget.eventId));
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('Coba Lagi'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFBBC863),
-                foregroundColor: Colors.white,
-              ),
+        ],
+      ),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(48),
+        child: Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: AppColors.divider, width: 1),
             ),
-          ],
+          ),
+          child: TabBar(
+            controller: _tabController,
+            labelColor: AppColors.textPrimary,
+            unselectedLabelColor: AppColors.textTertiary,
+            labelStyle: AppTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+            unselectedLabelStyle: AppTextStyles.bodyMedium,
+            indicator: const UnderlineTabIndicator(
+              borderSide: BorderSide(color: AppColors.secondary, width: 3),
+              insets: EdgeInsets.symmetric(horizontal: 16),
+            ),
+            tabs: const [
+              Tab(text: 'Edit'),
+              Tab(text: 'Peserta'),
+              Tab(text: 'Q&A'),
+              Tab(text: 'Analitik'),
+            ],
+          ),
         ),
-      );
+      ),
+    );
+  }
+
+  // ─── Edit Tab ─────────────────────────────────────────────────────────────
+
+  Widget _buildEditTab(EventsState state) {
+    if (_event != null) return EditEventScreen(event: _event!);
+    if (state is EventsError) return _buildErrorState(state.message);
+    return _buildLoadingState();
+  }
+
+  // ─── Analytics Tab ────────────────────────────────────────────────────────
+
+  Widget _buildAnalyticsTab(EventsState state) {
+    if (_event == null) {
+      if (state is EventsError) return _buildErrorState(state.message);
+      return _buildLoadingState();
     }
 
-    return const Center(
+    final event = _event!;
+    final ticketsSold = event.attendeeIds.length;
+    final maxTickets = event.maxAttendees ?? 0;
+    final occupancyRate = maxTickets > 0 ? ticketsSold / maxTickets : 0.0;
+    final revenue = (event.price ?? 0) * ticketsSold;
+    final isFree = event.isFree || (event.price == null || event.price == 0);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircularProgressIndicator(color: Color(0xFFBBC863)),
-          SizedBox(height: 16),
+          // Header
+          Text('Ringkasan', style: AppTextStyles.h2),
+          const SizedBox(height: 4),
           Text(
-            'Memuat event...',
-            style: TextStyle(
-              fontSize: 14,
-              color: Color(0xFFBBC863),
-              fontWeight: FontWeight.w500,
+            'Data tiket dan kehadiran event kamu',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textTertiary,
             ),
+          ),
+          const SizedBox(height: 20),
+
+          // Stat cards
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.confirmation_number_outlined,
+                  label: 'Tiket Terjual',
+                  value: '$ticketsSold',
+                  sub: maxTickets > 0 ? 'dari $maxTickets tiket' : 'tak terbatas',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.account_balance_wallet_outlined,
+                  label: 'Pendapatan',
+                  value: isFree ? 'Gratis' : _formatCurrency(revenue),
+                  sub: isFree
+                      ? 'event gratis'
+                      : '${_formatCurrency(event.price ?? 0)}/tiket',
+                ),
+              ),
+            ],
+          ),
+
+          // Capacity progress bar
+          if (maxTickets > 0) ...[
+            const SizedBox(height: 12),
+            _buildCapacityCard(ticketsSold, maxTickets, occupancyRate),
+          ],
+
+          // Event detail info
+          const SizedBox(height: 12),
+          _buildEventInfoCard(event),
+
+          // Coming soon note
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.accentSurface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.accentBorder),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.bar_chart_rounded,
+                  color: AppColors.secondary,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Grafik & analitik lengkap akan hadir di versi berikutnya!',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required String sub,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.accentSurface,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 18, color: AppColors.secondary),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: AppTextStyles.h2.copyWith(letterSpacing: -1),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.textTertiary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Text(
+            sub,
+            style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAnalyticsTab(EventsState state) {
-    if (_event != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: const Color(0xFFBBC863).withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.analytics_outlined,
-                size: 64,
-                color: Color(0xFFBBC863),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Analitik Event',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF1A1A1A),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${_event!.attendeeIds.length} Tiket Terjual',
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textTertiary,
-              ),
-            ),
-            if (_event!.price != null && _event!.price! > 0)
+  Widget _buildCapacityCard(int sold, int max, double rate) {
+    final percent = (rate * 100).toStringAsFixed(0);
+    Color barColor = AppColors.secondary;
+    if (rate >= 0.9) barColor = AppColors.error;
+    else if (rate >= 0.7) barColor = AppColors.warning;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
               Text(
-                'Total: ${_formatCurrency(_event!.price! * _event!.attendeeIds.length)}',
-                style: const TextStyle(
-                  fontSize: 16,
+                'Kapasitas',
+                style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFFBBC863),
                 ),
               ),
-            const SizedBox(height: 8),
-            Text(
-              'Fitur analitik lengkap akan segera hadir!',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textDisabled,
-                fontStyle: FontStyle.italic,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: rate >= 1.0
+                      ? AppColors.error.withValues(alpha: 0.1)
+                      : AppColors.accentSurface,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  rate >= 1.0 ? 'Penuh!' : '$percent% terisi',
+                  style: AppTextStyles.caption.copyWith(
+                    color: rate >= 1.0 ? AppColors.error : AppColors.secondary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: rate.clamp(0.0, 1.0),
+              backgroundColor: AppColors.surfaceAlt,
+              valueColor: AlwaysStoppedAnimation<Color>(barColor),
+              minHeight: 10,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '$sold dari $max kursi terisi',
+            style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEventInfoCard(Event event) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
+    ];
+    final dt = event.startTime;
+    final dateStr = '${dt.day} ${months[dt.month - 1]} ${dt.year}';
+    final timeStr =
+        '${dt.hour.toString().padLeft(2, '0')}.${dt.minute.toString().padLeft(2, '0')} WIB';
+    final isFree = event.isFree || (event.price == null || event.price == 0);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Detail Event',
+            style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 14),
+          _buildInfoRow(
+            Icons.calendar_today_outlined,
+            'Tanggal & Waktu',
+            '$dateStr • $timeStr',
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Divider(height: 1, color: AppColors.divider),
+          ),
+          _buildInfoRow(
+            Icons.location_on_outlined,
+            'Lokasi',
+            event.location.name,
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Divider(height: 1, color: AppColors.divider),
+          ),
+          _buildInfoRow(
+            Icons.sell_outlined,
+            'Harga Tiket',
+            isFree ? 'Gratis' : 'Rp ${event.price!.toStringAsFixed(0)}',
+          ),
+          if (event.maxAttendees != null) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: Divider(height: 1, color: AppColors.divider),
+            ),
+            _buildInfoRow(
+              Icons.people_outline,
+              'Kapasitas',
+              '${event.maxAttendees} peserta',
             ),
           ],
-        ),
-      );
-    }
+        ],
+      ),
+    );
+  }
 
-    if (state is EventsError) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Gagal memuat event',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              state.message,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textTertiary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: AppColors.accentSurface,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 15, color: AppColors.secondary),
         ),
-      );
-    }
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textTertiary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 
+  // ─── Shared States ────────────────────────────────────────────────────────
+
+  Widget _buildLoadingState() {
     return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: Color(0xFFBBC863)),
+          CircularProgressIndicator(color: AppColors.secondary),
           SizedBox(height: 16),
           Text(
             'Memuat data...',
-            style: TextStyle(
-              fontSize: 14,
-              color: Color(0xFFBBC863),
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(color: AppColors.textTertiary),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+            const SizedBox(height: 16),
+            Text('Gagal memuat event', style: AppTextStyles.h3),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textTertiary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => _eventsBloc.add(LoadEventById(widget.eventId)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.secondary,
+                foregroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: const Text('Coba Lagi'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
 
   String _formatCurrency(double amount) {
     if (amount >= 1000000) {
@@ -386,6 +552,6 @@ class _EventManagementDashboardState extends State<EventManagementDashboard>
     } else if (amount >= 1000) {
       return 'Rp ${(amount / 1000).toStringAsFixed(0)}rb';
     }
-    return 'Rp $amount';
+    return 'Rp ${amount.toStringAsFixed(0)}';
   }
 }

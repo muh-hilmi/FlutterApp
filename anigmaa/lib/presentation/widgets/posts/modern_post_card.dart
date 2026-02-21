@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/entities/post.dart';
 import '../../bloc/posts/posts_bloc.dart';
+import '../../bloc/posts/posts_event.dart';
 import '../../bloc/posts/posts_state.dart';
 import '../../pages/post_detail/post_detail_screen.dart';
 import '../modern_post_card_components/post_header.dart';
@@ -45,8 +46,8 @@ class ModernPostCard extends StatelessWidget {
 
         final cardContent = Container(
           color: AppColors.white,
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          margin: const EdgeInsets.only(bottom: 0),
+          padding: const EdgeInsets.symmetric(vertical: 2),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -86,13 +87,17 @@ class ModernPostCard extends StatelessWidget {
                   ),
                   child: BlocBuilder<PostsBloc, PostsState>(
                     buildWhen: (previous, current) {
-                      // Only rebuild when comments for THIS post change
+                      // Only rebuild when comment count for THIS post changes
                       if (previous is PostsLoaded && current is PostsLoaded) {
                         final previousCount = previous.commentsByPostId[currentPost.id]?.length;
                         final currentCount = current.commentsByPostId[currentPost.id]?.length;
                         return previousCount != currentCount;
                       }
-                      return previous.runtimeType != current.runtimeType;
+                      // Only rebuild when ENTERING PostsLoaded — not when leaving it.
+                      // Leaving (PostsLoaded→PostsLoading during refresh) would revert
+                      // actualCommentCount to null → PostActionBar falls back to stale
+                      // backend commentsCount and shows the wrong number.
+                      return current is PostsLoaded && previous is! PostsLoaded;
                     },
                     builder: (context, state) {
                       final actualCommentCount =
@@ -133,6 +138,14 @@ class ModernPostCard extends StatelessWidget {
                   builder: (context) => PostDetailScreen(post: currentPost),
                 ),
               );
+            },
+            onDoubleTap: () {
+              // Double-tap = like (TikTok/Instagram style)
+              if (!currentPost.isLikedByCurrentUser) {
+                context.read<PostsBloc>().add(
+                  LikePostToggled(currentPost.id, true),
+                );
+              }
             },
             child: cardContent,
           );

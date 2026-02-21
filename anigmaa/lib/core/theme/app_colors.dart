@@ -40,6 +40,7 @@ class AppColors {
   static const Color error = Color(0xFFFF3B30); // iOS Red
   static const Color success = Color(0xFF34C759); // iOS Green
   static const Color warning = Color(0xFFFFCC00); // iOS Yellow
+  static const Color orange = Color(0xFFFF9500); // iOS Orange — soft errors, caution
   static const Color info = Color(0xFF007AFF); // iOS Blue
 
   // ─── Surface Hierarchy ───────────────────────────────────────────────────

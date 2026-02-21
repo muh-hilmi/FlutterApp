@@ -94,12 +94,12 @@ class PriceSelector extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.white.withValues(alpha: 0.2),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 icon,
-                color: AppColors.white,
+                color: AppColors.primary,
                 size: 24,
               ),
             ),
@@ -111,7 +111,7 @@ class PriceSelector extends StatelessWidget {
                   Text(
                     title,
                     style: AppTextStyles.bodyLargeBold.copyWith(
-                      color: AppColors.white,
+                      color: AppColors.primary,
                       letterSpacing: -0.3,
                     ),
                   ),
@@ -119,7 +119,7 @@ class PriceSelector extends StatelessWidget {
                   Text(
                     description,
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.white.withValues(alpha: 0.85),
+                      color: AppColors.textEmphasis,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -128,7 +128,7 @@ class PriceSelector extends StatelessWidget {
             ),
             const Icon(
               Icons.arrow_forward_ios,
-              color: AppColors.white,
+              color: AppColors.primary,
               size: 18,
             ),
           ],

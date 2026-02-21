@@ -37,6 +37,7 @@ class Event {
   final bool ticketingEnabled; // Enable/disable ticket sales
   final int ticketsSold;
   final List<String> waitlistIds; // Waitlist when event is full
+  final bool allowCancellation; // Whether users can cancel their tickets
 
   // Interest fields
   final List<String>
@@ -70,6 +71,7 @@ class Event {
     this.waitlistIds = const [],
     this.interestedUserIds = const [],
     this.isUserAttending = false,
+    this.allowCancellation = true, // Default: allow cancellation
   });
 
   // Business logic getters

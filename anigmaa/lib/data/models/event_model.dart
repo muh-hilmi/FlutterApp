@@ -23,6 +23,9 @@ class EventModel extends Event {
     super.requirements,
     super.interestedUserIds = const [],
     super.isUserAttending = false,
+    super.ticketingEnabled = false,
+    super.ticketsSold = 0,
+    super.allowCancellation = true,
   });
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
@@ -140,6 +143,9 @@ class EventModel extends Event {
                   )
                 : <String>[]),
       isUserAttending: json['is_user_attending'] as bool? ?? false,
+      ticketingEnabled: json['ticketing_enabled'] as bool? ?? false,
+      ticketsSold: json['tickets_sold'] as int? ?? 0,
+      allowCancellation: json['allow_cancellation'] as bool? ?? true,
     );
   }
 
@@ -187,6 +193,9 @@ class EventModel extends Event {
       requirements: event.requirements,
       interestedUserIds: event.interestedUserIds,
       isUserAttending: event.isUserAttending,
+      ticketingEnabled: event.ticketingEnabled,
+      ticketsSold: event.ticketsSold,
+      allowCancellation: event.allowCancellation,
     );
   }
 

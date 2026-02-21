@@ -99,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
         onPressed: _isLoading ? null : _handleGoogleSignIn,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.secondary,
-          // foregroundColor: AppColors.white,
+          foregroundColor: AppColors.primary,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),

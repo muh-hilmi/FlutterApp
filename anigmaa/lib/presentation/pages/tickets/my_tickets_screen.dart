@@ -20,28 +20,35 @@ class MyTicketsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userId = di.sl<AuthService>().userId ?? '';
-    return BlocProvider(
-      create: (_) => di.sl<TicketsBloc>()
-        ..add(LoadUserTickets(userId)),
-      child: Scaffold(
-        backgroundColor: AppColors.white,
-        appBar: AppBar(
+    return BlocProvider.value(
+      value: di.sl<TicketsBloc>()..add(LoadUserTickets(userId)),
+      child: BlocListener<TicketsBloc, TicketsState>(
+        listener: (context, state) {
+          // Reload tickets when a ticket is cancelled
+          if (state is TicketCancelled) {
+            final uid = di.sl<AuthService>().userId ?? '';
+            context.read<TicketsBloc>().add(LoadUserTickets(uid));
+          }
+        },
+        child: Scaffold(
           backgroundColor: AppColors.white,
-          elevation: 0,
-          title: Text(
-            'Tiket Gue',
-            style: AppTextStyles.h3,
-          ),
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_rounded,
-              color: AppColors.textPrimary,
+          appBar: AppBar(
+            backgroundColor: AppColors.white,
+            elevation: 0,
+            title: Text(
+              'Tiket Gue',
+              style: AppTextStyles.h3,
             ),
-            onPressed: () => Navigator.pop(context),
+            leading: IconButton(
+              icon: const Icon(
+                Icons.arrow_back_rounded,
+                color: AppColors.textPrimary,
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
           ),
-        ),
-        body: BlocBuilder<TicketsBloc, TicketsState>(
-          builder: (context, state) {
+          body: BlocBuilder<TicketsBloc, TicketsState>(
+            builder: (context, state) {
             if (state is TicketsLoading) {
               return const Center(
                 child: CircularProgressIndicator(
@@ -108,6 +115,7 @@ class MyTicketsScreen extends StatelessWidget {
 
             return _buildEmptyState();
           },
+        ),
         ),
       ),
     );

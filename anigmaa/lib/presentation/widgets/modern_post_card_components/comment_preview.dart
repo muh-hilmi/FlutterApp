@@ -27,6 +27,7 @@ class CommentPreview extends StatefulWidget {
 class _CommentPreviewState extends State<CommentPreview> {
   List<Map<String, String>> _previewComments = [];
   bool _hasLoaded = false;
+  int? _loadedCommentCount; // cached once loaded — prevents reverting to stale backend count
 
   @override
   void initState() {
@@ -56,6 +57,7 @@ class _CommentPreviewState extends State<CommentPreview> {
         if (state is PostsLoaded &&
             state.commentsByPostId.containsKey(widget.post.id)) {
           final comments = state.commentsByPostId[widget.post.id]!;
+          _loadedCommentCount = comments.length; // cache — survives PostsLoading rebuilds
           if (comments.isNotEmpty) {
             _previewComments = comments.take(3).map((comment) {
               return {
@@ -121,12 +123,9 @@ class _CommentPreviewState extends State<CommentPreview> {
           return const SizedBox.shrink();
         }
 
-        // Calculate actual comment count from state or post
+        // Use cached loaded count — never revert to stale backend commentsCount
         final actualCommentCount =
-            state is PostsLoaded &&
-                state.commentsByPostId.containsKey(widget.post.id)
-            ? state.commentsByPostId[widget.post.id]!.length
-            : widget.post.commentsCount;
+            _loadedCommentCount ?? widget.post.commentsCount;
 
         final commentContent = Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -172,10 +172,10 @@ class ModernEventMiniCard extends StatelessWidget {
                     // Card cannot unlike - use Detail page for toggle
                     GestureDetector(
                       onTap: () {
-                        // Pin tap on Card = LIKE ONLY (same as double-tap)
-                        // Idempotent: if already interested, does nothing
+                        // Pin button tap = TOGGLE (like or unlike)
+                        // Double-tap on the whole card is still like-only
                         context.read<EventsBloc>().add(
-                          LikeInterestRequested(displayEvent),
+                          ToggleInterestRequested(displayEvent),
                         );
                       },
                       child: AnimatedContainer(

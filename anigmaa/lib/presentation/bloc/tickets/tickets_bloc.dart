@@ -3,6 +3,7 @@ import '../../../domain/usecases/check_in_ticket.dart';
 import '../../../domain/usecases/get_user_tickets.dart';
 import '../../../domain/usecases/get_event_tickets.dart';
 import '../../../domain/usecases/purchase_ticket.dart';
+import '../../../domain/usecases/cancel_ticket.dart';
 import '../../../core/utils/app_logger.dart';
 import 'tickets_event.dart';
 import 'tickets_state.dart';
@@ -12,18 +13,21 @@ class TicketsBloc extends Bloc<TicketsEvent, TicketsState> {
   final GetUserTickets getUserTickets;
   final CheckInTicket checkInTicket;
   final GetEventTickets getEventTickets;
+  final CancelTicket cancelTicket;
 
   TicketsBloc({
     required this.purchaseTicket,
     required this.getUserTickets,
     required this.checkInTicket,
     required this.getEventTickets,
+    required this.cancelTicket,
   }) : super(TicketsInitial()) {
     on<LoadUserTickets>(_onLoadUserTickets);
     on<PurchaseTicketRequested>(_onPurchaseTicketRequested);
     on<CheckInTicketRequested>(_onCheckInTicketRequested);
     on<LoadTicketForEvent>(_onLoadTicketForEvent);
     on<LoadEventTickets>(_onLoadEventTickets);
+    on<CancelTicketRequested>(_onCancelTicketRequested);
   }
 
   Future<void> _onLoadUserTickets(
@@ -133,6 +137,26 @@ class TicketsBloc extends Bloc<TicketsEvent, TicketsState> {
     result.fold(
       (failure) => emit(TicketsError(failure.message)),
       (tickets) => emit(EventTicketsLoaded(tickets)),
+    );
+  }
+
+  Future<void> _onCancelTicketRequested(
+    CancelTicketRequested event,
+    Emitter<TicketsState> emit,
+  ) async {
+    AppLogger().info('[TicketsBloc] Cancelling ticket: ${event.ticketId}');
+
+    final result = await cancelTicket(event.ticketId);
+
+    result.fold(
+      (failure) {
+        AppLogger().error('[TicketsBloc] Cancel failed: ${failure.message ?? 'Unknown error'}');
+        emit(TicketsError(failure.message ?? 'Gagal membatalkan tiket'));
+      },
+      (ticket) {
+        AppLogger().info('[TicketsBloc] Ticket cancelled: ${ticket.id}');
+        emit(TicketCancelled(ticket));
+      },
     );
   }
 }

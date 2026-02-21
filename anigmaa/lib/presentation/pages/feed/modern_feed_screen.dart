@@ -12,8 +12,6 @@ import '../../bloc/events/events_state.dart';
 import '../../bloc/ranked_feed/ranked_feed_bloc.dart';
 import '../../bloc/ranked_feed/ranked_feed_event.dart';
 import '../../bloc/ranked_feed/ranked_feed_state.dart';
-import '../../bloc/user/user_bloc.dart';
-import '../../bloc/user/user_state.dart';
 import '../../widgets/common/error_state_widget.dart';
 import '../../widgets/posts/modern_post_card.dart';
 import '../create_post/create_post_screen.dart';
@@ -113,18 +111,8 @@ class _ModernFeedScreenState extends State<ModernFeedScreen> {
     final postsState = context.read<PostsBloc>().state;
     if (postsState is! PostsLoaded) return;
 
-    final userState = context.read<UserBloc>().state;
-    String? currentUserId;
-    if (userState is UserLoaded) {
-      currentUserId = userState.user.id;
-    }
-
-    // Filter out current user's posts
-    final feedPosts = currentUserId != null
-        ? postsState.posts
-              .where((post) => post.author.id != currentUserId)
-              .toList()
-        : postsState.posts;
+    // Use all posts for precaching
+    final feedPosts = postsState.posts;
 
     if (feedPosts.isEmpty) return;
 
@@ -263,19 +251,8 @@ class _ModernFeedScreenState extends State<ModernFeedScreen> {
                       );
                     }
 
-                    // Get current user ID to filter out their posts
-                    final userState = context.read<UserBloc>().state;
-                    String? currentUserId;
-                    if (userState is UserLoaded) {
-                      currentUserId = userState.user.id;
-                    }
-
-                    // Filter out current user's posts
-                    final feedPosts = currentUserId != null
-                        ? displayPosts
-                              .where((post) => post.author.id != currentUserId)
-                              .toList()
-                        : displayPosts;
+                    // Show ALL posts including current user's posts
+                    final feedPosts = displayPosts;
 
                     // Precache visible images when posts are loaded
                     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -295,7 +272,7 @@ class _ModernFeedScreenState extends State<ModernFeedScreen> {
                       color: const Color(0xFFBBC863),
                       child: ListView.builder(
                         controller: _scrollController,
-                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        padding: EdgeInsets.zero,
                         itemCount: feedPosts.length,
                         itemBuilder: (context, index) {
                           final post = feedPosts[index];

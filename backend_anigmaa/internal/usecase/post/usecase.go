@@ -258,8 +258,8 @@ func (uc *Usecase) LikePost(ctx context.Context, postID, userID uuid.UUID) error
 		return err
 	}
 
-	// Increment likes count
-	return uc.postRepo.IncrementLikes(ctx, postID)
+	// Note: likes_count is updated by DB trigger on the likes table — do not call IncrementLikes here
+	return nil
 }
 
 // UnlikePost unlikes a post
@@ -284,8 +284,8 @@ func (uc *Usecase) UnlikePost(ctx context.Context, postID, userID uuid.UUID) err
 		return err
 	}
 
-	// Decrement likes count
-	return uc.postRepo.DecrementLikes(ctx, postID)
+	// Note: likes_count is updated by DB trigger on the likes table — do not call DecrementLikes here
+	return nil
 }
 
 // RepostPost reposts a post
@@ -642,8 +642,8 @@ func (uc *Usecase) LikeComment(ctx context.Context, commentID, userID uuid.UUID)
 		return err
 	}
 
-	// Increment likes count
-	return uc.commentRepo.IncrementLikes(ctx, commentID)
+	// Note: likes_count is updated by DB trigger on the likes table — do not call IncrementLikes here
+	return nil
 }
 
 // UnlikeComment unlikes a comment
@@ -668,8 +668,8 @@ func (uc *Usecase) UnlikeComment(ctx context.Context, commentID, userID uuid.UUI
 		return err
 	}
 
-	// Decrement likes count
-	return uc.commentRepo.DecrementLikes(ctx, commentID)
+	// Note: likes_count is updated by DB trigger on the likes table — do not call DecrementLikes here
+	return nil
 }
 
 // GetPublicPosts gets all public posts (for unauthenticated users)

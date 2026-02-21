@@ -95,13 +95,10 @@ class _LocationPickerState extends State<LocationPicker> {
   }
 
   Future<void> _initializeLocation() async {
-    // Auto-request GPS permission and get current location
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        if (mounted) {
-          setState(() => _isLoadingLocation = false);
-        }
+        if (mounted) setState(() => _isLoadingLocation = false);
         _showError('Layanan lokasi tidak aktif. Aktifkan GPS terlebih dahulu.');
         return;
       }
@@ -110,63 +107,69 @@ class _LocationPickerState extends State<LocationPicker> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          if (mounted) {
-            setState(() => _isLoadingLocation = false);
-          }
+          if (mounted) setState(() => _isLoadingLocation = false);
           _showError('Permission lokasi ditolak');
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        if (mounted) {
-          setState(() => _isLoadingLocation = false);
-        }
+        if (mounted) setState(() => _isLoadingLocation = false);
         _showError('Permission lokasi ditolak permanen. Aktifkan di Settings.');
         return;
       }
 
-      // Get current position - use medium accuracy for faster GPS lock
-      // High accuracy requires GPS lock which is slow (~5 seconds)
-      // Medium accuracy uses WiFi/cell towers which is faster (~1 second)
-      Position position = await Geolocator.getCurrentPosition(
+      // Step 1: Try last known position first — instant, no GPS wait
+      try {
+        final lastKnown = await Geolocator.getLastKnownPosition();
+        if (lastKnown != null && mounted) {
+          setState(() {
+            _currentPosition = LatLng(lastKnown.latitude, lastKnown.longitude);
+            _isLoadingLocation = false;
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _animateMapToPosition(_currentPosition, zoom: 16.0);
+          });
+          // Start address + nearby in parallel, don't await
+          Future.wait([
+            _updateAddress(_currentPosition),
+            _loadNearbyPlaces(),
+          ]);
+        }
+      } catch (_) {}
+
+      // Step 2: Get fresh GPS position with a hard timeout
+      final Position position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.medium,
+          timeLimit: Duration(seconds: 6),
         ),
       );
 
-      AppLogger().info('Initial GPS position: ${position.latitude}, ${position.longitude}');
-      _validateCoordinates('From GPS', position.latitude, position.longitude);
+      if (!mounted) return;
 
-      if (mounted) {
-        setState(() {
-          _currentPosition = LatLng(position.latitude, position.longitude);
-          _isLoadingLocation = false;
-        });
-      }
-
-      AppLogger().info('After setState - _currentPosition: ${_currentPosition.latitude}, ${_currentPosition.longitude}');
-
-      // Move map to current location AFTER widget is rendered
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _animateMapToPosition(_currentPosition, zoom: 16.0);
+      final newPos = LatLng(position.latitude, position.longitude);
+      setState(() {
+        _currentPosition = newPos;
+        _isLoadingLocation = false;
       });
 
-      // Get address for current position
-      await _updateAddress(_currentPosition);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _animateMapToPosition(newPos, zoom: 16.0);
+      });
 
-      // Load nearby places from Foursquare
-      await _loadNearbyPlaces();
-
-      AppLogger().info(
-        'Initial location final: ${_currentPosition.latitude}, ${_currentPosition.longitude}',
-      );
+      // Address + nearby places in parallel (not sequential)
+      await Future.wait([
+        _updateAddress(newPos),
+        _loadNearbyPlaces(),
+      ]);
     } catch (e) {
-      AppLogger().error('Error getting initial location: $e');
-      if (mounted) {
-        setState(() => _isLoadingLocation = false);
+      AppLogger().debug('GPS error (using default/last known): $e');
+      if (mounted) setState(() => _isLoadingLocation = false);
+      // Only show error if we have no position at all (still at default)
+      if (_locationName.isEmpty) {
+        _showError('Gagal mendapatkan lokasi GPS. Cari manual atau tap di peta.');
       }
-      _showError('Gagal mendapatkan lokasi: ${e.toString()}');
     }
   }
 
@@ -445,8 +448,8 @@ class _LocationPickerState extends State<LocationPicker> {
           AppLogger().error('POST FRAME - Failed to move map: $e');
         }
 
-        // Load nearby places after map has moved
-        _loadNearbyPlaces();
+        // Load nearby places (background, no await needed)
+        unawaited(_loadNearbyPlaces());
 
         // Show success feedback
         _lastSelectedPlaceName = place.name;
@@ -526,11 +529,11 @@ class _LocationPickerState extends State<LocationPicker> {
 
     AppLogger().info('After setState - _currentPosition: ${_currentPosition.latitude}, ${_currentPosition.longitude}');
 
-    // Update address for manually selected position
-    _updateAddress(position);
-
-    // Load nearby places for the new position
-    _loadNearbyPlaces();
+    // Update address + nearby places in parallel
+    Future.wait([
+      _updateAddress(position),
+      _loadNearbyPlaces(),
+    ]);
 
     AppLogger().info('=== MAP TAP DEBUG END ===');
   }

@@ -183,15 +183,18 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       logger.d('[PostRemoteDataSource] Like response status: ${response.statusCode}');
       logger.d('[PostRemoteDataSource] Like response data: ${response.data}');
 
-      if (response.statusCode != 200 && response.statusCode != 201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        logger.i('[PostRemoteDataSource] Like successful');
+      } else if (response.statusCode == 409) {
+        // 409 = already liked on server — the post IS liked, not an error
+        logger.w('[PostRemoteDataSource] Post already liked (409) - treating as success');
+      } else {
         throw ServerFailure('Failed to like post');
       }
-
-      logger.i('[PostRemoteDataSource] Like successful');
     } on DioException catch (e) {
       logger.e('[PostRemoteDataSource] Like error: ${e.message}');
 
-      // If post is already liked (400 or 409 with "already liked"), treat as success
+      // If post is already liked via DioException path, treat as success
       if ((e.response?.statusCode == 400 || e.response?.statusCode == 409) &&
           e.response?.data?['message']?.toString().toLowerCase().contains('already liked') == true) {
         logger.w('[PostRemoteDataSource] Post already liked - treating as success');

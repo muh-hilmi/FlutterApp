@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen>
         backgroundColor: AppColors.white,
         surfaceTintColor: AppColors.white,
         elevation: 0,
-        toolbarHeight: 88,
+        toolbarHeight: 60,
         titleSpacing: 20,
         automaticallyImplyLeading: false,
         title: Padding(
@@ -71,9 +71,7 @@ class _HomeScreenState extends State<HomeScreen>
               const SizedBox(width: 12),
               Text(
                 'flyerr',
-                style: AppTextStyles.h2.copyWith(
-                  letterSpacing: -0.8,
-                ),
+                style: AppTextStyles.h2.copyWith(letterSpacing: -0.8),
               ),
               const Spacer(),
               // Tickets button

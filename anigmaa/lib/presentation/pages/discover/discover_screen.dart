@@ -111,7 +111,10 @@ class DiscoverScreenState extends State<DiscoverScreen>
           _currentPosition = newPosition;
         });
 
-        if (!_hasCenteredMap && _mapController.isCompleted) {
+        // Always move to real GPS position when first obtained.
+        // _hasCenteredMap may already be true (set by onMapReady with default Jakarta),
+        // but we must still move to the actual user location.
+        if (_mapController.isCompleted) {
           _centerMapOnLocation(newPosition);
         }
 
@@ -515,13 +518,11 @@ class DiscoverScreenState extends State<DiscoverScreen>
     return Container(
       decoration: BoxDecoration(
         color: isMapMode
-            ? AppColors.primary.withValues(alpha: 0.85)
+            ? AppColors.white.withValues(alpha: 0.95)
             : AppColors.surface,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isMapMode
-              ? AppColors.textTertiary.withValues(alpha: 0.3)
-              : AppColors.border,
+          color: AppColors.border,
           width: 1,
         ),
       ),
@@ -539,7 +540,7 @@ class DiscoverScreenState extends State<DiscoverScreen>
             child: TextField(
               controller: _searchController,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: isMapMode ? AppColors.white : AppColors.textPrimary,
+                color: AppColors.textPrimary,
               ),
               decoration: InputDecoration(
                 hintText: 'Cari event di sekitar...',
@@ -561,7 +562,7 @@ class DiscoverScreenState extends State<DiscoverScreen>
       height: 44,
       decoration: BoxDecoration(
         color: _isMapView
-            ? AppColors.primary.withValues(alpha: 0.85)
+            ? AppColors.white
             : AppColors.surface,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: AppColors.border, width: 1),
@@ -607,7 +608,7 @@ class DiscoverScreenState extends State<DiscoverScreen>
         child: Icon(
           icon,
           size: 18,
-          color: isActive ? AppColors.white : AppColors.textTertiary,
+          color: isActive ? AppColors.primary : AppColors.textTertiary,
         ),
       ),
     );
@@ -657,13 +658,13 @@ class DiscoverScreenState extends State<DiscoverScreen>
     if (isSelected) {
       bgColor = AppColors.secondary;
       borderColor = AppColors.secondary;
-      iconColor = AppColors.white;
-      textColor = AppColors.white;
+      iconColor = AppColors.primary;
+      textColor = AppColors.primary;
     } else if (isMapMode) {
-      bgColor = AppColors.primary.withValues(alpha: 0.8);
-      borderColor = AppColors.textTertiary.withValues(alpha: 0.3);
+      bgColor = AppColors.white.withValues(alpha: 0.95);
+      borderColor = AppColors.border;
       iconColor = AppColors.textTertiary;
-      textColor = AppColors.textEmphasis;
+      textColor = AppColors.textPrimary;
     } else {
       bgColor = AppColors.surfaceAlt;
       borderColor = AppColors.border;
@@ -782,7 +783,7 @@ class DiscoverScreenState extends State<DiscoverScreen>
                       child: Text(
                         event.category.displayName,
                         style: AppTextStyles.label.copyWith(
-                          color: AppColors.white,
+                          color: AppColors.primary,
                         ),
                       ),
                     ),
@@ -899,7 +900,7 @@ class DiscoverScreenState extends State<DiscoverScreen>
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.secondary,
-                            foregroundColor: AppColors.white,
+                            foregroundColor: AppColors.primary,
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
@@ -909,7 +910,7 @@ class DiscoverScreenState extends State<DiscoverScreen>
                           child: Text(
                             'Lihat Detail →',
                             style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.white,
+                              color: AppColors.primary,
                               fontWeight: FontWeight.w700,
                             ),
                           ),

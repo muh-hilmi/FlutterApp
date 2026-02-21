@@ -526,7 +526,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                           onPressed: () => Navigator.pop(context, selectedDate),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.secondary,
-                            foregroundColor: AppColors.white,
+                            foregroundColor: AppColors.primary,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -877,7 +877,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.secondary,
-                          foregroundColor: AppColors.white,
+                          foregroundColor: AppColors.primary,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
@@ -1097,7 +1097,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                 label: const Text('Lanjut Tanpa Foto'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.secondary,
-                  foregroundColor: AppColors.white,
+                  foregroundColor: AppColors.primary,
                 ),
               ),
             ],
@@ -1320,7 +1320,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
         child: Text(
           text,
           style: const TextStyle(
-            color: AppColors.white,
+            color: AppColors.primary,
             fontWeight: FontWeight.w700,
             fontSize: 15,
             letterSpacing: -0.3,
@@ -1384,7 +1384,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
               color: AppColors.secondary,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.send, color: AppColors.white, size: 20),
+            child: const Icon(Icons.send, color: AppColors.primary, size: 20),
           ),
         ),
       ],
@@ -1571,7 +1571,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.secondary,
-                foregroundColor: AppColors.white,
+                foregroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -1614,7 +1614,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: isSelected ? AppColors.white : AppColors.textSecondary,
+              color: isSelected ? AppColors.primary : AppColors.textSecondary,
             ),
           ),
         ),
@@ -1750,7 +1750,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.white,
+                            AppColors.primary,
                           ),
                         ),
                       )
@@ -1760,7 +1760,7 @@ class _CreateEventConversationState extends State<CreateEventConversation>
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.white,
+                          color: AppColors.primary,
                         ),
                       ),
               ),
@@ -2488,7 +2488,7 @@ class _CustomTimePickerState extends State<_CustomTimePicker> {
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.secondary,
-                      foregroundColor: AppColors.white,
+                      foregroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

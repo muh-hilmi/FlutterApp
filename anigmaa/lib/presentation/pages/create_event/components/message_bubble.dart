@@ -43,7 +43,7 @@ class MessageBubble extends StatelessWidget {
                     message.text,
                     style: AppTextStyles.button.copyWith(
                       fontSize: 15,
-                      color: message.isBot ? AppColors.textEmphasis : AppColors.white,
+                      color: message.isBot ? AppColors.textEmphasis : AppColors.primary,
                       height: 1.4,
                       fontWeight: FontWeight.w500,
                     ),

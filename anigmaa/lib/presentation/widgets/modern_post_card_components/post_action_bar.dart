@@ -163,53 +163,35 @@ class _PostActionBarState extends State<PostActionBar>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Star with breathing glow
-                        Padding(
+                        // Star icon — outline (grey) when not liked, filled yellow when liked
+                        // Note: emoji Text ignores the color property, so we use Icon instead
+                        Container(
+                          margin: const EdgeInsets.only(left: 8, top: 2, bottom: 2),
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
+                            horizontal: 6,
+                            vertical: 2,
                           ),
-                          child: Text(
-                            '⭐',
-                            style: TextStyle(
-                              fontSize: 19 * (_isLiked ? 1.1 : 1.0),
-                              color: _isLiked ? const Color(0xFFFFD700) : null,
-                              shadows: _isLiked
-                                  ? [
-                                      Shadow(
-                                        color: Color.lerp(
-                                          const Color(
-                                            0xFFFFD700,
-                                          ).withValues(alpha: 0.6),
-                                          const Color(
-                                            0xFFFFD700,
-                                          ).withValues(alpha: 1.0),
-                                          _pulseGlowAnimation.value,
-                                        )!,
-                                        blurRadius:
-                                            12 +
-                                            (8 * _pulseGlowAnimation.value),
-                                      ),
-                                      Shadow(
-                                        color: Color.lerp(
-                                          const Color(
-                                            0xFFFFD700,
-                                          ).withValues(alpha: 0.4),
-                                          const Color(
-                                            0xFFFFD700,
-                                          ).withValues(alpha: 0.7),
-                                          _pulseGlowAnimation.value,
-                                        )!,
-                                        blurRadius:
-                                            20 +
-                                            (10 * _pulseGlowAnimation.value),
-                                      ),
-                                    ]
-                                  : null,
-                            ),
+                          decoration: _isLiked
+                              ? BoxDecoration(
+                                  color: Color.lerp(
+                                    const Color(0xFFFFD700).withValues(alpha: 0.10),
+                                    const Color(0xFFFFD700).withValues(alpha: 0.20),
+                                    _pulseGlowAnimation.value,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                )
+                              : null,
+                          child: Icon(
+                            _isLiked
+                                ? Icons.star_rounded
+                                : Icons.star_border_rounded,
+                            color: _isLiked
+                                ? const Color(0xFFFFD700)
+                                : AppColors.textTertiary,
+                            size: 22 * (_isLiked ? 1.05 : 1.0),
                           ),
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 4),
                         Text(
                           widget.post.likesCount > 0
                               ? _formatCount(widget.post.likesCount)
@@ -218,7 +200,9 @@ class _PostActionBarState extends State<PostActionBar>
                             fontWeight: _isLiked
                                 ? FontWeight.w700
                                 : FontWeight.w600,
-                            color: AppColors.textEmphasis,
+                            color: _isLiked
+                                ? const Color(0xFFFFD700)
+                                : AppColors.textEmphasis,
                             letterSpacing: -0.3,
                           ),
                         ),
@@ -452,10 +436,7 @@ class _PostActionBarState extends State<PostActionBar>
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    Text(
-                      'Bagikan Post',
-                      style: AppTextStyles.h3,
-                    ),
+                    Text('Bagikan Post', style: AppTextStyles.h3),
                     const SizedBox(height: 20),
                     GridView.count(
                       shrinkWrap: true,

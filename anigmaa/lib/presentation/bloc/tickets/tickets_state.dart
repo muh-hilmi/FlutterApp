@@ -54,6 +54,16 @@ class TicketCheckedIn extends TicketsState {
   List<Object> get props => [ticket];
 }
 
+/// Ticket cancelled successfully
+class TicketCancelled extends TicketsState {
+  final Ticket ticket;
+
+  const TicketCancelled(this.ticket);
+
+  @override
+  List<Object> get props => [ticket];
+}
+
 /// Event tickets loaded (for host stats)
 class EventTicketsLoaded extends TicketsState {
   final List<Ticket> tickets;

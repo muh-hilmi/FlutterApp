@@ -11,6 +11,7 @@ import 'core/config/image_config.dart';
 import 'core/network/connectivity_monitor.dart';
 import 'core/api/dio_client.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/app_colors.dart';
 import 'injection_container.dart' as di;
 import 'presentation/pages/discover/discover_screen.dart';
 import 'presentation/pages/home/home_screen.dart';
@@ -281,20 +282,45 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       child: Scaffold(
         body: Stack(
           children: [
-            // Use IndexedStack to keep all pages alive and prevent rebuilds
-            IndexedStack(
-              index: _currentIndex,
-              children: [
-                HomeScreen(
-                  key: const Key('home_feed'),
-                  onTabChanged: _onHomeTabChanged,
-                ), // Home with Feed/Events tabs
-                DiscoverScreen(key: _discoverKey), // Redesigned Discover Page
-                const NewCommunityScreen(key: Key('communities_screen')),
-                ProfileScreen(
-                  key: const Key('profile_screen'),
-                ), // Removed const to allow refresh
-              ],
+            // Smooth page transition with fade and slide
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                // Fade + slight slide from bottom for smooth transition
+                final offsetAnimation = Tween<Offset>(
+                  begin: const Offset(0.0, 0.03),
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutCubic,
+                ));
+
+                return FadeTransition(
+                  opacity: CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOut,
+                  ),
+                  child: SlideTransition(
+                    position: offsetAnimation,
+                    child: child,
+                  ),
+                );
+              },
+              child: IndexedStack(
+                key: ValueKey<int>(_currentIndex),
+                index: _currentIndex,
+                children: [
+                  HomeScreen(
+                    key: const Key('home_feed'),
+                    onTabChanged: _onHomeTabChanged,
+                  ), // Home with Feed/Events tabs
+                  DiscoverScreen(key: _discoverKey), // Redesigned Discover Page
+                  const NewCommunityScreen(key: Key('communities_screen')),
+                  ProfileScreen(
+                    key: const Key('profile_screen'),
+                  ), // Removed const to allow refresh
+                ],
+              ),
             ),
             // Backdrop overlay when speed dial is open
             if (_isSpeedDialOpen)
@@ -309,7 +335,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
         bottomNavigationBar: Container(
           key: const Key('bottom_nav'),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFFFFF),
+            color: AppColors.background,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.05),
@@ -321,46 +347,71 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Flexible(
-                    child: _buildNavItem(
-                      LucideIcons.home,
-                      LucideIcons.home,
-                      'Beranda',
-                      0,
-                      key: const Key('home_tab'),
-                    ),
-                  ),
-                  Flexible(
-                    child: _buildNavItem(
-                      LucideIcons.compass,
-                      LucideIcons.compass,
-                      'Jelajah',
-                      1,
-                      key: const Key('events_tab'),
-                    ),
-                  ),
-                  Flexible(
-                    child: _buildNavItem(
-                      LucideIcons.users,
-                      LucideIcons.users,
-                      'Komunitas',
-                      2,
-                      key: const Key('communities_tab'),
-                    ),
-                  ),
-                  Flexible(
-                    child: _buildNavItem(
-                      LucideIcons.user,
-                      LucideIcons.user,
-                      'Profil',
-                      3,
-                      key: const Key('profile_tab'),
-                    ),
-                  ),
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Stack(
+                    children: [
+                      // Nav items
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Flexible(
+                            child: _buildNavItem(
+                              LucideIcons.home,
+                              LucideIcons.home,
+                              'Beranda',
+                              0,
+                              itemKey: const Key('home_tab'),
+                            ),
+                          ),
+                          Flexible(
+                            child: _buildNavItem(
+                              LucideIcons.compass,
+                              LucideIcons.compass,
+                              'Jelajah',
+                              1,
+                              itemKey: const Key('events_tab'),
+                            ),
+                          ),
+                          Flexible(
+                            child: _buildNavItem(
+                              LucideIcons.users,
+                              LucideIcons.users,
+                              'Komunitas',
+                              2,
+                              itemKey: const Key('communities_tab'),
+                            ),
+                          ),
+                          Flexible(
+                            child: _buildNavItem(
+                              LucideIcons.user,
+                              LucideIcons.user,
+                              'Profil',
+                              3,
+                              itemKey: const Key('profile_tab'),
+                            ),
+                          ),
+                        ],
+                      ),
+                      // Sliding indicator
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOutCubic,
+                        bottom: 4,
+                        left: (_currentIndex * constraints.maxWidth / 4) +
+                            (constraints.maxWidth / 4 - 28) / 2,
+                        child: Container(
+                          width: 28,
+                          height: 3,
+                          decoration: BoxDecoration(
+                            color: AppColors.secondary,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -455,11 +506,11 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
     IconData filledIcon,
     String label,
     int index, {
-    Key? key,
+    Key? itemKey,
   }) {
     final isActive = _currentIndex == index;
     return InkWell(
-      key: key,
+      key: itemKey,
       onTap: () {
         AppLogger().info('Tab changed: $_currentIndex -> $index');
 
@@ -496,22 +547,12 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
           children: [
             Icon(
               outlineIcon,
-              color: isActive
-                  ? const Color(0xFFBBC863)
-                  : const Color(0xFF000000),
+              color: isActive ? AppColors.secondary : AppColors.textPrimary,
               size: 28,
             ),
             const SizedBox(height: 6),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOut,
-              height: 3,
-              width: 22,
-              decoration: BoxDecoration(
-                color: isActive ? const Color(0xFFBBC863) : Colors.transparent,
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
+            // Space reserved for indicator
+            const SizedBox(height: 3),
           ],
         ),
       ),

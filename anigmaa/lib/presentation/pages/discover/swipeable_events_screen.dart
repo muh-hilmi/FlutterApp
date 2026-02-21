@@ -5,16 +5,20 @@ import 'package:intl/intl.dart';
 import '../../../domain/entities/event.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/services/auth_service.dart';
 import '../../bloc/events/events_bloc.dart';
 import '../../bloc/events/events_event.dart';
 import '../../bloc/events/events_state.dart';
 import '../../bloc/tickets/tickets_bloc.dart';
 import '../../bloc/tickets/tickets_event.dart';
+import '../../bloc/tickets/tickets_state.dart';
 import '../event_detail/event_detail_screen.dart';
 import '../payment/payment_screen.dart';
+import '../tickets/ticket_detail_screen.dart';
 import '../../widgets/tickets/join_confirmation_ticket.dart';
 import '../../widgets/common/error_state_widget.dart';
 import '../../widgets/common/empty_state_widget.dart';
+import '../../../injection_container.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -123,21 +127,29 @@ class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
   }
 
   void _handleJoin(Event event) {
+    final authService = sl<AuthService>();
+    final userId = authService.userId;
+    final userName = authService.userName;
+    final userEmail = authService.userEmail;
+
+    if (userId == null || userId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Silakan login terlebih dahulu'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     if (event.isFree) {
       context.read<TicketsBloc>().add(
         PurchaseTicketRequested(
-          userId: 'current_user',
+          userId: userId,
           eventId: event.id,
           amount: 0.0,
-          customerName: 'User',
-          customerEmail: 'user@example.com',
-        ),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text("Joined Event! 🎟️"),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: AppColors.success,
+          customerName: userName ?? 'User',
+          customerEmail: userEmail ?? 'user@example.com',
         ),
       );
     } else {
@@ -158,21 +170,53 @@ class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      body: BlocBuilder<EventsBloc, EventsState>(
-        builder: (context, state) {
-          if (state is EventsLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.secondary),
-            );
-          }
-          if (state is EventsError) {
-            return ErrorStateWidget(
-              message: _getUserFriendlyError(state.message),
-              onRetry: () => context.read<EventsBloc>().add(LoadEvents()),
-            );
-          }
+    return BlocListener<TicketsBloc, TicketsState>(
+      listener: (context, state) {
+        if (state is TicketPurchased) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text("Terima kasih! Tiket kamu siap 🎉"),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: AppColors.success,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+          // Navigate to ticket detail after short delay
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted && context.mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TicketDetailScreen(ticket: state.ticket),
+                ),
+              );
+            }
+          });
+        } else if (state is TicketsError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Gagal: ${state.message}'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.white,
+        body: BlocBuilder<EventsBloc, EventsState>(
+          builder: (context, state) {
+            if (state is EventsLoading) {
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.secondary),
+              );
+            }
+            if (state is EventsError) {
+              return ErrorStateWidget(
+                message: _getUserFriendlyError(state.message),
+                onRetry: () => context.read<EventsBloc>().add(LoadEvents()),
+              );
+            }
           if (state is EventsLoaded) {
             // Sync local events with bloc state
             // Only update if the filtered events list has changed
@@ -284,6 +328,7 @@ class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
           }
           return const SizedBox.shrink();
         },
+      ),
       ),
     );
   }

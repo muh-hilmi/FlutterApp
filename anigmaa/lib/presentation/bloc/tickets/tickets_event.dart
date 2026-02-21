@@ -112,3 +112,13 @@ class LoadTicketForEvent extends TicketsEvent {
   @override
   List<Object> get props => [userId, eventId];
 }
+
+/// Cancel a ticket
+class CancelTicketRequested extends TicketsEvent {
+  final String ticketId;
+
+  const CancelTicketRequested(this.ticketId);
+
+  @override
+  List<Object> get props => [ticketId];
+}

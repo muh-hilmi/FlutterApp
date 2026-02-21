@@ -126,27 +126,25 @@ class _EventDetailScreenState extends State<EventDetailScreen>
   }
 
   void _triggerJumpingEmoji(Offset tapPosition) {
-    // Get current event from bloc state (has fresh data from API)
-    final state = _eventsBloc?.state;
-    if (state is EventsLoaded) {
-      final eventFromState = state.events
+    // Always resolve the freshest event from state (prefer state over widget)
+    final blobState = _eventsBloc?.state;
+    final Event eventToLike;
+    if (blobState is EventsLoaded) {
+      eventToLike = blobState.events
           .where((e) => e.id == widget.event.id)
-          .firstOrNull;
-      if (eventFromState != null) {
-        // Use the fresh event data for the API call
-        _eventsBloc?.add(LikeInterestRequested(eventFromState));
-        return;
-      }
+          .firstOrNull ?? widget.event;
+    } else {
+      eventToLike = widget.event;
     }
 
-    // Fall back to widget event if not found in state
-    _eventsBloc?.add(LikeInterestRequested(widget.event));
-    final key = UniqueKey();
+    // Dispatch interest API call
+    _eventsBloc?.add(LikeInterestRequested(eventToLike));
 
-    // Calculate Target Position (Interest Button)
+    // Always show flying emoji animation — was broken by early return before
+    final key = UniqueKey();
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final targetPosition = Offset(screenWidth - 60, screenHeight - 60);
+    final targetPosition = Offset(screenWidth - 60, screenHeight - 120);
 
     setState(() {
       _floatingEmojis.add(
@@ -308,7 +306,13 @@ class _EventDetailScreenState extends State<EventDetailScreen>
                             builder: (context) =>
                                 TicketDetailScreen(ticket: state.ticket),
                           ),
-                        );
+                        ).then((result) {
+                          // If ticket was cancelled, reload event to update isUserAttending
+                          if (result == true && mounted) {
+                            setState(() => _hasUserTicket = false);
+                            _eventsBloc?.add(LoadEventById(widget.event.id));
+                          }
+                        });
                       }
                     });
                   } else if (state is TicketLoaded) {
@@ -321,7 +325,13 @@ class _EventDetailScreenState extends State<EventDetailScreen>
                           builder: (context) =>
                               TicketDetailScreen(ticket: state.ticket),
                         ),
-                      );
+                      ).then((result) {
+                        // If ticket was cancelled, reload event to update isUserAttending
+                        if (result == true && mounted) {
+                          setState(() => _hasUserTicket = false);
+                          _eventsBloc?.add(LoadEventById(widget.event.id));
+                        }
+                      });
                     } else {
                       // Initial check on screen open — just update button state
                       setState(() => _hasUserTicket = true);
@@ -424,6 +434,9 @@ class _EventDetailScreenState extends State<EventDetailScreen>
                         onJoinPressed: _onJoinPressed,
                         onManagePressed: _onManagePressed,
                         onViewTicketPressed: _onViewTicketPressed,
+                        onInterestPressed: () {
+                          _eventsBloc?.add(ToggleInterestRequested(currentEvent));
+                        },
                       ),
                     ),
 

@@ -4,11 +4,18 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:intl/intl.dart';
 import '../../../domain/entities/ticket.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../bloc/tickets/tickets_bloc.dart';
+import '../../bloc/tickets/tickets_event.dart';
+import '../../bloc/tickets/tickets_state.dart';
+import '../../../injection_container.dart' as di;
 
-class TicketDetailScreen extends StatelessWidget {
+class TicketDetailScreen extends StatefulWidget {
   final Ticket ticket;
 
   const TicketDetailScreen({
@@ -17,27 +24,81 @@ class TicketDetailScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final isCheckedIn = ticket.isCheckedIn;
-    final isCancelled = ticket.status == TicketStatus.cancelled;
+  State<TicketDetailScreen> createState() => _TicketDetailScreenState();
+}
 
-    return Scaffold(
-      backgroundColor: AppColors.cardSurface,
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        title: Text(
-          'Detail Tiket',
-          style: AppTextStyles.h3,
-        ),
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_rounded,
-            color: AppColors.textPrimary,
+class _TicketDetailScreenState extends State<TicketDetailScreen> {
+  late Ticket _currentTicket;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentTicket = widget.ticket;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isCheckedIn = _currentTicket.isCheckedIn;
+    final isCancelled = _currentTicket.status == TicketStatus.cancelled;
+    final isFree = _currentTicket.isFree;
+
+    // Cancel rules:
+    // - FREE events: can cancel (auto cancel, no refund)
+    // - PAID events: CANNOT cancel
+    bool canCancel = !isCheckedIn && !isCancelled && isFree;
+
+    // Also check if event hasn't started yet
+    if (_currentTicket.eventStartTime != null) {
+      final eventHasStarted = DateTime.now().isAfter(_currentTicket.eventStartTime!);
+      canCancel = canCancel && !eventHasStarted;
+    }
+
+    return BlocProvider.value(
+      value: di.sl<TicketsBloc>(),
+      child: BlocListener<TicketsBloc, TicketsState>(
+        listener: (context, state) {
+          if (state is TicketCancelled) {
+            setState(() {
+              _currentTicket = state.ticket;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Tiket berhasil dibatalkan'),
+                backgroundColor: AppColors.info,
+              ),
+            );
+            // Navigate back and signal that ticket was cancelled
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                Navigator.pop(context, true); // true = ticket cancelled
+              }
+            });
+          } else if (state is TicketsError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Gagal: ${state.message}'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.cardSurface,
+          appBar: AppBar(
+            backgroundColor: AppColors.white,
+            elevation: 0,
+            title: Text(
+              'Detail Tiket',
+              style: AppTextStyles.h3,
+            ),
+            leading: IconButton(
+              icon: const Icon(
+                Icons.arrow_back_rounded,
+                color: AppColors.textPrimary,
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
           ),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -126,9 +187,10 @@ class TicketDetailScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 12),
+                        // QR Code + Attendance Code
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
+                            horizontal: 24,
                             vertical: 20,
                           ),
                           decoration: BoxDecoration(
@@ -142,23 +204,56 @@ class TicketDetailScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          child: Text(
-                            ticket.attendanceCode,
-                            style: AppTextStyles.display.copyWith(
-                              fontSize: 56,
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.secondary,
-                              letterSpacing: 8,
-                              fontFamily: 'monospace',
-                            ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // QR Code
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: QrImageView(
+                                  data: _currentTicket.attendanceCode,
+                                  version: QrVersions.auto,
+                                  size: 80,
+                                  backgroundColor: AppColors.white,
+                                ),
+                              ),
+                              const SizedBox(width: 20),
+                              // Attendance Code - smaller
+                              Column(
+                                children: [
+                                  Text(
+                                    'Kode',
+                                    style: AppTextStyles.caption.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _currentTicket.attendanceCode,
+                                    style: AppTextStyles.display.copyWith(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w900,
+                                      color: AppColors.secondary,
+                                      letterSpacing: 4,
+                                      fontFamily: 'monospace',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         // Copy button
                         TextButton.icon(
                           onPressed: () {
                             Clipboard.setData(
-                              ClipboardData(text: ticket.attendanceCode),
+                              ClipboardData(text: _currentTicket.attendanceCode),
                             );
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -214,53 +309,61 @@ class TicketDetailScreen extends StatelessWidget {
                         _buildInfoRow(
                           Icons.event,
                           'Event',
-                          'Nama Event', // Placeholder - will get from event
+                          _currentTicket.eventTitle ?? 'Nama Event',
                         ),
                         const SizedBox(height: 12),
                         _buildInfoRow(
                           Icons.confirmation_number_outlined,
                           'Ticket ID',
-                          '#${ticket.id.substring(0, 8).toUpperCase()}',
+                          _currentTicket.id.substring(0, 8).toUpperCase(),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildInfoRow(
+                          Icons.qr_code_2_outlined,
+                          'Kode Check-In',
+                          _currentTicket.attendanceCode,
+                          iconColor: AppColors.secondary,
                         ),
                         const SizedBox(height: 12),
                         _buildInfoRow(
                           Icons.calendar_today,
                           'Dibeli',
-                          _formatDate(ticket.purchasedAt),
+                          _formatDateLocal(_currentTicket.purchasedAt),
                         ),
                         const SizedBox(height: 12),
+                        if (_currentTicket.eventStartTime != null)
+                          _buildInfoRow(
+                            Icons.schedule,
+                            'Waktu Event',
+                            _formatDateLocal(_currentTicket.eventStartTime!),
+                          ),
+                        if (_currentTicket.eventStartTime != null) const SizedBox(height: 12),
                         _buildInfoRow(
                           Icons.payments_outlined,
                           'Harga',
-                          ticket.pricePaid > 0
-                              ? 'Rp ${ticket.pricePaid.toStringAsFixed(0)}'
+                          _currentTicket.pricePaid > 0
+                              ? 'Rp ${_currentTicket.pricePaid.toStringAsFixed(0)}'
                               : 'GRATIS',
-                        ),
-                        const SizedBox(height: 12),
-                        _buildInfoRow(
-                          Icons.receipt_outlined,
-                          'Transaction ID',
-                          'TRX-${ticket.id.substring(0, 8).toUpperCase()}',
                         ),
                         const SizedBox(height: 12),
                         _buildInfoRow(
                           Icons.payment,
                           'Metode Bayar',
-                          ticket.pricePaid > 0 ? 'Virtual Account' : 'Gratis',
+                          _currentTicket.pricePaid > 0 ? 'Midtrans' : 'Gratis',
                         ),
                         const SizedBox(height: 12),
                         _buildInfoRow(
                           Icons.check_circle_outline,
-                          'Status Bayar',
-                          'Lunas',
-                          iconColor: AppColors.success,
+                          'Status',
+                          _getStatusText(),
+                          iconColor: _getStatusColor(),
                         ),
-                        if (isCheckedIn && ticket.checkedInAt != null) ...[
+                        if (isCheckedIn && _currentTicket.checkedInAt != null) ...[
                           const SizedBox(height: 12),
                           _buildInfoRow(
                             Icons.check_circle_outline,
                             'Check-In',
-                            _formatDate(ticket.checkedInAt!),
+                            _formatDateLocal(_currentTicket.checkedInAt!),
                             iconColor: AppColors.success,
                           ),
                         ],
@@ -272,7 +375,7 @@ class TicketDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             // Receipt actions
-            if (ticket.pricePaid > 0) ...[
+            if (_currentTicket.pricePaid > 0) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
@@ -327,6 +430,28 @@ class TicketDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
             ],
+            // Cancel Ticket Button (only if allowed)
+            if (canCancel)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showCancelDialog(context),
+                    icon: const Icon(Icons.cancel_outlined, size: 18),
+                    label: const Text('Batal Tiket'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.error,
+                      side: const BorderSide(color: AppColors.error),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            if (!isCheckedIn && !isCancelled) const SizedBox(height: 16),
             // Instructions card
             if (!isCheckedIn && !isCancelled) ...[
               Container(
@@ -406,6 +531,41 @@ class TicketDetailScreen extends StatelessWidget {
           ],
         ),
       ),
+        ),
+      ),
+    );
+  }
+
+  void _showCancelDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.white,
+        title: const Text(
+          'Batalkan Tiket?',
+          style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Kamu yakin mau batalkan tiket gratis ini? Tindakan ini tidak bisa dibatalkan.',
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<TicketsBloc>().add(CancelTicketRequested(_currentTicket.id));
+            },
+            child: const Text(
+              'Ya, Batalkan',
+              style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -449,22 +609,21 @@ class TicketDetailScreen extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'Mei',
-      'Jun',
-      'Jul',
-      'Agu',
-      'Sep',
-      'Okt',
-      'Nov',
-      'Des'
-    ];
-    return '${date.day} ${months[date.month - 1]} ${date.year} jam ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  String _formatDateLocal(DateTime date) {
+    final localDate = date.toLocal();
+    return DateFormat('d MMM yyyy, HH:mm').format(localDate);
+  }
+
+  String _getStatusText() {
+    if (_currentTicket.status == TicketStatus.cancelled) return 'Dibatalkan';
+    if (_currentTicket.isCheckedIn) return 'Sudah Check-In';
+    return 'Aktif';
+  }
+
+  Color _getStatusColor() {
+    if (_currentTicket.status == TicketStatus.cancelled) return AppColors.error;
+    if (_currentTicket.isCheckedIn) return AppColors.success;
+    return AppColors.secondary;
   }
 }
 

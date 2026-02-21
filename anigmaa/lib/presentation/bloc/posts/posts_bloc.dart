@@ -386,17 +386,65 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
     LikePostToggled event,
     Emitter<PostsState> emit,
   ) async {
-    await _performOptimisticPostUpdate(
-      emit,
-      event.postId,
-      event.isCurrentlyLiked,
-      () async {
-        final result = event.isCurrentlyLiked
-            ? await likePost(event.postId)
-            : await unlikePost(event.postId);
-        result.fold((failure) => throw Exception(failure.toString()), (_) {});
-      },
-    );
+    if (event.isCurrentlyLiked) {
+      // LIKE path: optimistic update, but DON'T revert on 409 "already liked".
+      // The backend returns 409 when the post is already liked server-side even
+      // though our local state shows it as not liked (backend doesn't reliably
+      // return isLikedByCurrentUser). Keep the optimistic liked state on 409.
+      final currentState = _getCurrentState();
+      if (currentState == null) return;
+
+      final originalPost = currentState.posts.firstWhere(
+        (p) => p.id == event.postId,
+      );
+
+      final updatedPosts = currentState.posts.map((post) {
+        if (post.id == event.postId) {
+          return post.copyWith(
+            isLikedByCurrentUser: true,
+            likesCount: post.likesCount + 1,
+          );
+        }
+        return post;
+      }).toList();
+      emit(currentState.copyWith(posts: updatedPosts));
+
+      final result = await likePost(event.postId);
+      result.fold(
+        (failure) {
+          final msg = failure.toString().toLowerCase();
+          // 409 CONFLICT = already liked on server — keep the optimistic state.
+          // Also catches 'failed to like post' in case the datasource didn't
+          // intercept the 409 in the response (non-DioException path).
+          if (msg.contains('already liked') ||
+              msg.contains('conflict') ||
+              msg.contains('failed to like post')) {
+            return;
+          }
+          // Real error — revert
+          final latestState = _getCurrentState();
+          if (latestState != null) {
+            final revertedPosts = latestState.posts.map((post) {
+              if (post.id == event.postId) return originalPost;
+              return post;
+            }).toList();
+            emit(latestState.copyWith(posts: revertedPosts));
+          }
+        },
+        (_) {},
+      );
+    } else {
+      // UNLIKE path: normal optimistic update with full revert on error
+      await _performOptimisticPostUpdate(
+        emit,
+        event.postId,
+        false,
+        () async {
+          final result = await unlikePost(event.postId);
+          result.fold((failure) => throw Exception(failure.toString()), (_) {});
+        },
+      );
+    }
   }
 
   Future<void> _onRepostRequested(
