@@ -39,7 +39,8 @@ class EventModel extends Event {
 
     // Handle attendee_ids or attendees_count from backend
     final attendeeIds = json['attendee_ids'];
-    final attendeesCount = json['attendees_count'];
+    // Check both 'attendees_count' and 'event_attendees_count' (from posts feed)
+    final attendeesCount = json['attendees_count'] ?? json['event_attendees_count'];
 
     final isFree = json['is_free'];
     // final isFree = json['is_free']; // Removed duplicate

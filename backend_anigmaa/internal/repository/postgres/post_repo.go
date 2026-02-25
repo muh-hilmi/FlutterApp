@@ -316,6 +316,7 @@ func (r *postRepository) GetFeed(ctx context.Context, userID uuid.UUID, limit, o
 				e.host_id as event_host_id, eh.name as event_host_name, eh.avatar_url as event_host_avatar_url,
 				e.max_attendees as event_max_attendees,
 				(SELECT COUNT(*) FROM event_attendees WHERE event_id = e.id AND status = 'confirmed') as event_attendees_count,
+				(SELECT COUNT(*) FROM event_interests WHERE event_id = e.id) as interests_count,
 				e.price as event_price, e.is_free as event_is_free,
 				e.status as event_status, e.privacy as event_privacy,
 				COALESCE(

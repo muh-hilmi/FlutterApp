@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/entities/post.dart';
@@ -37,6 +38,12 @@ class _PostActionBarState extends State<PostActionBar>
   late Animation<double> _pulseGlowAnimation;
   late bool _isLiked;
   bool _showSparkles = false;
+
+  // Debounce and loading state for like button
+  DateTime? _lastLikeTap;
+  static const _likeDebounce = Duration(milliseconds: 300);
+  bool _isLiking = false;
+  Timer? _likingResetTimer;
 
   @override
   void initState() {
@@ -120,6 +127,7 @@ class _PostActionBarState extends State<PostActionBar>
     _likeAnimationController.dispose();
     _sparkleAnimationController.dispose();
     _pulseGlowController.dispose();
+    _likingResetTimer?.cancel();
     super.dispose();
   }
 
@@ -132,26 +140,47 @@ class _PostActionBarState extends State<PostActionBar>
           clipBehavior: Clip.none,
           children: [
             GestureDetector(
-              onTap: () {
-                final newLikedState = !_isLiked;
-                setState(() {
-                  _isLiked = newLikedState;
-                  // Only show sparkles when LIKING (not unliking)
-                  _showSparkles = newLikedState;
-                });
-                _likeAnimationController.forward(from: 0.0);
-                // Only trigger sparkle animation when liking
-                if (newLikedState) {
-                  _sparkleAnimationController.forward(from: 0.0);
-                  _pulseGlowController.repeat(reverse: true);
-                } else {
-                  _pulseGlowController.stop();
-                  _pulseGlowController.reset();
-                }
-                context.read<PostsBloc>().add(
-                  LikePostToggled(widget.post.id, newLikedState),
-                );
-              },
+              onTap: _isLiking
+                  ? null
+                  : () {
+                      // Debounce: check if enough time has passed since last tap
+                      final now = DateTime.now();
+                      if (_lastLikeTap != null &&
+                          now.difference(_lastLikeTap!) < _likeDebounce) {
+                        return;
+                      }
+                      _lastLikeTap = now;
+
+                      final newLikedState = !_isLiked;
+                      setState(() {
+                        _isLiked = newLikedState;
+                        _isLiking = true;
+                        // Only show sparkles when LIKING (not unliking)
+                        _showSparkles = newLikedState;
+                      });
+                      _likeAnimationController.forward(from: 0.0);
+                      // Only trigger sparkle animation when liking
+                      if (newLikedState) {
+                        _sparkleAnimationController.forward(from: 0.0);
+                        _pulseGlowController.repeat(reverse: true);
+                      } else {
+                        _pulseGlowController.stop();
+                        _pulseGlowController.reset();
+                      }
+                      context.read<PostsBloc>().add(
+                        LikePostToggled(widget.post.id, newLikedState),
+                      );
+
+                      // Reset loading state after a short delay
+                      _likingResetTimer?.cancel();
+                      _likingResetTimer = Timer(const Duration(milliseconds: 500), () {
+                        if (mounted) {
+                          setState(() {
+                            _isLiking = false;
+                          });
+                        }
+                      });
+                    },
               child: AnimatedBuilder(
                 animation: Listenable.merge([
                   _likeScaleAnimation,
@@ -160,53 +189,52 @@ class _PostActionBarState extends State<PostActionBar>
                 builder: (context, child) {
                   return Transform.scale(
                     scale: _likeScaleAnimation.value,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Star icon — outline (grey) when not liked, filled yellow when liked
-                        // Note: emoji Text ignores the color property, so we use Icon instead
-                        Container(
-                          margin: const EdgeInsets.only(left: 8, top: 2, bottom: 2),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
+                    child: Opacity(
+                      opacity: _isLiking ? 0.6 : 1.0,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Star emoji — outline when not liked, filled yellow when liked
+                          Container(
+                            margin: const EdgeInsets.only(left: 8, top: 2, bottom: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: _isLiked
+                                ? BoxDecoration(
+                                    color: Color.lerp(
+                                      const Color(0xFFFFD700).withValues(alpha: 0.10),
+                                      const Color(0xFFFFD700).withValues(alpha: 0.20),
+                                      _pulseGlowAnimation.value,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  )
+                                : null,
+                            child: Text(
+                              '⭐',
+                              style: TextStyle(
+                                fontSize: 20 * (_isLiked ? 1.1 : 1.0),
+                              ),
+                            ),
                           ),
-                          decoration: _isLiked
-                              ? BoxDecoration(
-                                  color: Color.lerp(
-                                    const Color(0xFFFFD700).withValues(alpha: 0.10),
-                                    const Color(0xFFFFD700).withValues(alpha: 0.20),
-                                    _pulseGlowAnimation.value,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                )
-                              : null,
-                          child: Icon(
-                            _isLiked
-                                ? Icons.star_rounded
-                                : Icons.star_border_rounded,
-                            color: _isLiked
-                                ? const Color(0xFFFFD700)
-                                : AppColors.textTertiary,
-                            size: 22 * (_isLiked ? 1.05 : 1.0),
+                          const SizedBox(width: 4),
+                          Text(
+                            widget.post.likesCount > 0
+                                ? _formatCount(widget.post.likesCount)
+                                : 'Gas!',
+                            style: AppTextStyles.bodyMediumBold.copyWith(
+                              fontWeight: _isLiked
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
+                              color: _isLiked
+                                  ? const Color(0xFFFFD700)
+                                  : AppColors.textEmphasis,
+                              letterSpacing: -0.3,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          widget.post.likesCount > 0
-                              ? _formatCount(widget.post.likesCount)
-                              : 'Gas!',
-                          style: AppTextStyles.bodyMediumBold.copyWith(
-                            fontWeight: _isLiked
-                                ? FontWeight.w700
-                                : FontWeight.w600,
-                            color: _isLiked
-                                ? const Color(0xFFFFD700)
-                                : AppColors.textEmphasis,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },

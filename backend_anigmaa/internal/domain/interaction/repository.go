@@ -13,6 +13,9 @@ type Repository interface {
 	Unlike(ctx context.Context, userID uuid.UUID, likeableType LikeableType, likeableID uuid.UUID) error
 	IsLiked(ctx context.Context, userID uuid.UUID, likeableType LikeableType, likeableID uuid.UUID) (bool, error)
 	GetLikes(ctx context.Context, likeableType LikeableType, likeableID uuid.UUID, limit, offset int) ([]Like, error)
+	// GetLikedByUserForPosts returns a list of post IDs that the user has liked
+	// This is a batch query for performance - checks multiple posts at once
+	GetLikedByUserForPosts(ctx context.Context, userID uuid.UUID, postIDs []uuid.UUID) ([]uuid.UUID, error)
 
 	// Repost management
 	Repost(ctx context.Context, repost *Repost) error

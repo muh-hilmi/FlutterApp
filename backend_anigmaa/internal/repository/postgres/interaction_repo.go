@@ -359,3 +359,31 @@ func (r *interactionRepository) CountBookmarks(ctx context.Context, userID uuid.
 	err := r.db.QueryRowContext(ctx, query, userID).Scan(&count)
 	return count, err
 }
+
+// GetLikedByUserForPosts returns a list of post IDs that the user has liked
+// This is a batch query for performance - checks multiple posts at once
+func (r *interactionRepository) GetLikedByUserForPosts(ctx context.Context, userID uuid.UUID, postIDs []uuid.UUID) ([]uuid.UUID, error) {
+	if len(postIDs) == 0 {
+		return []uuid.UUID{}, nil
+	}
+
+	query := `
+		SELECT likeable_id
+		FROM likes
+		WHERE user_id = $1
+		  AND likeable_type = 'post'
+		  AND likeable_id = ANY($2)
+	`
+
+	var likedIDs []uuid.UUID
+	err := r.db.SelectContext(ctx, &likedIDs, query, userID, pq.Array(postIDs))
+	if err != nil {
+		return nil, err
+	}
+
+	if likedIDs == nil {
+		likedIDs = []uuid.UUID{}
+	}
+
+	return likedIDs, nil
+}

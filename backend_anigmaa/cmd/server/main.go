@@ -284,25 +284,24 @@ func main() {
 		postsPublic := v1.Group("/posts")
 		{
 			// IMPORTANT: Static routes MUST come before parameterized routes
-			// Feed endpoint - public (anyone can view posts)
-			postsPublic.GET("/feed", postHandler.GetFeed)
 
 			// Get post by ID - public
 			postsPublic.GET("/:id", postHandler.GetPostByID)
-
-			// Get comments for a post - public
-			postsPublic.GET("/:id/comments", postHandler.GetComments)
 		}
 
 		// Post routes - Protected routes (require auth)
 		posts := v1.Group("/posts")
 		posts.Use(authMiddleware)
 		{
-			// Feed endpoint also available for authenticated users (personalized feed)
-			posts.GET("/feed/authenticated", postHandler.GetFeed)
+			// Feed endpoint - authenticated (personalized feed with like status)
+			// IMPORTANT: Must come before /:id route to avoid route conflicts
+			posts.GET("/feed", postHandler.GetFeed)
 
 			// Bookmarks endpoint (must be before :id routes)
 			posts.GET("/bookmarks", postHandler.GetBookmarks)
+
+			// Get comments for a post (must be before /:id route)
+			posts.GET("/:id/comments", postHandler.GetComments)
 
 			// Create post
 			posts.POST("", postHandler.CreatePost)

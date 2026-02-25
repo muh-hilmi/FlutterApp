@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -57,6 +58,11 @@ func (h *PostHandler) GetFeed(c *gin.Context) {
 			response.BadRequest(c, "Invalid user ID", err.Error())
 			return
 		}
+		// DEBUG: Log userID
+		log.Printf("DEBUG: userID = %v", userID)
+	} else {
+		// DEBUG: Log for public feed
+		log.Printf("DEBUG: public feed request (no user authentication)")
 	}
 
 	// Get total count for pagination
@@ -88,6 +94,13 @@ func (h *PostHandler) GetFeed(c *gin.Context) {
 	if err != nil {
 		response.InternalError(c, "Failed to get feed", err.Error())
 		return
+	}
+
+	// DEBUG: Log posts results
+	log.Printf("DEBUG: Retrieved %d posts from feed", len(posts))
+	for i, p := range posts {
+		log.Printf("DEBUG: Post[%d] ID=%v, IsLikedByUser=%v, AuthorID=%v",
+			i, p.ID, p.IsLikedByUser, p.AuthorID)
 	}
 
 	// Transform to Flutter-compatible response format

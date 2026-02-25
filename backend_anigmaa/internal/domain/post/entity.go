@@ -85,6 +85,7 @@ type EventSummary struct {
 	HostAvatarURL   *string   `json:"host_avatar_url,omitempty"`
 	MaxAttendees    int       `json:"max_attendees,omitempty"`
 	AttendeesCount  int       `json:"attendees_count"`
+	InterestsCount  int       `json:"interests_count"`
 	IsFree          bool      `json:"is_free"`
 	Price           *float64  `json:"price,omitempty"`
 	Status          string    `json:"status,omitempty"`

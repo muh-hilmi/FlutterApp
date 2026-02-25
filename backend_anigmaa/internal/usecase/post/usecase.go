@@ -3,6 +3,7 @@ package post
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/anigmaa/backend/internal/domain/comment"
@@ -178,6 +179,9 @@ func (uc *Usecase) DeletePost(ctx context.Context, postID, userID uuid.UUID) err
 
 // GetFeed gets a user's personalized feed
 func (uc *Usecase) GetFeed(ctx context.Context, userID uuid.UUID, limit, offset int) ([]post.PostWithDetails, error) {
+	// DEBUG: Log input parameters
+	log.Printf("DEBUG: GetFeed called with userID=%v, limit=%d, offset=%d", userID, limit, offset)
+
 	if limit <= 0 {
 		limit = 20
 	}
@@ -185,7 +189,21 @@ func (uc *Usecase) GetFeed(ctx context.Context, userID uuid.UUID, limit, offset 
 		limit = 100
 	}
 
-	return uc.postRepo.GetFeed(ctx, userID, limit, offset)
+	// Repository layer already sets IsLikedByUser via SQL EXISTS subquery
+	// No need for batch query - it was causing the value to be overwritten incorrectly
+	posts, err := uc.postRepo.GetFeed(ctx, userID, limit, offset)
+	if err != nil {
+		log.Printf("DEBUG: GetFeed error: %v", err)
+		return nil, err
+	}
+
+	// DEBUG: Log results from repository
+	log.Printf("DEBUG: GetFeed repository returned %d posts", len(posts))
+	for i, p := range posts {
+		log.Printf("DEBUG: Repository Post[%d] ID=%v, IsLikedByUser=%v", i, p.ID, p.IsLikedByUser)
+	}
+
+	return posts, nil
 }
 
 // CountFeed counts total posts in user's feed
@@ -502,10 +520,8 @@ func (uc *Usecase) CreateComment(ctx context.Context, authorID uuid.UUID, req *c
 		return nil, err
 	}
 
-	// Increment post comments count
-	if err := uc.postRepo.IncrementComments(ctx, req.PostID); err != nil {
-		// Log error but don't fail
-	}
+	// Note: comments_count is automatically updated via database trigger (update_comments_count_trigger)
+	// No manual increment needed here
 
 	// Fetch comment with details to include author info
 	commentWithDetails, err := uc.commentRepo.GetWithDetails(ctx, newComment.ID, authorID)
@@ -568,10 +584,8 @@ func (uc *Usecase) DeleteComment(ctx context.Context, commentID, userID uuid.UUI
 		return err
 	}
 
-	// Decrement post comments count
-	if err := uc.postRepo.DecrementComments(ctx, existingComment.PostID); err != nil {
-		// Log error but don't fail
-	}
+	// Note: comments_count is automatically updated via database trigger (update_comments_count_trigger)
+	// No manual decrement needed here
 
 	return nil
 }
@@ -674,6 +688,9 @@ func (uc *Usecase) UnlikeComment(ctx context.Context, commentID, userID uuid.UUI
 
 // GetPublicPosts gets all public posts (for unauthenticated users)
 func (uc *Usecase) GetPublicPosts(ctx context.Context, limit, offset int) ([]post.PostWithDetails, error) {
+	// DEBUG: Log public feed request
+	log.Printf("DEBUG: GetPublicPosts called with limit=%d, offset=%d", limit, offset)
+
 	if limit <= 0 {
 		limit = 20
 	}
@@ -682,7 +699,21 @@ func (uc *Usecase) GetPublicPosts(ctx context.Context, limit, offset int) ([]pos
 	}
 
 	// Use a nil userID to indicate no user context - returns public posts only
-	return uc.postRepo.GetFeed(ctx, uuid.Nil, limit, offset)
+	posts, err := uc.postRepo.GetFeed(ctx, uuid.Nil, limit, offset)
+	if err != nil {
+		log.Printf("DEBUG: GetPublicPosts error: %v", err)
+		return nil, err
+	}
+
+	// DEBUG: Log public posts results
+	log.Printf("DEBUG: GetPublicPosts returned %d posts", len(posts))
+	for i, p := range posts {
+		log.Printf("DEBUG: Public Post[%d] ID=%v, IsLikedByUser=%v", i, p.ID, p.IsLikedByUser)
+	}
+
+	// For public posts, there's no user context, so IsLikedByUser should always be false
+	// This is already set correctly by the repository layer when userID is uuid.Nil
+	return posts, nil
 }
 
 // CountPublicPosts counts total public posts

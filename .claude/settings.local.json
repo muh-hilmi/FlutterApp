@@ -30,8 +30,22 @@
       "Bash(cd:*)",
       "Bash(cmd:*)",
       "Bash(powershell:*)",
-      "Bash(docker ps:*)"
+      "Bash(docker ps:*)",
+      "mcp__plugin_oh-my-claudecode_t__state_read",
+      "mcp__plugin_oh-my-claudecode_t__lsp_diagnostics",
+      "Bash(cd C:\\\\Users\\\\mailh\\\\OneDrive\\\\Desktop\\\\FlutterApp\\\\backend_anigmaa:*)",
+      "mcp__plugin_oh-my-claudecode_t__state_write",
+      "mcp__plugin_oh-my-claudecode_t__state_get_status",
+      "mcp__plugin_oh-my-claudecode_t__state_clear",
+      "mcp__plugin_oh-my-claudecode_t__state_list_active",
+      "Bash(wsl.exe curl:*)",
+      "Bash(powershell.exe:*)",
+      "Bash(curl:*)",
+      "Bash(wsl.exe:*)"
     ]
+  },
+  "enabledPlugins": {
+    "oh-my-claudecode@omc": true
   },
   "prefersReducedMotion": true
 }

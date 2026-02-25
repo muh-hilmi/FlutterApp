@@ -1,0 +1,334 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1771986756345,
+  "projectRoot": "C:\\Users\\mailh\\OneDrive\\Desktop\\FlutterApp",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "anigmaa": {
+      "path": "anigmaa",
+      "purpose": null,
+      "fileCount": 18,
+      "lastAccessed": 1771986756330,
+      "keyFiles": [
+        "all_dart_files.txt",
+        "analysis_options.yaml",
+        "anigmaa.iml",
+        "appium_config.json",
+        "build.yaml"
+      ]
+    },
+    "backend_anigmaa": {
+      "path": "backend_anigmaa",
+      "purpose": null,
+      "fileCount": 14,
+      "lastAccessed": 1771986756330,
+      "keyFiles": [
+        "DEBUG_UPLOAD_ISSUE.md",
+        "docker-compose.prod.yml",
+        "docker-compose.staging.yml",
+        "docker-compose.yml",
+        "Dockerfile"
+      ]
+    },
+    "BLUEPRINT": {
+      "path": "BLUEPRINT",
+      "purpose": null,
+      "fileCount": 16,
+      "lastAccessed": 1771986756330,
+      "keyFiles": [
+        "00_audit_fixes_summary.md",
+        "00_audit_report.md",
+        "00_v1_refund_removal_summary.md",
+        "01_vision.md",
+        "03_api_contracts.md"
+      ]
+    },
+    "backend_anigmaa\\bin": {
+      "path": "backend_anigmaa\\bin",
+      "purpose": "Executable scripts",
+      "fileCount": 2,
+      "lastAccessed": 1771986756331,
+      "keyFiles": [
+        "server",
+        "server.exe"
+      ]
+    },
+    "backend_anigmaa\\config": {
+      "path": "backend_anigmaa\\config",
+      "purpose": "Configuration files",
+      "fileCount": 1,
+      "lastAccessed": 1771986756332,
+      "keyFiles": [
+        "config.go"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "backend_anigmaa\\internal\\usecase\\post\\usecase.go",
+      "accessCount": 35,
+      "lastAccessed": 1771988890413,
+      "type": "file"
+    },
+    {
+      "path": "backend_anigmaa",
+      "accessCount": 18,
+      "lastAccessed": 1771989969864,
+      "type": "directory"
+    },
+    {
+      "path": "anigmaa\\lib\\presentation\\widgets\\modern_post_card_components\\post_action_bar.dart",
+      "accessCount": 15,
+      "lastAccessed": 1771989576699,
+      "type": "file"
+    },
+    {
+      "path": "backend_anigmaa\\internal\\repository\\postgres\\post_repo.go",
+      "accessCount": 15,
+      "lastAccessed": 1771989988501,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 13,
+      "lastAccessed": 1771988926319,
+      "type": "directory"
+    },
+    {
+      "path": "backend_anigmaa\\cmd\\server\\main.go",
+      "accessCount": 11,
+      "lastAccessed": 1771989735217,
+      "type": "file"
+    },
+    {
+      "path": "anigmaa",
+      "accessCount": 9,
+      "lastAccessed": 1771989947459,
+      "type": "directory"
+    },
+    {
+      "path": "backend_anigmaa\\internal\\repository\\postgres\\interaction_repo.go",
+      "accessCount": 8,
+      "lastAccessed": 1771988855693,
+      "type": "file"
+    },
+    {
+      "path": "backend_anigmaa\\internal\\delivery\\http\\handler\\post_handler.go",
+      "accessCount": 8,
+      "lastAccessed": 1771988861247,
+      "type": "file"
+    },
+    {
+      "path": "backend_anigmaa\\internal\\domain\\post\\entity.go",
+      "accessCount": 7,
+      "lastAccessed": 1771989980339,
+      "type": "file"
+    },
+    {
+      "path": "backend_anigmaa\\internal\\domain\\interaction\\repository.go",
+      "accessCount": 5,
+      "lastAccessed": 1771987677582,
+      "type": "file"
+    },
+    {
+      "path": "backend_anigmaa\\migrations\\consolidated\\03_post_service.up.sql",
+      "accessCount": 4,
+      "lastAccessed": 1771988553840,
+      "type": "file"
+    },
+    {
+      "path": "anigmaa\\lib\\presentation\\bloc\\posts",
+      "accessCount": 2,
+      "lastAccessed": 1771987686238,
+      "type": "directory"
+    },
+    {
+      "path": "anigmaa\\lib\\presentation\\bloc\\posts\\posts_bloc.dart",
+      "accessCount": 2,
+      "lastAccessed": 1771987689230,
+      "type": "file"
+    },
+    {
+      "path": "anigmaa\\lib\\domain\\entities\\post.dart",
+      "accessCount": 2,
+      "lastAccessed": 1771987699752,
+      "type": "file"
+    },
+    {
+      "path": "backend_anigmaa\\internal\\repository\\postgres\\comment_repo.go",
+      "accessCount": 2,
+      "lastAccessed": 1771988281544,
+      "type": "file"
+    },
+    {
+      "path": "backend_anigmaa\\migrations\\consolidated\\04_fix_counts.up.sql",
+      "accessCount": 2,
+      "lastAccessed": 1771988552993,
+      "type": "file"
+    },
+    {
+      "path": "backend_anigmaa\\internal\\repository\\postgres",
+      "accessCount": 2,
+      "lastAccessed": 1771988864318,
+      "type": "directory"
+    },
+    {
+      "path": "anigmaa\\lib\\data\\models\\post_model.dart",
+      "accessCount": 2,
+      "lastAccessed": 1771988872501,
+      "type": "file"
+    },
+    {
+      "path": "anigmaa\\lib\\data\\models\\event_model.dart",
+      "accessCount": 2,
+      "lastAccessed": 1771989902510,
+      "type": "file"
+    },
+    {
+      "path": "anigmaa\\lib\\domain\\usecases\\unlike_post.dart",
+      "accessCount": 1,
+      "lastAccessed": 1771987295280,
+      "type": "file"
+    },
+    {
+      "path": "anigmaa\\lib\\domain\\usecases\\like_post.dart",
+      "accessCount": 1,
+      "lastAccessed": 1771987295310,
+      "type": "file"
+    },
+    {
+      "path": "backend_anigmaa\\internal\\domain\\interaction\\entity.go",
+      "accessCount": 1,
+      "lastAccessed": 1771987296299,
+      "type": "file"
+    },
+    {
+      "path": "backend_anigmaa\\internal\\domain",
+      "accessCount": 1,
+      "lastAccessed": 1771987477253,
+      "type": "directory"
+    },
+    {
+      "path": "backend_anigmaa\\internal\\domain\\post\\repository.go",
+      "accessCount": 1,
+      "lastAccessed": 1771987479627,
+      "type": "file"
+    },
+    {
+      "path": "anigmaa\\lib\\domain\\entities",
+      "accessCount": 1,
+      "lastAccessed": 1771987696368,
+      "type": "directory"
+    },
+    {
+      "path": "backend_anigmaa\\internal\\domain\\post",
+      "accessCount": 1,
+      "lastAccessed": 1771987702754,
+      "type": "directory"
+    },
+    {
+      "path": "anigmaa\\lib\\data",
+      "accessCount": 1,
+      "lastAccessed": 1771987727201,
+      "type": "directory"
+    },
+    {
+      "path": "backend_anigmaa\\internal\\infrastructure\\database\\migrate.go",
+      "accessCount": 1,
+      "lastAccessed": 1771988130083,
+      "type": "file"
+    },
+    {
+      "path": "backend_anigmaa\\internal\\usecase",
+      "accessCount": 1,
+      "lastAccessed": 1771988188094,
+      "type": "directory"
+    },
+    {
+      "path": "backend_anigmaa\\internal\\usecase\\post",
+      "accessCount": 1,
+      "lastAccessed": 1771988188123,
+      "type": "directory"
+    },
+    {
+      "path": "backend_anigmaa\\migrations\\consolidated\\04_fix_counts.down.sql",
+      "accessCount": 1,
+      "lastAccessed": 1771988521372,
+      "type": "file"
+    },
+    {
+      "path": "backend_anigmaa\\internal\\delivery\\http\\middleware\\auth.go",
+      "accessCount": 1,
+      "lastAccessed": 1771988884708,
+      "type": "file"
+    },
+    {
+      "path": "anigmaa\\lib\\presentation\\widgets\\posts\\modern_post_card.dart",
+      "accessCount": 1,
+      "lastAccessed": 1771989494751,
+      "type": "file"
+    },
+    {
+      "path": "anigmaa\\lib\\domain\\entities\\event.dart",
+      "accessCount": 1,
+      "lastAccessed": 1771989880499,
+      "type": "file"
+    },
+    {
+      "path": "anigmaa\\lib\\presentation\\widgets\\modern_post_card_components\\event_attachment.dart",
+      "accessCount": 1,
+      "lastAccessed": 1771989954020,
+      "type": "file"
+    },
+    {
+      "path": "anigmaa\\lib\\presentation\\widgets\\events\\modern_event_mini_card.dart",
+      "accessCount": 1,
+      "lastAccessed": 1771989958694,
+      "type": "file"
+    },
+    {
+      "path": "backend_anigmaa\\docker-compose.yml",
+      "accessCount": 1,
+      "lastAccessed": 1771990308045,
+      "type": "file"
+    },
+    {
+      "path": "backend_anigmaa\\.env.example",
+      "accessCount": 1,
+      "lastAccessed": 1771990313838,
+      "type": "file"
+    },
+    {
+      "path": "backend_anigmaa\\.env.docker",
+      "accessCount": 1,
+      "lastAccessed": 1771990320331,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
