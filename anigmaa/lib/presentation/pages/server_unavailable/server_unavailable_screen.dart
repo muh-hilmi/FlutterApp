@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/auth/auth_bloc.dart';
 import '../../../core/auth/auth_state.dart';
+import '../../../core/errors/error_messages.dart';
 import '../../../injection_container.dart' as di;
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -9,7 +10,7 @@ import '../../../core/theme/app_text_styles.dart';
 /// Screen shown when server is unreachable but user has a valid token
 ///
 /// Features:
-/// - Shows clear error message
+/// - Shows clear error message with proper error classification
 /// - Retry button (triggers re-validation)
 /// - Continue offline button (enters offline mode)
 /// - Force logout button (clears local state)
@@ -34,17 +35,14 @@ class ServerUnavailableScreen extends StatelessWidget {
 
         switch (state.state) {
           case AuthState.validated:
-            // Token is valid - navigate to home
             Navigator.pushReplacementNamed(context, '/home');
             break;
 
           case AuthState.offlineMode:
-            // Enter offline mode - navigate to home
             Navigator.pushReplacementNamed(context, '/home');
             break;
 
           case AuthState.unauthenticated:
-            // Token is invalid - go to login
             Navigator.pushReplacementNamed(context, '/login');
             break;
 
@@ -53,13 +51,20 @@ class ServerUnavailableScreen extends StatelessWidget {
           case AuthState.refreshing:
           case AuthState.error:
           case AuthState.initial:
-            // Stay on this screen
             break;
         }
       },
       child: BlocBuilder<AuthBloc, AuthStateData>(
         bloc: authBloc,
         builder: (context, state) {
+          // Use error message from state, parameter, or default
+          final displayMessage = state.errorMessage ??
+              errorMessage ??
+              ErrorMessageResolver.genericNetworkError;
+
+          // Get appropriate title based on error message
+          final errorTitle = ErrorMessageResolver.getTitle(displayMessage);
+
           return Scaffold(
             backgroundColor: AppColors.surface,
             body: SafeArea(
@@ -68,18 +73,18 @@ class ServerUnavailableScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Icon
+                    // Icon with design system colors
                     Container(
                       width: 80,
                       height: 80,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFA726).withValues(alpha: 0.2),
+                        color: AppColors.secondary.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
-                        Icons.cloud_off,
+                      child: Icon(
+                        _getIconForError(displayMessage),
                         size: 40,
-                        color: Color(0xFFFFA726),
+                        color: AppColors.secondary,
                       ),
                     ),
 
@@ -87,7 +92,7 @@ class ServerUnavailableScreen extends StatelessWidget {
 
                     // Title
                     Text(
-                      'Server Tidak Dapat Dihubungi',
+                      errorTitle,
                       style: AppTextStyles.h3.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
@@ -99,11 +104,10 @@ class ServerUnavailableScreen extends StatelessWidget {
 
                     // Message
                     Text(
-                      state.errorMessage ??
-                          errorMessage ??
-                          'Tidak dapat terhubung ke server. Periksa koneksi internet kamu.',
+                      displayMessage,
                       style: AppTextStyles.bodyMedium.copyWith(
                         color: AppColors.textSecondary,
+                        height: 1.5,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -125,7 +129,7 @@ class ServerUnavailableScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        state.state.description,
+                        'Memeriksa koneksi...',
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: AppColors.textTertiary,
                         ),
@@ -137,21 +141,20 @@ class ServerUnavailableScreen extends StatelessWidget {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        onPressed: state.state == AuthState.validating ||
-                                state.state == AuthState.refreshing
+                        onPressed: _isBusy(state)
                             ? null
                             : () {
                                 authBloc.add(AuthRetryValidation());
                               },
-                        icon: const Icon(Icons.refresh, size: 20),
+                        icon: const Icon(Icons.refresh_rounded, size: 20),
                         label: const Text('Coba Lagi'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.secondary,
                           foregroundColor: AppColors.white,
                           disabledBackgroundColor: AppColors.border,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(16),
                           ),
                         ),
                       ),
@@ -163,20 +166,19 @@ class ServerUnavailableScreen extends StatelessWidget {
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
-                        onPressed: state.state == AuthState.validating ||
-                                state.state == AuthState.refreshing
+                        onPressed: _isBusy(state)
                             ? null
                             : () {
                                 authBloc.add(AuthEnterOfflineMode());
                               },
-                        icon: const Icon(Icons.wifi_off, size: 20),
+                        icon: const Icon(Icons.wifi_off_rounded, size: 20),
                         label: const Text('Lanjut Offline'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.textSecondary,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           side: const BorderSide(color: AppColors.border),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(16),
                           ),
                         ),
                       ),
@@ -186,16 +188,15 @@ class ServerUnavailableScreen extends StatelessWidget {
 
                     // Force logout text button
                     TextButton.icon(
-                      onPressed: state.state == AuthState.validating ||
-                              state.state == AuthState.refreshing
+                      onPressed: _isBusy(state)
                           ? null
                           : () async {
                               final confirmed = await showDialog<bool>(
                                 context: context,
                                 builder: (context) => AlertDialog(
-                                  title: const Text('Keluar?'),
+                                  title: const Text('Keluar'),
                                   content: const Text(
-                                    'Kamu akan keluar dari aplikasi. Data offline akan tetap tersimpan.',
+                                    'Kamu akan keluar dari akun. Data lokal akan tetap tersimpan.',
                                   ),
                                   actions: [
                                     TextButton(
@@ -216,12 +217,11 @@ class ServerUnavailableScreen extends StatelessWidget {
                                 authBloc.add(AuthLogoutRequested());
                               }
                             },
-                      icon: const Icon(Icons.logout, size: 16),
+                      icon: const Icon(Icons.logout_rounded, size: 16),
                       label: Text(
-                        'Keluar dari akun',
+                        'Keluar dari Akun',
                         style: AppTextStyles.bodyMedium.copyWith(
-                          color: state.state == AuthState.validating ||
-                                  state.state == AuthState.refreshing
+                          color: _isBusy(state)
                               ? AppColors.border
                               : AppColors.textTertiary,
                         ),
@@ -230,13 +230,29 @@ class ServerUnavailableScreen extends StatelessWidget {
 
                     const SizedBox(height: 16),
 
-                    // Retry count indicator
-                    if (state.retryCount > 0)
-                      Text(
-                        'Percobaan otomatis akan dilakukan sebentar lagi...',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textTertiary,
-                        ),
+                    // Auto-retry indicator
+                    if (state.retryCount > 0 && !_isBusy(state))
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.textTertiary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Mencoba ulang otomatis...',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textTertiary,
+                            ),
+                          ),
+                        ],
                       ),
                   ],
                 ),
@@ -246,5 +262,29 @@ class ServerUnavailableScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  bool _isBusy(AuthStateData state) {
+    return state.state == AuthState.validating ||
+        state.state == AuthState.refreshing;
+  }
+
+  IconData _getIconForError(String message) {
+    final msgLower = message.toLowerCase();
+
+    if (msgLower.contains('internet') || msgLower.contains('koneksi')) {
+      return Icons.wifi_off_rounded;
+    }
+    if (msgLower.contains('server')) {
+      return Icons.cloud_off_rounded;
+    }
+    if (msgLower.contains('sesi') || msgLower.contains('login')) {
+      return Icons.lock_clock_rounded;
+    }
+    if (msgLower.contains('izin') || msgLower.contains('akses')) {
+      return Icons.block_rounded;
+    }
+
+    return Icons.error_outline_rounded;
   }
 }

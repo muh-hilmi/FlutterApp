@@ -6,7 +6,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../domain/entities/post.dart';
-import 'package:anigmaa/core/theme/app_colors.dart';
+import '../theme/app_colors.dart';
 
 class ShareService {
   static const String _appBaseUrl = 'https://flyerr.app';
@@ -360,6 +360,7 @@ class ShareService {
   }
 
   void _showErrorSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -369,10 +370,10 @@ class ShareService {
             Expanded(child: Text(message)),
           ],
         ),
-        backgroundColor: Colors.red[600],
+        backgroundColor: AppColors.error,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 5),
       ),
     );
   }

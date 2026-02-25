@@ -9,6 +9,7 @@ import '../tickets/post_payment_ticket_screen.dart';
 import '../../widgets/tickets/celebration_bottom_sheet.dart';
 import '../../../injection_container.dart';
 import '../EXPERIMENTAL/midtrans_payment_webview_screen.dart';
+import '../../widgets/common/snackbar_helper.dart';
 
 class PaymentScreen extends StatefulWidget {
   final Event event;
@@ -95,13 +96,9 @@ class _PaymentScreenState extends State<PaymentScreen>
             } else if (state.isSuccess) {
               _showSuccessDialog();
             } else if (state.isError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    state.errorMessage ?? 'Terjadi kesalahan saat pembayaran',
-                  ),
-                  backgroundColor: Colors.red,
-                ),
+              SnackBarHelper.showError(
+                context,
+                state.errorMessage ?? 'Terjadi kesalahan saat pembayaran',
               );
             }
           },

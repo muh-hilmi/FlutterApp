@@ -6,7 +6,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/services/google_places_service.dart';
-import 'package:anigmaa/core/theme/app_colors.dart';
+import '../../../core/theme/app_colors.dart';
+import 'snackbar_helper.dart';
 
 class LocationData {
   final String name;
@@ -575,13 +576,7 @@ class _LocationPickerState extends State<LocationPicker> {
 
   void _showError(String message) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      SnackBarHelper.showError(context, message);
     }
   }
 

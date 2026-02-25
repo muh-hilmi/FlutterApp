@@ -7,7 +7,8 @@ import '../../bloc/event_participants/event_participants_event.dart';
 import '../../bloc/event_participants/event_participants_state.dart';
 import '../../widgets/checkin_dialog.dart';
 import '../qr_checkin/qr_checkin_screen.dart';
-import 'package:anigmaa/core/theme/app_colors.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../widgets/common/snackbar_helper.dart';
 
 /// Screen for event hosts to view and manage event attendees
 /// Features: attendee list, search, filter, manual check-in, QR scan
@@ -612,32 +613,10 @@ class _EventParticipantsScreenState extends State<EventParticipantsScreen> {
   }
 
   void _showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-        action: SnackBarAction(
-          label: 'Tutup',
-          textColor: Colors.white,
-          onPressed: () {},
-        ),
-      ),
-    );
+    SnackBarHelper.showError(context, message, actionLabel: 'Tutup');
   }
 
   void _showSuccessSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        action: SnackBarAction(
-          label: 'Tutup',
-          textColor: Colors.white,
-          onPressed: () {},
-        ),
-      ),
-    );
+    SnackBarHelper.showSuccess(context, message, actionLabel: 'Tutup');
   }
 }

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../domain/entities/user.dart';
 import '../../../core/services/api_service.dart';
 import '../../pages/profile/profile_screen.dart';
-import 'package:anigmaa/core/theme/app_colors.dart';
+import '../../../core/theme/app_colors.dart';
+import 'snackbar_helper.dart';
 
 class FindMatchesModal extends StatelessWidget {
   final String eventId;
@@ -309,12 +310,9 @@ class FindMatchesModal extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to send connection request: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
+        SnackBarHelper.showError(
+          context,
+          'Failed to send connection request: $e',
         );
       }
     }

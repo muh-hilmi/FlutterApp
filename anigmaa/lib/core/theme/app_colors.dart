@@ -37,7 +37,7 @@ class AppColors {
   static const Color accentBorder = Color(0x33BBC863);
 
   // ─── Semantic / Functional ───────────────────────────────────────────────
-  static const Color error = Color(0xFFFF3B30); // iOS Red
+  static const Color error = Color(0xFFE65100); // Dark Orange — error states, notifications
   static const Color success = Color(0xFF34C759); // iOS Green
   static const Color warning = Color(0xFFFFCC00); // iOS Yellow
   static const Color orange = Color(0xFFFF9500); // iOS Orange — soft errors, caution

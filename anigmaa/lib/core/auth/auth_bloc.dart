@@ -4,7 +4,7 @@ import '../services/auth_service.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../utils/app_logger.dart';
 import '../api/dio_client.dart';
-import '../../injection_container.dart' show sl;
+import '../errors/error_messages.dart';
 import 'auth_state.dart';
 
 /// Callback for token refresh notification
@@ -222,7 +222,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthStateData> {
           _validationCompleter?.complete(false);
           emit(AuthStateData(
             state: AuthState.unauthenticated,
-            errorMessage: 'Session expired. Please login again.',
+            errorMessage: ErrorMessageResolver.sessionExpired,
             retryCount: 0,
           ));
           break;
@@ -234,18 +234,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthStateData> {
 
           final newRetryCount = state.retryCount + 1;
           if (newRetryCount >= 3) {
-            // Too many retries, enter offline mode option
+            // Too many retries, show clearer message
             emit(state.copyWith(
               state: AuthState.serverUnavailable,
-              errorMessage: 'Cannot reach server. Check your connection.',
+              errorMessage: ErrorMessageResolver.genericNetworkError,
               retryCount: newRetryCount,
             ));
             _startRetryTimer();
           } else {
-            // Retry automatically
+            // Retry automatically with loading message
             emit(state.copyWith(
               state: AuthState.serverUnavailable,
-              errorMessage: 'Server unreachable. Retrying...',
+              errorMessage: 'Tidak dapat terhubung ke server. Mencoba ulang...',
               retryCount: newRetryCount,
             ));
             _startRetryTimer();
@@ -259,7 +259,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthStateData> {
 
           emit(state.copyWith(
             state: AuthState.serverUnavailable,
-            errorMessage: 'Server error. Please try again.',
+            errorMessage: ErrorMessageResolver.internalServerError,
             retryCount: state.retryCount + 1,
           ));
           _startRetryTimer();
@@ -326,12 +326,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthStateData> {
     if (event.allowOfflineMode) {
       emit(state.copyWith(
         state: AuthState.offlineMode,
-        errorMessage: 'Offline mode - Limited features available',
+        errorMessage: 'Mode offline - Fitur terbatas tersedia',
       ));
     } else {
       emit(state.copyWith(
         state: AuthState.serverUnavailable,
-        errorMessage: 'Server unreachable. Check your connection.',
+        errorMessage: ErrorMessageResolver.genericNetworkError,
       ));
       _startRetryTimer();
     }

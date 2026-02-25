@@ -14,7 +14,8 @@ import '../../bloc/posts/posts_bloc.dart';
 import '../../bloc/posts/posts_event.dart';
 import '../../../core/services/upload_service.dart';
 import '../../../core/utils/app_logger.dart';
-import 'package:anigmaa/core/theme/app_colors.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../widgets/common/snackbar_helper.dart';
 
 class CreatePostSheet extends StatefulWidget {
   const CreatePostSheet({super.key});
@@ -773,16 +774,6 @@ class _CreatePostSheetState extends State<CreatePostSheet> {
   }
 
   void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        action: SnackBarAction(
-          label: 'OK',
-          textColor: Colors.white,
-          onPressed: () {},
-        ),
-      ),
-    );
+    SnackBarHelper.showError(context, message, actionLabel: 'OK');
   }
 }
