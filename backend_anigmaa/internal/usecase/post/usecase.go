@@ -177,6 +177,54 @@ func (uc *Usecase) DeletePost(ctx context.Context, postID, userID uuid.UUID) err
 	return uc.postRepo.Delete(ctx, postID)
 }
 
+// ArchivePost archives a post
+func (uc *Usecase) ArchivePost(ctx context.Context, postID, userID uuid.UUID) (*post.Post, error) {
+	// Get existing post
+	existingPost, err := uc.postRepo.GetByID(ctx, postID)
+	if err != nil {
+		return nil, ErrPostNotFound
+	}
+
+	// Check if user is the author
+	if existingPost.AuthorID != userID {
+		return nil, ErrUnauthorized
+	}
+
+	// Archive the post
+	existingPost.IsArchived = true
+	existingPost.UpdatedAt = time.Now()
+
+	if err := uc.postRepo.Update(ctx, existingPost); err != nil {
+		return nil, err
+	}
+
+	return existingPost, nil
+}
+
+// UnarchivePost unarchives a post
+func (uc *Usecase) UnarchivePost(ctx context.Context, postID, userID uuid.UUID) (*post.Post, error) {
+	// Get existing post
+	existingPost, err := uc.postRepo.GetByID(ctx, postID)
+	if err != nil {
+		return nil, ErrPostNotFound
+	}
+
+	// Check if user is the author
+	if existingPost.AuthorID != userID {
+		return nil, ErrUnauthorized
+	}
+
+	// Unarchive the post
+	existingPost.IsArchived = false
+	existingPost.UpdatedAt = time.Now()
+
+	if err := uc.postRepo.Update(ctx, existingPost); err != nil {
+		return nil, err
+	}
+
+	return existingPost, nil
+}
+
 // GetFeed gets a user's personalized feed
 func (uc *Usecase) GetFeed(ctx context.Context, userID uuid.UUID, limit, offset int) ([]post.PostWithDetails, error) {
 	// DEBUG: Log input parameters

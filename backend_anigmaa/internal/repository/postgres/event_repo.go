@@ -24,11 +24,11 @@ func (r *eventRepository) Create(ctx context.Context, e *event.Event) error {
 		INSERT INTO events (id, host_id, title, description, category, start_time, end_time,
 			location_name, location_address, location_lat, location_lng, location_geom,
 			max_attendees, price, is_free, status, privacy, requirements, ticketing_enabled,
-			tickets_sold, created_at, updated_at)
+			tickets_sold, is_archived, created_at, updated_at)
 		VALUES ($1::uuid, $2::uuid, $3, $4, $5::event_category, $6::timestamp with time zone, $7::timestamp with time zone,
 			$8, $9, $10::numeric, $11::numeric, ST_SetSRID(ST_MakePoint($11::numeric, $10::numeric), 4326),
 			$12::integer, $13::numeric, $14, $15::event_status, $16::event_privacy, $17,
-			$18, $19::integer, $20::timestamp with time zone, $21::timestamp with time zone)
+			$18, $19::integer, $20, $21::timestamp with time zone, $22::timestamp with time zone)
 	`
 
 	e.ID = uuid.New()
@@ -36,12 +36,13 @@ func (r *eventRepository) Create(ctx context.Context, e *event.Event) error {
 	e.UpdatedAt = time.Now().UTC()
 	e.Status = event.StatusUpcoming
 	e.TicketsSold = 0
+	e.IsArchived = false
 
 	_, err := r.db.ExecContext(ctx, query,
 		e.ID, e.HostID, e.Title, e.Description, e.Category, e.StartTime, e.EndTime,
 		e.LocationName, e.LocationAddress, e.LocationLat, e.LocationLng,
 		e.MaxAttendees, e.Price, e.IsFree, e.Status, e.Privacy, e.Requirements,
-		e.TicketingEnabled, e.TicketsSold, e.CreatedAt, e.UpdatedAt,
+		e.TicketingEnabled, e.TicketsSold, e.IsArchived, e.CreatedAt, e.UpdatedAt,
 	)
 
 	return err
@@ -51,7 +52,7 @@ func (r *eventRepository) GetByID(ctx context.Context, id uuid.UUID) (*event.Eve
 	var e event.Event
 	query := `SELECT id, host_id, title, description, category, start_time, end_time,
 		location_name, location_address, ST_Y(location_geom::geometry) as location_lat, ST_X(location_geom::geometry) as location_lng, max_attendees,
-		price, is_free, status, privacy, requirements, ticketing_enabled, tickets_sold,
+		price, is_free, status, privacy, requirements, ticketing_enabled, tickets_sold, is_archived,
 		created_at, updated_at FROM events WHERE id = $1`
 
 	err := r.db.GetContext(ctx, &e, query, id)
@@ -67,7 +68,7 @@ func (r *eventRepository) GetWithDetails(ctx context.Context, eventID, userID uu
 		SELECT e.id, e.host_id, e.title, e.description, e.category, e.start_time, e.end_time,
 			e.location_name, e.location_address, ST_Y(e.location_geom::geometry) as location_lat, ST_X(e.location_geom::geometry) as location_lng,
 			e.max_attendees, e.price, e.is_free, e.status, e.privacy, e.requirements,
-			e.ticketing_enabled, e.tickets_sold, e.created_at, e.updated_at,
+			e.ticketing_enabled, e.tickets_sold, e.is_archived, e.created_at, e.updated_at,
 			(SELECT COUNT(*) FROM event_interests WHERE event_id = e.id) as interests_count,
 			u.name as host_name, u.avatar_url as host_avatar_url,
 			(SELECT COUNT(*) FROM event_attendees WHERE event_id = e.id AND status = 'confirmed') as attendees_count,
@@ -101,8 +102,8 @@ func (r *eventRepository) Update(ctx context.Context, e *event.Event) error {
 			end_time = $5, location_name = $6, location_address = $7, location_lat = $8,
 			location_lng = $9, location_geom = ST_SetSRID(ST_MakePoint($9, $8), 4326),
 			max_attendees = $10, price = $11, privacy = $12, requirements = $13,
-			status = $14, updated_at = $15
-		WHERE id = $16
+			status = $14, is_archived = $15, updated_at = $16
+		WHERE id = $17
 	`
 
 	e.UpdatedAt = time.Now()
@@ -110,7 +111,7 @@ func (r *eventRepository) Update(ctx context.Context, e *event.Event) error {
 		e.Title, e.Description, e.Category, e.StartTime, e.EndTime,
 		e.LocationName, e.LocationAddress, e.LocationLat, e.LocationLng,
 		e.MaxAttendees, e.Price, e.Privacy, e.Requirements, e.Status,
-		e.UpdatedAt, e.ID,
+		e.IsArchived, e.UpdatedAt, e.ID,
 	)
 
 	return err
@@ -127,7 +128,7 @@ func (r *eventRepository) List(ctx context.Context, filter *event.EventFilter, u
 		SELECT e.id, e.host_id, e.title, e.description, e.category, e.start_time, e.end_time,
 			e.location_name, e.location_address, ST_Y(e.location_geom::geometry) as location_lat, ST_X(e.location_geom::geometry) as location_lng,
 			e.max_attendees, e.price, e.is_free, e.status, e.privacy, e.requirements,
-			e.ticketing_enabled, e.tickets_sold, e.created_at, e.updated_at,
+			e.ticketing_enabled, e.tickets_sold, e.is_archived, e.created_at, e.updated_at,
 			(SELECT COUNT(*) FROM event_interests WHERE event_id = e.id) as interests_count,
 			u.name as host_name, u.avatar_url as host_avatar_url,
 			(SELECT COUNT(*) FROM event_attendees WHERE event_id = e.id AND status = 'confirmed') as attendees_count,
@@ -254,7 +255,7 @@ func (r *eventRepository) GetByHost(ctx context.Context, hostID uuid.UUID, limit
 		SELECT e.id, e.host_id, e.title, e.description, e.category, e.start_time, e.end_time,
 			e.location_name, e.location_address, ST_Y(e.location_geom::geometry) as location_lat, ST_X(e.location_geom::geometry) as location_lng,
 			e.max_attendees, e.price, e.is_free, e.status, e.privacy, e.requirements,
-			e.ticketing_enabled, e.tickets_sold, e.created_at, e.updated_at,
+			e.ticketing_enabled, e.tickets_sold, e.is_archived, e.created_at, e.updated_at,
 			(SELECT COUNT(*) FROM event_interests WHERE event_id = e.id) as interests_count,
 			u.name as host_name, u.avatar_url as host_avatar_url,
 			(SELECT COUNT(*) FROM event_attendees WHERE event_id = e.id AND status = 'confirmed') as attendees_count
@@ -287,7 +288,7 @@ func (r *eventRepository) GetJoinedEvents(ctx context.Context, userID uuid.UUID,
 		SELECT e.id, e.host_id, e.title, e.description, e.category, e.start_time, e.end_time,
 			e.location_name, e.location_address, ST_Y(e.location_geom::geometry) as location_lat, ST_X(e.location_geom::geometry) as location_lng,
 			e.max_attendees, e.price, e.is_free, e.status, e.privacy, e.requirements,
-			e.ticketing_enabled, e.tickets_sold, e.created_at, e.updated_at,
+			e.ticketing_enabled, e.tickets_sold, e.is_archived, e.created_at, e.updated_at,
 			(SELECT COUNT(*) FROM event_interests WHERE event_id = e.id) as interests_count,
 			u.name as host_name, u.avatar_url as host_avatar_url,
 			(SELECT COUNT(*) FROM event_attendees WHERE event_id = e.id AND status = 'confirmed') as attendees_count,
@@ -320,7 +321,7 @@ func (r *eventRepository) GetNearby(ctx context.Context, lat, lng, radiusKm floa
 		SELECT e.id, e.host_id, e.title, e.description, e.category, e.start_time, e.end_time,
 			e.location_name, e.location_address, ST_Y(e.location_geom::geometry) as location_lat, ST_X(e.location_geom::geometry) as location_lng,
 			e.max_attendees, e.price, e.is_free, e.status, e.privacy, e.requirements,
-			e.ticketing_enabled, e.tickets_sold, e.created_at, e.updated_at,
+			e.ticketing_enabled, e.tickets_sold, e.is_archived, e.created_at, e.updated_at,
 			(SELECT COUNT(*) FROM event_interests WHERE event_id = e.id) as interests_count,
 			u.name as host_name, u.avatar_url as host_avatar_url,
 			(SELECT COUNT(*) FROM event_attendees WHERE event_id = e.id AND status = 'confirmed') as attendees_count,
@@ -444,7 +445,7 @@ func (r *eventRepository) GetUpcomingEvents(ctx context.Context, limit int) ([]e
 		SELECT e.id, e.host_id, e.title, e.description, e.category, e.start_time, e.end_time,
 			e.location_name, e.location_address, ST_Y(e.location_geom::geometry) as location_lat, ST_X(e.location_geom::geometry) as location_lng,
 			e.max_attendees, e.price, e.is_free, e.status, e.privacy, e.requirements,
-			e.ticketing_enabled, e.tickets_sold, e.created_at, e.updated_at,
+			e.ticketing_enabled, e.tickets_sold, e.is_archived, e.created_at, e.updated_at,
 			(SELECT COUNT(*) FROM event_interests WHERE event_id = e.id) as interests_count,
 			u.name as host_name, u.avatar_url as host_avatar_url,
 			(SELECT COUNT(*) FROM event_attendees WHERE event_id = e.id AND status = 'confirmed') as attendees_count
@@ -479,7 +480,7 @@ func (r *eventRepository) GetLiveEvents(ctx context.Context, limit int) ([]event
 		SELECT e.id, e.host_id, e.title, e.description, e.category, e.start_time, e.end_time,
 			e.location_name, e.location_address, ST_Y(e.location_geom::geometry) as location_lat, ST_X(e.location_geom::geometry) as location_lng,
 			e.max_attendees, e.price, e.is_free, e.status, e.privacy, e.requirements,
-			e.ticketing_enabled, e.tickets_sold, e.created_at, e.updated_at,
+			e.ticketing_enabled, e.tickets_sold, e.is_archived, e.created_at, e.updated_at,
 			(SELECT COUNT(*) FROM event_interests WHERE event_id = e.id) as interests_count,
 			u.name as host_name, u.avatar_url as host_avatar_url,
 			(SELECT COUNT(*) FROM event_attendees WHERE event_id = e.id AND status = 'confirmed') as attendees_count
@@ -516,7 +517,7 @@ func (r *eventRepository) GetByHostID(ctx context.Context, hostID uuid.UUID) ([]
 		SELECT id, host_id, title, description, category, start_time, end_time,
 			location_name, location_address, ST_Y(location_geom::geometry) as location_lat, ST_X(location_geom::geometry) as location_lng,
 			max_attendees, price, is_free, status, privacy, requirements,
-			ticketing_enabled, tickets_sold, created_at, updated_at
+			ticketing_enabled, tickets_sold, is_archived, created_at, updated_at
 		FROM events
 		WHERE host_id = $1
 		ORDER BY start_time DESC

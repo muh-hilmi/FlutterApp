@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/errors/failures.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/google_auth_service.dart';
 import '../../../core/utils/app_logger.dart';
@@ -67,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
             color: AppColors.secondary,
             borderRadius: BorderRadius.circular(25),
           ),
-          child: const Icon(Icons.event, color: AppColors.white, size: 50),
+          child: const Icon(Icons.event, color: AppColors.primary, size: 50),
         ),
         const SizedBox(height: 24),
         Text(
@@ -258,28 +259,28 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         String errorMessage = 'Yah, gagal login 😢';
 
-        // Better error messages - Gen Z friendly
-        if (e.toString().contains('timeout') ||
-            e.toString().contains('connectTimeout')) {
-          // Timeout errors are already handled in datasource with good messages
-          errorMessage = e.toString().replaceFirst('NetworkFailure: ', '');
-        } else if (e.toString().contains('401')) {
-          errorMessage = 'Login gagal. Coba lagi ya!';
-        } else if (e.toString().contains('404')) {
-          errorMessage = 'Server-nya ilang. Hubungi admin.';
-        } else if (e.toString().contains('500')) {
-          errorMessage = 'Server lagi error. Sabar ya, coba lagi nanti.';
-        } else if (e.toString().contains('network') ||
-            e.toString().contains('wifi')) {
-          errorMessage = e.toString().replaceFirst('NetworkFailure: ', '');
+        // Type-safe error handling — Failure.toString() is 'FailureType: message',
+        // so string-matching on '401'/'404' never worked. Use 'is' checks instead.
+        if (e is AuthenticationFailure) {
+          // 401 from /auth/google: invalid Google token, user not registered, etc.
+          errorMessage = 'Login gagal. Coba lagi ya! 🔄';
+        } else if (e is NotFoundFailure) {
+          // 404: endpoint or user not found
+          errorMessage = 'Akun belum ditemukan. Coba lagi atau hubungi admin.';
+        } else if (e is AuthorizationFailure) {
+          // 403: forbidden
+          errorMessage = 'Akses ditolak. Hubungi admin.';
+        } else if (e is ServerFailure) {
+          // 5xx: backend error
+          errorMessage = 'Server lagi error. Sabar ya, coba lagi nanti. 🔧';
+        } else if (e is NetworkFailure) {
+          // Connection refused, timeout, no internet — message already user-friendly
+          errorMessage = e.message;
         } else if (e.toString().contains('PlatformException') ||
             e.toString().contains('channel-error')) {
           errorMessage = 'Google Sign-In error. Coba lagi ya.';
-        } else if (e.toString().contains('NetworkFailure:')) {
-          // Extract the message from NetworkFailure
-          errorMessage = e.toString().replaceFirst('NetworkFailure: ', '');
         } else {
-          errorMessage = 'Error: ${e.toString()}';
+          errorMessage = 'Yah, ada yang error nih. Coba lagi ya! 😅';
         }
 
         ScaffoldMessenger.of(context).showSnackBar(

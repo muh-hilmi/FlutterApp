@@ -15,6 +15,8 @@ import '../../bloc/tickets/tickets_event.dart';
 import '../../bloc/tickets/tickets_state.dart';
 import '../../../injection_container.dart' as di;
 
+import '../../widgets/common/snackbar_helper.dart';
+
 class TicketDetailScreen extends StatefulWidget {
   final Ticket ticket;
 
@@ -61,11 +63,9 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
             setState(() {
               _currentTicket = state.ticket;
             });
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Tiket berhasil dibatalkan'),
-                backgroundColor: AppColors.info,
-              ),
+            SnackBarHelper.showInfo(
+              context,
+              'Tiket berhasil dibatalkan',
             );
             // Navigate back and signal that ticket was cancelled
             Future.delayed(const Duration(milliseconds: 500), () {
@@ -74,11 +74,9 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
               }
             });
           } else if (state is TicketsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Gagal: ${state.message}'),
-                backgroundColor: AppColors.error,
-              ),
+            SnackBarHelper.showError(
+              context,
+              'Gagal: ${state.message}',
             );
           }
         },
@@ -255,21 +253,9 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                             Clipboard.setData(
                               ClipboardData(text: _currentTicket.attendanceCode),
                             );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Row(
-                                  children: [
-                                    Icon(Icons.check, color: AppColors.white, size: 18),
-                                    const SizedBox(width: 8),
-                                    const Text('Kode udah disalin!'),
-                                  ],
-                                ),
-                                backgroundColor: AppColors.success,
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
+                            SnackBarHelper.showSuccess(
+                              context,
+                              'Kode udah disalin!',
                             );
                           },
                           icon: const Icon(
@@ -383,11 +369,9 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text('Download struk bentar lagi ya!'),
-                              backgroundColor: AppColors.secondary,
-                            ),
+                          SnackBarHelper.showInfo(
+                            context,
+                            'Download struk bentar lagi ya!',
                           );
                         },
                         icon: const Icon(Icons.download, size: 18),
@@ -406,11 +390,9 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Bagiin struk bentar lagi ya!'),
-                              backgroundColor: AppColors.secondary,
-                            ),
+                          SnackBarHelper.showInfo(
+                            context,
+                            'Bagiin struk bentar lagi ya!',
                           );
                         },
                         icon: const Icon(Icons.share, size: 18),

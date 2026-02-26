@@ -8,6 +8,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
+import '../../widgets/common/snackbar_helper.dart';
+
 class EventShareScreen extends StatefulWidget {
   final String eventId;
   final String eventName;
@@ -448,19 +450,9 @@ class _EventShareScreenState extends State<EventShareScreen> {
 
   void _copyLink() {
     Clipboard.setData(ClipboardData(text: _shareLink));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Row(
-          children: [
-            Icon(LucideIcons.checkCircle, color: AppColors.white),
-            SizedBox(width: 12),
-            Text('Link berhasil disalin!'),
-          ],
-        ),
-        backgroundColor: AppColors.secondary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
+    SnackBarHelper.showSuccess(
+      context,
+      'Link berhasil disalin!',
     );
   }
 
@@ -485,11 +477,10 @@ class _EventShareScreenState extends State<EventShareScreen> {
   }
 
   void _showShareSuccess(String platform) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Membuka $platform...'),
-        duration: const Duration(seconds: 2),
-      ),
+    SnackBarHelper.showInfo(
+      context,
+      'Membuka $platform...',
+      duration: const Duration(seconds: 2),
     );
   }
 

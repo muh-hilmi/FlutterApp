@@ -33,7 +33,8 @@ class SwipeableEventsScreen extends StatefulWidget {
 class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
     with TickerProviderStateMixin {
   // Local state to manage the stack of events
-  List<Event> _events = [];
+  List<Event> _sourceEvents = []; // Unfiltered source from bloc (for sync detection)
+  List<Event> _events = [];       // Filtered (ended events excluded)
   int _currentIndex = 0;
   bool _isFinished = false;
 
@@ -218,13 +219,18 @@ class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
               );
             }
           if (state is EventsLoaded) {
-            // Sync local events with bloc state
-            // Only update if the filtered events list has changed
-            if (_events.isEmpty ||
-                _events.length != state.filteredEvents.length ||
-                _events.first.id != state.filteredEvents.first.id) {
-              _events = List.from(state.filteredEvents);
-              // Reset indices when events are refreshed
+            // Sync local events with bloc state only when the source list changes.
+            // Compare against _sourceEvents (unfiltered) so our extra hasEnded
+            // filter doesn't make the length differ and trigger infinite resyncs.
+            final incoming = state.filteredEvents;
+            final sourceChanged = _sourceEvents.length != incoming.length ||
+                (_sourceEvents.isNotEmpty &&
+                    incoming.isNotEmpty &&
+                    _sourceEvents.first.id != incoming.first.id);
+
+            if (_events.isEmpty || sourceChanged) {
+              _sourceEvents = incoming;
+              _events = incoming.where((e) => !e.hasEnded).toList();
               _currentIndex = 0;
               _isFinished = false;
             }
@@ -861,22 +867,6 @@ class _EventCardFace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Debug logging for swipeable card time display
-    final localTime = event.startTime.toLocal();
-    AppLogger().info('[SwipeableCard] ===== CARD TIME DISPLAY =====');
-    AppLogger().info('[SwipeableCard] Event: ${event.title}');
-    AppLogger().info(
-      '[SwipeableCard] startTime raw: ${event.startTime} (isUtc: ${event.startTime.isUtc})',
-    );
-    AppLogger().info('[SwipeableCard] startTime.toLocal(): $localTime');
-    AppLogger().info(
-      '[SwipeableCard] Display time: ${DateFormat('MMM d, HH:mm').format(localTime)}',
-    );
-    AppLogger().info(
-      '[SwipeableCard] Expected: If 12:00 UTC, should show 19:00 in WIB (UTC+7)',
-    );
-    AppLogger().info('[SwipeableCard] ===== END CARD DIAGNOSTICS =====');
-
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,

@@ -1079,3 +1079,113 @@ func (h *EventHandler) GetEventInterestCount(c *gin.Context) {
 
 	response.Success(c, http.StatusOK, "Interest count retrieved successfully", data)
 }
+
+// ArchiveEvent godoc
+// @Summary Archive an event
+// @Description Archive an event (host only)
+// @Tags events
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Event ID" format(uuid)
+// @Success 200 {object} response.Response{data=event.Event}
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Failure 403 {object} response.Response
+// @Failure 404 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Router /events/{id}/archive [patch]
+func (h *EventHandler) ArchiveEvent(c *gin.Context) {
+	// Get user ID from context
+	userIDStr, exists := middleware.GetUserID(c)
+	if !exists {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid user ID", err.Error())
+		return
+	}
+
+	// Parse event ID from path
+	eventIDStr := c.Param("id")
+	eventID, err := uuid.Parse(eventIDStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid event ID", err.Error())
+		return
+	}
+
+	// Call usecase to archive event
+	updatedEvent, err := h.eventUsecase.ArchiveEvent(c.Request.Context(), eventID, userID)
+	if err != nil {
+		if err == eventUsecase.ErrEventNotFound {
+			response.NotFound(c, "Event not found")
+			return
+		}
+		if err == eventUsecase.ErrUnauthorized {
+			response.Forbidden(c, "Only the event host can archive this event")
+			return
+		}
+		response.InternalError(c, "Failed to archive event", err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, "Event archived successfully", updatedEvent)
+}
+
+// UnarchiveEvent godoc
+// @Summary Unarchive an event
+// @Description Unarchive an event (host only)
+// @Tags events
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Event ID" format(uuid)
+// @Success 200 {object} response.Response{data=event.Event}
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Failure 403 {object} response.Response
+// @Failure 404 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Router /events/{id}/unarchive [patch]
+func (h *EventHandler) UnarchiveEvent(c *gin.Context) {
+	// Get user ID from context
+	userIDStr, exists := middleware.GetUserID(c)
+	if !exists {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid user ID", err.Error())
+		return
+	}
+
+	// Parse event ID from path
+	eventIDStr := c.Param("id")
+	eventID, err := uuid.Parse(eventIDStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid event ID", err.Error())
+		return
+	}
+
+	// Call usecase to unarchive event
+	updatedEvent, err := h.eventUsecase.UnarchiveEvent(c.Request.Context(), eventID, userID)
+	if err != nil {
+		if err == eventUsecase.ErrEventNotFound {
+			response.NotFound(c, "Event not found")
+			return
+		}
+		if err == eventUsecase.ErrUnauthorized {
+			response.Forbidden(c, "Only the event host can unarchive this event")
+			return
+		}
+		response.InternalError(c, "Failed to unarchive event", err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, "Event unarchived successfully", updatedEvent)
+}

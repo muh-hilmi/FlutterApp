@@ -36,13 +36,13 @@ func (r *postRepository) Create(ctx context.Context, p *post.Post) error {
 		INSERT INTO posts (
 			id, author_id, content, type, attached_event_id, original_post_id,
 			visibility, created_at, updated_at, likes_count, comments_count,
-			reposts_count, shares_count
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 0, 0, 0, 0)
+			reposts_count, shares_count, is_archived
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 0, 0, 0, 0, $10)
 	`
 
 	_, err := r.db.ExecContext(ctx, query,
 		p.ID, p.AuthorID, p.Content, p.Type, p.AttachedEventID, p.OriginalPostID,
-		p.Visibility, p.CreatedAt, p.UpdatedAt,
+		p.Visibility, p.CreatedAt, p.UpdatedAt, p.IsArchived,
 	)
 
 	return err
@@ -53,7 +53,7 @@ func (r *postRepository) GetByID(ctx context.Context, postID uuid.UUID) (*post.P
 	query := `
 		SELECT id, author_id, content, type, attached_event_id, original_post_id,
 		       visibility, created_at, updated_at, likes_count, comments_count,
-		       reposts_count, shares_count
+		       reposts_count, shares_count, is_archived
 		FROM posts
 		WHERE id = $1
 	`
@@ -73,7 +73,7 @@ func (r *postRepository) GetWithDetails(ctx context.Context, postID, userID uuid
 		SELECT
 			p.id, p.author_id, p.content, p.type, p.attached_event_id,
 			p.original_post_id, p.visibility, p.created_at, p.updated_at,
-			p.likes_count, p.comments_count, p.reposts_count, p.shares_count,
+			p.likes_count, p.comments_count, p.reposts_count, p.shares_count, p.is_archived,
 			u.name as author_name, u.avatar_url as author_avatar_url, u.is_verified as author_is_verified,
 			EXISTS(SELECT 1 FROM likes WHERE user_id = $2 AND likeable_type = 'post' AND likeable_id = p.id) as is_liked_by_user,
 			EXISTS(SELECT 1 FROM bookmarks WHERE user_id = $2 AND post_id = p.id) as is_bookmarked_by_user,
@@ -123,7 +123,7 @@ func (r *postRepository) GetWithDetails(ctx context.Context, postID, userID uuid
 	err := r.db.QueryRowxContext(ctx, query, postID, userID).Scan(
 		&p.ID, &p.AuthorID, &p.Content, &p.Type, &p.AttachedEventID,
 		&p.OriginalPostID, &p.Visibility, &p.CreatedAt, &p.UpdatedAt,
-		&p.LikesCount, &p.CommentsCount, &p.RepostsCount, &p.SharesCount,
+		&p.LikesCount, &p.CommentsCount, &p.RepostsCount, &p.SharesCount, &p.IsArchived,
 		&p.AuthorName, &p.AuthorAvatarURL, &p.AuthorIsVerified,
 		&p.IsLikedByUser, &p.IsBookmarkedByUser, &p.IsRepostedByUser,
 		&imageURLs,
@@ -236,11 +236,11 @@ func (r *postRepository) Update(ctx context.Context, p *post.Post) error {
 
 	query := `
 		UPDATE posts
-		SET content = $1, visibility = $2, updated_at = $3
-		WHERE id = $4
+		SET content = $1, visibility = $2, updated_at = $3, is_archived = $4
+		WHERE id = $5
 	`
 
-	result, err := r.db.ExecContext(ctx, query, p.Content, p.Visibility, p.UpdatedAt, p.ID)
+	result, err := r.db.ExecContext(ctx, query, p.Content, p.Visibility, p.UpdatedAt, p.IsArchived, p.ID)
 	if err != nil {
 		return err
 	}
@@ -301,7 +301,7 @@ func (r *postRepository) GetFeed(ctx context.Context, userID uuid.UUID, limit, o
 			SELECT
 				p.id, p.author_id, p.content, p.type, p.attached_event_id,
 				p.original_post_id, p.visibility, p.created_at, p.updated_at,
-				p.likes_count, p.comments_count, p.reposts_count, p.shares_count,
+				p.likes_count, p.comments_count, p.reposts_count, p.shares_count, p.is_archived,
 				u.name as author_name, u.avatar_url as author_avatar_url, u.is_verified as author_is_verified,
 				EXISTS(SELECT 1 FROM likes WHERE user_id = $1 AND likeable_type = 'post' AND likeable_id = p.id) as is_liked_by_user,
 				EXISTS(SELECT 1 FROM bookmarks WHERE user_id = $1 AND post_id = p.id) as is_bookmarked_by_user,
@@ -373,7 +373,7 @@ func (r *postRepository) GetFeed(ctx context.Context, userID uuid.UUID, limit, o
 		err := rows.Scan(
 			&p.ID, &p.AuthorID, &p.Content, &p.Type, &p.AttachedEventID,
 			&p.OriginalPostID, &p.Visibility, &p.CreatedAt, &p.UpdatedAt,
-			&p.LikesCount, &p.CommentsCount, &p.RepostsCount, &p.SharesCount,
+			&p.LikesCount, &p.CommentsCount, &p.RepostsCount, &p.SharesCount, &p.IsArchived,
 			&p.AuthorName, &p.AuthorAvatarURL, &p.AuthorIsVerified,
 			&p.IsLikedByUser, &p.IsBookmarkedByUser, &p.IsRepostedByUser,
 			&imageURLs,
@@ -491,7 +491,7 @@ func (r *postRepository) GetUserPosts(ctx context.Context, authorID, viewerID uu
 		SELECT
 			p.id, p.author_id, p.content, p.type, p.attached_event_id,
 			p.original_post_id, p.visibility, p.created_at, p.updated_at,
-			p.likes_count, p.comments_count, p.reposts_count, p.shares_count,
+			p.likes_count, p.comments_count, p.reposts_count, p.shares_count, p.is_archived,
 			u.name as author_name, u.avatar_url as author_avatar_url, u.is_verified as author_is_verified,
 			EXISTS(SELECT 1 FROM likes WHERE user_id = $2 AND likeable_type = 'post' AND likeable_id = p.id) as is_liked_by_user,
 			EXISTS(SELECT 1 FROM bookmarks WHERE user_id = $2 AND post_id = p.id) as is_bookmarked_by_user,
@@ -508,6 +508,7 @@ func (r *postRepository) GetUserPosts(ctx context.Context, authorID, viewerID uu
 			e.max_attendees as event_max_attendees,
 			(SELECT COUNT(*) FROM event_attendees WHERE event_id = e.id AND status = 'confirmed') as event_attendees_count,
 			(SELECT COUNT(*) FROM event_interests WHERE event_id = e.id) as interests_count,
+			EXISTS(SELECT 1 FROM event_interests WHERE event_id = e.id AND user_id = $2) as event_is_interested,
 			e.price as event_price, e.is_free as event_is_free,
 			e.status as event_status, e.privacy as event_privacy,
 			COALESCE(
@@ -553,7 +554,7 @@ func (r *postRepository) GetUserPosts(ctx context.Context, authorID, viewerID uu
 		err := rows.Scan(
 			&p.ID, &p.AuthorID, &p.Content, &p.Type, &p.AttachedEventID,
 			&p.OriginalPostID, &p.Visibility, &p.CreatedAt, &p.UpdatedAt,
-			&p.LikesCount, &p.CommentsCount, &p.RepostsCount, &p.SharesCount,
+			&p.LikesCount, &p.CommentsCount, &p.RepostsCount, &p.SharesCount, &p.IsArchived,
 			&p.AuthorName, &p.AuthorAvatarURL, &p.AuthorIsVerified,
 			&p.IsLikedByUser, &p.IsBookmarkedByUser, &p.IsRepostedByUser,
 			&imageURLs,

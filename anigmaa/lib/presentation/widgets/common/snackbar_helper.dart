@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 /// Centralized SnackBar helper for consistent error/success/warning notifications
 ///
-/// All snackbars shown through this helper will:
-/// - Auto-dismiss after 5 seconds
-/// - Use consistent styling from AppColors
-/// - Support optional action buttons
-/// - Use floating behavior for modern look
+/// Design: Clean white background + colored icon + accent border
+/// Warm, minimal style inspired by profile page
 class SnackBarHelper {
   SnackBarHelper._();
 
-  static const Duration _defaultDuration = Duration(seconds: 5);
+  static const Duration _defaultDuration = Duration(seconds: 4);
 
-  /// Show error notification (auto-dismisses after 5 seconds)
+  /// Show error notification
   static void showError(
     BuildContext context,
     String message, {
@@ -21,29 +19,18 @@ class SnackBarHelper {
     String? actionLabel,
     VoidCallback? onActionPressed,
   }) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.error,
-        duration: duration ?? _defaultDuration,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        action: actionLabel != null
-            ? SnackBarAction(
-                label: actionLabel,
-                textColor: AppColors.white,
-                onPressed: onActionPressed ?? () {},
-              )
-            : null,
-      ),
+    _showSnackBar(
+      context,
+      message: message,
+      iconColor: AppColors.error,
+      icon: Icons.error_rounded,
+      duration: duration,
+      actionLabel: actionLabel,
+      onActionPressed: onActionPressed,
     );
   }
 
-  /// Show success notification (auto-dismisses after 5 seconds)
+  /// Show success notification
   static void showSuccess(
     BuildContext context,
     String message, {
@@ -51,29 +38,18 @@ class SnackBarHelper {
     String? actionLabel,
     VoidCallback? onActionPressed,
   }) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.success,
-        duration: duration ?? _defaultDuration,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        action: actionLabel != null
-            ? SnackBarAction(
-                label: actionLabel,
-                textColor: AppColors.white,
-                onPressed: onActionPressed ?? () {},
-              )
-            : null,
-      ),
+    _showSnackBar(
+      context,
+      message: message,
+      iconColor: AppColors.success,
+      icon: Icons.check_circle_rounded,
+      duration: duration,
+      actionLabel: actionLabel,
+      onActionPressed: onActionPressed,
     );
   }
 
-  /// Show warning notification (auto-dismisses after 5 seconds)
+  /// Show warning notification
   static void showWarning(
     BuildContext context,
     String message, {
@@ -81,29 +57,18 @@ class SnackBarHelper {
     String? actionLabel,
     VoidCallback? onActionPressed,
   }) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: const TextStyle(color: Color(0xFF111111))),
-        backgroundColor: AppColors.warning,
-        duration: duration ?? _defaultDuration,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        action: actionLabel != null
-            ? SnackBarAction(
-                label: actionLabel,
-                textColor: const Color(0xFF111111),
-                onPressed: onActionPressed ?? () {},
-              )
-            : null,
-      ),
+    _showSnackBar(
+      context,
+      message: message,
+      iconColor: AppColors.orange,
+      icon: Icons.warning_rounded,
+      duration: duration,
+      actionLabel: actionLabel,
+      onActionPressed: onActionPressed,
     );
   }
 
-  /// Show info notification (auto-dismisses after 5 seconds)
+  /// Show info notification
   static void showInfo(
     BuildContext context,
     String message, {
@@ -111,21 +76,74 @@ class SnackBarHelper {
     String? actionLabel,
     VoidCallback? onActionPressed,
   }) {
+    _showSnackBar(
+      context,
+      message: message,
+      iconColor: AppColors.info,
+      icon: Icons.info_rounded,
+      duration: duration,
+      actionLabel: actionLabel,
+      onActionPressed: onActionPressed,
+    );
+  }
+
+  static void _showSnackBar(
+    BuildContext context, {
+    required String message,
+    required Color iconColor,
+    required IconData icon,
+    Duration? duration,
+    String? actionLabel,
+    VoidCallback? onActionPressed,
+  }) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.info,
+        content: Row(
+          children: [
+            // Icon with soft background
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: iconColor,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Message text
+            Expanded(
+              child: Text(
+                message,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.white,
         duration: duration ?? _defaultDuration,
         behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: iconColor.withValues(alpha: 0.3),
+            width: 1,
+          ),
         ),
         action: actionLabel != null
             ? SnackBarAction(
                 label: actionLabel,
-                textColor: AppColors.white,
+                textColor: AppColors.secondary,
                 onPressed: onActionPressed ?? () {},
               )
             : null,
@@ -133,11 +151,11 @@ class SnackBarHelper {
     );
   }
 
-  /// Show custom notification (auto-dismisses after 5 seconds)
+  /// Show custom notification
   static void showCustom(
     BuildContext context, {
     required Widget content,
-    required Color backgroundColor,
+    required Color borderColor,
     Duration? duration,
     SnackBarAction? action,
   }) {
@@ -145,12 +163,17 @@ class SnackBarHelper {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: content,
-        backgroundColor: backgroundColor,
+        backgroundColor: AppColors.white,
         duration: duration ?? _defaultDuration,
         behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: borderColor.withValues(alpha: 0.3),
+            width: 1,
+          ),
         ),
         action: action,
       ),

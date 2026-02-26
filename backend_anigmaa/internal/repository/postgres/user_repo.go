@@ -415,6 +415,19 @@ func (r *userRepository) IncrementEventsCreated(ctx context.Context, userID uuid
 	return err
 }
 
+// RecalculateEventsCreated recalculates events created from actual events table
+func (r *userRepository) RecalculateEventsCreated(ctx context.Context, userID uuid.UUID) error {
+	query := `
+		INSERT INTO user_stats (user_id, events_attended, events_created, followers_count, following_count, reviews_given, average_rating)
+		VALUES ($1, 0, (SELECT COUNT(*) FROM events WHERE host_id = $1 AND deleted_at IS NULL), 0, 0, 0, 0)
+		ON CONFLICT (user_id) DO UPDATE SET
+			events_created = (SELECT COUNT(*) FROM events WHERE host_id = $1 AND deleted_at IS NULL)
+	`
+
+	_, err := r.db.ExecContext(ctx, query, userID)
+	return err
+}
+
 // UpdateAverageRating updates average rating
 func (r *userRepository) UpdateAverageRating(ctx context.Context, userID uuid.UUID, rating float64) error {
 	query := `

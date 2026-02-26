@@ -61,6 +61,7 @@ type Event struct {
 	PriceMin         int64         `json:"price_min,omitempty" db:"price_min"` // For filtering
 	IsFree           bool          `json:"is_free" db:"is_free"`
 	Status           EventStatus   `json:"status" db:"status"`
+	IsArchived       bool          `json:"is_archived" db:"is_archived"`
 	Privacy          EventPrivacy  `json:"privacy" db:"privacy"`
 	Requirements     *string       `json:"requirements,omitempty" db:"requirements"`
 	TicketingEnabled bool          `json:"ticketing_enabled" db:"ticketing_enabled"`
@@ -72,16 +73,17 @@ type Event struct {
 // EventWithDetails includes additional event information
 type EventWithDetails struct {
 	Event
-	HostName            string    `json:"host_name" db:"host_name"`
-	HostAvatarURL       *string   `json:"host_avatar_url" db:"host_avatar_url"`
-	ImageURLs           []string  `json:"image_urls" db:"-"`
-	AttendeesCount      int       `json:"attendees_count" db:"attendees_count"`
-	InterestsCount      int       `json:"interests_count" db:"interests_count"`
-	InterestedUserIDs   []uuid.UUID `json:"interested_user_ids" db:"-"` // List of user IDs interested in this event
-	IsUserAttending     bool      `json:"is_user_attending" db:"is_user_attending"`
-	IsUserInterested    bool      `json:"is_user_interested" db:"is_user_interested"`
-	IsUserHost          bool      `json:"is_user_host" db:"is_user_host"`
-	Distance            *float64  `json:"distance,omitempty" db:"distance"` // Distance in km from user
+	HostName            string       `json:"host_name" db:"host_name"`
+	HostAvatarURL       *string      `json:"host_avatar_url" db:"host_avatar_url"`
+	ImageURLs           []string     `json:"image_urls" db:"-"`
+	AttendeesCount      int          `json:"attendees_count" db:"attendees_count"`
+	InterestsCount      int          `json:"interests_count" db:"interests_count"`
+	InterestedUserIDs   []uuid.UUID  `json:"interested_user_ids" db:"-"` // List of user IDs interested in this event
+	IsUserAttending     bool         `json:"is_user_attending" db:"is_user_attending"`
+	IsUserInterested    bool         `json:"is_user_interested" db:"is_user_interested"`
+	IsUserHost          bool         `json:"is_user_host" db:"is_user_host"`
+	IsArchived          bool         `json:"is_archived" db:"is_archived"`
+	Distance            *float64     `json:"distance,omitempty" db:"distance"` // Distance in km from user
 }
 
 // EventAttendee represents an event attendee

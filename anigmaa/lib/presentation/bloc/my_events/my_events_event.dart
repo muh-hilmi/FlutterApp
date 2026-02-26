@@ -56,3 +56,23 @@ class NavigateToCheckIn extends MyEventsEvent {
   @override
   List<Object?> get props => [eventId];
 }
+
+/// Event to archive an event
+class ArchiveMyEvent extends MyEventsEvent {
+  final String eventId;
+
+  const ArchiveMyEvent(this.eventId);
+
+  @override
+  List<Object?> get props => [eventId];
+}
+
+/// Event to unarchive an event
+class UnarchiveMyEvent extends MyEventsEvent {
+  final String eventId;
+
+  const UnarchiveMyEvent(this.eventId);
+
+  @override
+  List<Object?> get props => [eventId];
+}

@@ -57,6 +57,9 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
     on<DeleteCommentRequested>(_onDeleteComment);
     on<SavePostToggled>(_onSavePostToggled);
     on<LoadSavedPosts>(_onLoadSavedPosts);
+    on<ArchivePostRequested>(_onArchivePost);
+    on<UnarchivePostRequested>(_onUnarchivePost);
+    on<LoadArchivedPosts>(_onLoadArchivedPosts);
   }
 
   // Helper method to get current PostsLoaded state safely
@@ -680,6 +683,74 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
       );
     } catch (e) {
       emit(PostsError('Exception loading saved posts: $e'));
+    }
+  }
+
+  Future<void> _onArchivePost(
+    ArchivePostRequested event,
+    Emitter<PostsState> emit,
+  ) async {
+    final currentState = _getCurrentState();
+    if (currentState == null) return;
+
+    // Optimistically update the post's archived status
+    final updatedPosts = currentState.posts.map((post) {
+      if (post.id == event.postId) {
+        return post.copyWith(isArchived: true);
+      }
+      return post;
+    }).toList();
+
+    // Filter out archived posts from the current list
+    final visiblePosts = updatedPosts.where((post) => !post.isArchived).toList();
+
+    emit(currentState.copyWith(posts: visiblePosts));
+  }
+
+  Future<void> _onUnarchivePost(
+    UnarchivePostRequested event,
+    Emitter<PostsState> emit,
+  ) async {
+    final currentState = _getCurrentState();
+    if (currentState == null) return;
+
+    // For archived posts view, optimistically update and remove from list
+    final updatedPosts = currentState.posts.map((post) {
+      if (post.id == event.postId) {
+        return post.copyWith(isArchived: false);
+      }
+      return post;
+    }).toList();
+
+    // Filter to show only archived posts (remove the unarchived one)
+    final visiblePosts = updatedPosts.where((post) => post.isArchived).toList();
+
+    emit(currentState.copyWith(posts: visiblePosts));
+  }
+
+  Future<void> _onLoadArchivedPosts(
+    LoadArchivedPosts event,
+    Emitter<PostsState> emit,
+  ) async {
+    emit(PostsLoading());
+
+    try {
+      final result = await getPosts(
+        const GetPostsParams(limit: postsPerPage, offset: 0),
+      );
+
+      result.fold(
+        (failure) {
+          emit(PostsError('Failed to load archived posts: ${failure.toString()}'));
+        },
+        (paginatedResponse) {
+          // Filter to show only archived posts
+          final archivedPosts = paginatedResponse.data.where((post) => post.isArchived).toList();
+          emit(PostsLoaded(posts: archivedPosts, paginationMeta: paginatedResponse.meta));
+        },
+      );
+    } catch (e) {
+      emit(PostsError('Exception loading archived posts: $e'));
     }
   }
 }

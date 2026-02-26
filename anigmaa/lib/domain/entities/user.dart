@@ -130,6 +130,7 @@ class UserSettings {
 class UserStats {
   final int eventsAttended;
   final int eventsCreated;
+  final int totalUniqueEvents; // Unique events (host + attended, no duplicates)
   final int followersCount;
   final int followingCount;
   final int reviewsGiven;
@@ -138,6 +139,7 @@ class UserStats {
   const UserStats({
     this.eventsAttended = 0,
     this.eventsCreated = 0,
+    this.totalUniqueEvents = 0,
     this.followersCount = 0,
     this.followingCount = 0,
     this.reviewsGiven = 0,
@@ -147,6 +149,7 @@ class UserStats {
   UserStats copyWith({
     int? eventsAttended,
     int? eventsCreated,
+    int? totalUniqueEvents,
     int? followersCount,
     int? followingCount,
     int? reviewsGiven,
@@ -155,6 +158,7 @@ class UserStats {
     return UserStats(
       eventsAttended: eventsAttended ?? this.eventsAttended,
       eventsCreated: eventsCreated ?? this.eventsCreated,
+      totalUniqueEvents: totalUniqueEvents ?? this.totalUniqueEvents,
       followersCount: followersCount ?? this.followersCount,
       followingCount: followingCount ?? this.followingCount,
       reviewsGiven: reviewsGiven ?? this.reviewsGiven,

@@ -26,6 +26,7 @@ class Event {
   final double? price;
   final bool isFree;
   final EventStatus status;
+  final bool isArchived;
   final String? requirements;
 
   // Community fields
@@ -62,6 +63,7 @@ class Event {
     this.price,
     this.isFree = true,
     this.status = EventStatus.upcoming,
+    this.isArchived = false,
     this.requirements,
     this.communityId,
     this.isCommunityEvent = false,
@@ -79,7 +81,11 @@ class Event {
   int get spotsLeft => maxAttendees - currentAttendees;
   bool get isFull => currentAttendees >= maxAttendees;
   // IMPORTANT: Use UTC for time comparisons since backend sends UTC times
-  bool get isStartingSoon => startTime.difference(DateTime.now().toUtc()).inHours < 2;
+  // Starting soon = event starts within the next 2 hours (must be in the future)
+  bool get isStartingSoon {
+    final minutesToStart = startTime.difference(DateTime.now().toUtc()).inMinutes;
+    return minutesToStart >= 0 && minutesToStart < 120;
+  }
 
   /// Check if event is still active (not ended)
   bool get isActive => !hasEnded && status != EventStatus.cancelled;
@@ -166,6 +172,7 @@ class Event {
     double? price,
     bool? isFree,
     EventStatus? status,
+    bool? isArchived,
     String? requirements,
     String? communityId,
     bool? isCommunityEvent,
@@ -191,6 +198,7 @@ class Event {
       price: price ?? this.price,
       isFree: isFree ?? this.isFree,
       status: status ?? this.status,
+      isArchived: isArchived ?? this.isArchived,
       requirements: requirements ?? this.requirements,
       communityId: communityId ?? this.communityId,
       isCommunityEvent: isCommunityEvent ?? this.isCommunityEvent,

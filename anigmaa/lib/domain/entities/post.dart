@@ -74,6 +74,9 @@ class Post extends Equatable {
   // Visibility
   final PostVisibility visibility;
 
+  // Archive status
+  final bool isArchived;
+
   const Post({
     required this.id,
     required this.author,
@@ -97,6 +100,7 @@ class Post extends Equatable {
     this.hashtags = const [],
     this.mentions = const [],
     this.visibility = PostVisibility.public,
+    this.isArchived = false,
   });
 
   Post copyWith({
@@ -122,6 +126,7 @@ class Post extends Equatable {
     List<String>? hashtags,
     List<String>? mentions,
     PostVisibility? visibility,
+    bool? isArchived,
   }) {
     return Post(
       id: id ?? this.id,
@@ -146,6 +151,7 @@ class Post extends Equatable {
       hashtags: hashtags ?? this.hashtags,
       mentions: mentions ?? this.mentions,
       visibility: visibility ?? this.visibility,
+      isArchived: isArchived ?? this.isArchived,
     );
   }
 
@@ -216,6 +222,7 @@ class Post extends Equatable {
         hashtags,
         mentions,
         visibility,
+        isArchived,
       ];
 }
 

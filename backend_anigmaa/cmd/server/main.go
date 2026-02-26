@@ -243,14 +243,13 @@ func main() {
 			users.POST("/:id/follow", userHandler.FollowUser)
 			users.DELETE("/:id/follow", userHandler.UnfollowUser)
 			users.GET("/:id/stats", userHandler.GetUserStats)
+			users.POST("/:id/recalculate-stats", userHandler.RecalculateStats)
 			users.GET("/:id/posts", postHandler.GetUserPosts) // Get posts by user ID
 		}
 
-		// Event routes
+		// Event routes - public (no auth required)
 		events := v1.Group("/events")
 		{
-			events.GET("", eventHandler.GetEvents)
-			events.GET("/nearby", eventHandler.GetNearbyEvents)
 			events.GET("/:id", eventHandler.GetEventByID)
 			events.GET("/:id/attendees", eventHandler.GetEventAttendees)
 			events.GET("/:id/interest/count", eventHandler.GetEventInterestCount)
@@ -259,6 +258,9 @@ func main() {
 		eventsProtected := v1.Group("/events")
 		eventsProtected.Use(authMiddleware)
 		{
+			// Discovery endpoints moved here so userID is available for is_user_interested
+			eventsProtected.GET("", eventHandler.GetEvents)
+			eventsProtected.GET("/nearby", eventHandler.GetNearbyEvents)
 			eventsProtected.POST("", eventHandler.CreateEvent)
 			eventsProtected.PUT("/:id", eventHandler.UpdateEvent)
 			eventsProtected.DELETE("/:id", eventHandler.DeleteEvent)
@@ -275,6 +277,10 @@ func main() {
 			// Interest/Like endpoints
 			eventsProtected.POST("/:id/interest", eventHandler.ToggleEventInterest)
 			eventsProtected.GET("/:id/interest/status", eventHandler.GetEventInterestStatus)
+
+			// Archive/Unarchive endpoints
+			eventsProtected.PATCH("/:id/archive", eventHandler.ArchiveEvent)
+			eventsProtected.PATCH("/:id/unarchive", eventHandler.UnarchiveEvent)
 
 			// Event Q&A endpoints
 			eventsProtected.GET("/:id/qna", qnaHandler.GetEventQnA)
@@ -325,6 +331,8 @@ func main() {
 			posts.POST("/:id/unlike", postHandler.UnlikePost)
 			posts.POST("/:id/bookmark", postHandler.BookmarkPost)
 			posts.DELETE("/:id/bookmark", postHandler.RemoveBookmark)
+			posts.PATCH("/:id/archive", postHandler.ArchivePost)
+			posts.PATCH("/:id/unarchive", postHandler.UnarchivePost)
 
 			// Comment like/unlike
 			posts.POST("/:id/comments/:commentId/like", postHandler.LikeComment)

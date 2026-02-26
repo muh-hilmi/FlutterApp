@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd \\\"C:\\\\Users\\\\mailh\\\\OneDrive\\\\Desktop\\\\FlutterApp\\\\backend_anigmaa\\\" && docker compose down -v 2>&1\",\"description\":\"Stop containers AND remove volumes (clean DB state)\"}",
+  "error": "Exit code 127\n/usr/bin/bash: line 1: docker: command not found\n\n/usr/bin/bash: line 1: docker: command not found",
+  "timestamp": "2026-02-26T06:38:03.489Z",
+  "retry_count": 1
+}

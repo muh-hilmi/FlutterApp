@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"wsl -d Debian -- bash -c \\\"cd ~/OneDrive/Desktop/FlutterApp/backend_anigmaa && docker compose down\\\"\",\"timeout\":60000,\"description\":\"Stop backend containers via WSL\"}",
-  "error": "EINVAL: invalid argument, open 'C:\\Users\\mailh\\AppData\\Local\\Temp\\claude\\C--Users-mailh-OneDrive-Desktop-FlutterApp\\tasks\\b3qupiqc6.output'",
-  "timestamp": "2026-02-25T03:51:59.803Z",
-  "retry_count": 3
+  "tool_input_preview": "{\"command\":\"wsl.exe docker compose down -v 2>&1\",\"timeout\":120000,\"description\":\"Stop containers via default WSL\"}",
+  "error": "Exit code 1\nno configuration file provided: not found\n\nno configuration file provided: not found",
+  "timestamp": "2026-02-26T05:41:03.604Z",
+  "retry_count": 4
 }

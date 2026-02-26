@@ -162,6 +162,7 @@ class UserStatsModel extends UserStats {
   const UserStatsModel({
     super.eventsAttended = 0,
     super.eventsCreated = 0,
+    super.totalUniqueEvents = 0,
     super.followersCount = 0,
     super.followingCount = 0,
     super.reviewsGiven = 0,
@@ -182,6 +183,10 @@ class UserStatsModel extends UserStats {
         json['events_created'] ??
         json['eventsCreated'] ??
         json['created_count'];
+    final totalUniqueEvents =
+        json['total_unique_events'] ??
+        json['totalUniqueEvents'] ??
+        json['unique_events_count'];
     final reviewsGiven =
         json['reviews_given'] ?? json['reviewsCount'] ?? json['reviews'];
     final averageRating =
@@ -194,6 +199,9 @@ class UserStatsModel extends UserStats {
       eventsCreated: eventsCreated is int
           ? eventsCreated
           : (int.tryParse(eventsCreated?.toString() ?? '0') ?? 0),
+      totalUniqueEvents: totalUniqueEvents is int
+          ? totalUniqueEvents
+          : (int.tryParse(totalUniqueEvents?.toString() ?? '0') ?? 0),
       followersCount: followersCount is int
           ? followersCount
           : (int.tryParse(followersCount?.toString() ?? '0') ?? 0),
@@ -213,6 +221,7 @@ class UserStatsModel extends UserStats {
     return {
       'eventsAttended': eventsAttended,
       'eventsCreated': eventsCreated,
+      'totalUniqueEvents': totalUniqueEvents,
       'followersCount': followersCount,
       'followingCount': followingCount,
       'reviewsGiven': reviewsGiven,

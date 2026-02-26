@@ -82,26 +82,26 @@ class DiscoverScreenState extends State<DiscoverScreen>
     context.read<PostsBloc>().add(LoadPosts());
   }
 
-  Future<void> _determinePosition() async {
+  Future<LatLng?> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return;
+    if (!serviceEnabled) return null;
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) return;
+      if (permission == LocationPermission.denied) return null;
     }
 
-    if (permission == LocationPermission.deniedForever) return;
+    if (permission == LocationPermission.deniedForever) return null;
 
     try {
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          timeLimit: Duration(seconds: 10),
+          accuracy: LocationAccuracy.medium,
+          timeLimit: Duration(seconds: 5),
         ),
       );
 
@@ -118,31 +118,33 @@ class DiscoverScreenState extends State<DiscoverScreen>
           _centerMapOnLocation(newPosition);
         }
 
-        try {
-          List<Placemark> placemarks = await placemarkFromCoordinates(
-            position.latitude,
-            position.longitude,
-          );
+        // Do geocoding in background AFTER map is centered (non-blocking)
+        _updateLocationName(position.latitude, position.longitude);
 
-          if (placemarks.isNotEmpty) {
-            final place = placemarks.first;
-            final name = [
-              place.subLocality,
-              place.locality,
-            ].where((e) => e != null && e.isNotEmpty).join(', ');
-
-            if (mounted) {
-              setState(() {
-                _locationName = name.isEmpty ? place.name : name;
-              });
-            }
-          }
-        } catch (e) {
-          debugPrint('Geocoding error: $e');
-        }
+        return newPosition;
       }
     } catch (e) {
       debugPrint('Error getting location: $e');
+    }
+    return null;
+  }
+
+  /// Update location name in background (non-blocking)
+  void _updateLocationName(double lat, double lng) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
+      if (placemarks.isNotEmpty && mounted) {
+        final place = placemarks.first;
+        final name = [
+          place.subLocality,
+          place.locality,
+        ].where((e) => e != null && e.isNotEmpty).join(', ');
+        setState(() {
+          _locationName = name.isEmpty ? place.name : name;
+        });
+      }
+    } catch (e) {
+      debugPrint('Geocoding error: $e');
     }
   }
 
@@ -169,6 +171,22 @@ class DiscoverScreenState extends State<DiscoverScreen>
     }
   }
 
+  /// Re-fetch current GPS location and center map
+  Future<void> _refreshLocationAndCenter() async {
+    // Show quick feedback - move to last known position first
+    final lastPosition = await Geolocator.getLastKnownPosition();
+    if (lastPosition != null && _mapController.isCompleted) {
+      final quickPos = LatLng(lastPosition.latitude, lastPosition.longitude);
+      await _centerMapOnLocation(quickPos);
+    }
+
+    // Then get fresh position
+    final position = await _determinePosition();
+    if (position != null && _mapController.isCompleted) {
+      await _centerMapOnLocation(position);
+    }
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -192,10 +210,12 @@ class DiscoverScreenState extends State<DiscoverScreen>
     final searchQuery = _searchController.text.toLowerCase();
     var filtered = List<Event>.from(_allEvents);
 
-    // Filter by status
+    // Filter out ended events using actual time check (not just status field,
+    // since backend may not update status to 'ended' immediately)
     filtered = filtered.where((event) {
-      return event.status == EventStatus.upcoming ||
-          event.status == EventStatus.ongoing;
+      return !event.hasEnded &&
+          (event.status == EventStatus.upcoming ||
+              event.status == EventStatus.ongoing);
     }).toList();
 
     // Filter by category
@@ -390,10 +410,10 @@ class DiscoverScreenState extends State<DiscoverScreen>
           child: _buildMapTopBar(),
         ),
 
-        // Location FAB — right side, above bottom of screen
+        // GPS FAB — right side, above create FAB
         Positioned(
           right: 16,
-          bottom: 120,
+          bottom: 100,
           child: _buildLocationFab(),
         ),
       ],
@@ -457,7 +477,7 @@ class DiscoverScreenState extends State<DiscoverScreen>
           color: AppColors.secondary,
           size: 22,
         ),
-        onPressed: () => _centerMapOnLocation(_currentPosition),
+        onPressed: _refreshLocationAndCenter,
         padding: EdgeInsets.zero,
       ),
     );

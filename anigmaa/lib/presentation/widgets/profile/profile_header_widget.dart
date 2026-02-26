@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../../domain/entities/user.dart';
 
 class ProfileHeaderWidget extends StatelessWidget {
@@ -136,9 +137,9 @@ class ProfileInfoWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Section: Avatar (Left), Name + Location (Right)
+            // Top Section: Avatar (Left), Name + Interests + Location (Right)
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ProfileAvatar(
                   avatarUrl: user.avatar,
@@ -163,30 +164,39 @@ class ProfileInfoWidget extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      const SizedBox(height: 6),
 
-                      if (user.location != null &&
-                          user.location!.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        // Location
-                        Row(
-                          children: [
+                      // Interests (emoji only) + Location (side by side)
+                      Row(
+                        children: [
+                          // Interests emojis
+                          if (user.interests.isNotEmpty) ...[
+                            _buildInterestsEmojiRow(),
+                            const SizedBox(width: 8),
+                          ],
+                          // Location
+                          if (user.location != null &&
+                              user.location!.isNotEmpty) ...[
                             Icon(
                               Icons.location_on,
-                              size: 13,
+                              size: 16,
                               color: AppColors.textTertiary,
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 3),
                             Expanded(
                               child: Text(
-                                user.location!,
-                                style: AppTextStyles.caption,
+                                _formatLocation(user.location!),
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.textTertiary,
+                                  fontSize: 15,
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
-                        ),
-                      ],
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -221,8 +231,8 @@ class ProfileInfoWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _buildMiniStat(
-                  '${_formatNumber(user.stats.eventsAttended)} Ikut Event',
-                  onEventsTap,
+                  '${_formatNumber(_getTotalEventCount(user))} Event',
+                  null,
                 ),
                 const SizedBox(width: 8),
                 _buildMiniStat(
@@ -252,6 +262,75 @@ class ProfileInfoWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildInterestsEmojiRow() {
+    return Row(
+      children: user.interests.take(5).map((interest) {
+        return Padding(
+          padding: const EdgeInsets.only(right: 6),
+          child: Text(
+            _getInterestEmoji(interest),
+            style: const TextStyle(fontSize: 14),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  String _formatLocation(String location) {
+    // Handle both old format (comma-separated) and new format (subAdministrativeArea only)
+    final parts = location.split(',').map((e) => e.trim()).toList();
+
+    // New format: directly "Kabupaten Boyolali" or "Kota Jakarta"
+    if (parts.length == 1) {
+      return location;
+    }
+
+    // Old format: "Kecamatan Ngemplak, Jawa Tengah"
+    // Try to find Kabupaten/Kota in the parts
+    for (final part in parts) {
+      final lowerPart = part.toLowerCase();
+      if (lowerPart.contains('kabupaten') || lowerPart.contains('kota')) {
+        return part;
+      }
+    }
+
+    // If no Kabupaten/Kota found, return the first part (skip "Kecamatan" prefix if exists)
+    String firstPart = parts.first;
+    if (firstPart.toLowerCase().startsWith('kecamatan')) {
+      // Remove "Kecamatan" prefix
+      return firstPart.substring(9).trim();
+    }
+
+    return parts.first;
+  }
+
+  String _getInterestEmoji(String interest) {
+    switch (interest.toLowerCase()) {
+      case 'meetup':
+        return '👥';
+      case 'sports':
+        return '⚽';
+      case 'workshop':
+        return '🛠️';
+      case 'networking':
+        return '🤝';
+      case 'food':
+        return '🍕';
+      case 'creative':
+        return '🎨';
+      case 'outdoor':
+        return '🌳';
+      case 'fitness':
+        return '💪';
+      case 'learning':
+        return '📚';
+      case 'social':
+        return '🎉';
+      default:
+        return '✨';
+    }
   }
 
   Widget _buildEventsHostedSection() {
@@ -360,6 +439,17 @@ class ProfileInfoWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  int _getTotalEventCount(User user) {
+    // Fallback: if totalUniqueEvents is 0, calculate from created + attended
+    // Backend will provide accurate unique count later
+    if (user.stats.totalUniqueEvents > 0) {
+      return user.stats.totalUniqueEvents;
+    }
+    // Debug log
+    AppLogger().info('[Profile] Events: created=${user.stats.eventsCreated}, attended=${user.stats.eventsAttended}, total=${user.stats.eventsCreated + user.stats.eventsAttended}');
+    return user.stats.eventsCreated + user.stats.eventsAttended;
   }
 
   String _formatNumber(int number) {

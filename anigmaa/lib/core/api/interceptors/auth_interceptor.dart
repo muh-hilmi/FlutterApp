@@ -55,10 +55,22 @@ class AuthInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     try {
-      final token = await _secureStorage.read(key: AuthService.keyAccessToken);
+      // Don't attach Bearer token to endpoints that use their own auth mechanism:
+      // - /auth/google uses Google idToken in body
+      // - /auth/register uses registration data
+      // - /auth/refresh uses refresh_token in body
+      // Attaching a stale Bearer token to these endpoints can cause the backend
+      // to reject the request with 401 before even processing the actual credentials.
+      final path = options.path.toLowerCase();
+      final isPublicAuthEndpoint = path.startsWith('/auth/google') ||
+          path.startsWith('/auth/register') ||
+          path.startsWith('/auth/refresh');
 
-      if (token != null && token.isNotEmpty) {
-        options.headers['Authorization'] = 'Bearer $token';
+      if (!isPublicAuthEndpoint) {
+        final token = await _secureStorage.read(key: AuthService.keyAccessToken);
+        if (token != null && token.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
       }
     } catch (e) {
       _logger.error('Failed to read auth token', e);
@@ -69,6 +81,16 @@ class AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
+    // Auth/login endpoints manage their own credentials — don't intercept their errors.
+    // Triggering a token-refresh cycle on /auth/google or /auth/refresh makes no sense
+    // and causes a logout loop when the backend rejects a login attempt.
+    final requestPath = err.requestOptions.path.toLowerCase();
+    if (requestPath.startsWith('/auth/')) {
+      _logger.debug('[Auth] Skipping token refresh for auth endpoint: $requestPath');
+      handler.next(err);
+      return;
+    }
+
     // Classify the error first - this is critical for proper handling
     final networkError = ErrorClassifier.classify(err);
 

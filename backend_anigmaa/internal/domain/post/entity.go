@@ -35,6 +35,7 @@ type Post struct {
 	AttachedEventID uuid.UUID      `json:"attached_event_id" db:"attached_event_id"`
 	OriginalPostID  *uuid.UUID     `json:"original_post_id,omitempty" db:"original_post_id"`
 	Visibility      PostVisibility `json:"visibility" db:"visibility"`
+	IsArchived      bool           `json:"is_archived" db:"is_archived"`
 	CreatedAt       time.Time      `json:"created_at" db:"created_at"`
 	UpdatedAt       time.Time      `json:"updated_at" db:"updated_at"`
 	LikesCount      int            `json:"likes_count" db:"likes_count"`
@@ -150,6 +151,7 @@ type PostResponse struct {
 	OriginalPost       *Post          `json:"original_post,omitempty"`
 	OriginalPostAuthor *AuthorSummary `json:"original_post_author,omitempty"`
 	Visibility         PostVisibility `json:"visibility"`
+	IsArchived         bool           `json:"is_archived"`
 	CreatedAt          time.Time      `json:"created_at"`
 	UpdatedAt          time.Time      `json:"updated_at"`
 	LikesCount         int            `json:"likes_count"`
@@ -180,6 +182,7 @@ func (p *PostWithDetails) ToResponse() PostResponse {
 		OriginalPost:       p.OriginalPost,
 		OriginalPostAuthor: p.OriginalPostAuthor,
 		Visibility:         p.Visibility,
+		IsArchived:         p.IsArchived,
 		CreatedAt:          p.CreatedAt,
 		UpdatedAt:          p.UpdatedAt,
 		LikesCount:         p.LikesCount,

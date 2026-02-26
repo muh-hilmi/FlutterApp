@@ -12,6 +12,8 @@ import '../../pages/discover/swipeable_events_screen.dart';
 import '../../widgets/notifications/event_notification_scheduler.dart'
     show EventNotificationScheduler, TicketStatus;
 
+import '../../widgets/common/snackbar_helper.dart';
+
 class PostPaymentTicketScreen extends StatefulWidget {
   final Event event;
   final String? ticketId;
@@ -618,59 +620,31 @@ class _PostPaymentTicketScreenState extends State<PostPaymentTicketScreen> {
 
   void _copyTicketId(String ticketId) {
     Clipboard.setData(ClipboardData(text: ticketId));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Kode tiket disalin!',
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
-        ),
-        backgroundColor: AppColors.textEmphasis,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        duration: const Duration(seconds: 2),
-      ),
+    SnackBarHelper.showInfo(
+      context,
+      'Kode tiket disalin!',
+      duration: const Duration(seconds: 2),
     );
   }
 
   void _saveTicketImage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Fitur simpan tiket coming soon!',
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
-        ),
-        backgroundColor: AppColors.textEmphasis,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
+    SnackBarHelper.showInfo(
+      context,
+      'Fitur simpan tiket coming soon!',
     );
   }
 
   void _addToCalendar() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Add to Calendar coming soon!',
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
-        ),
-        backgroundColor: AppColors.textEmphasis,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
+    SnackBarHelper.showInfo(
+      context,
+      'Add to Calendar coming soon!',
     );
   }
 
   void _shareEvent() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Share coming soon!',
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
-        ),
-        backgroundColor: AppColors.textEmphasis,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
+    SnackBarHelper.showInfo(
+      context,
+      'Share coming soon!',
     );
   }
 

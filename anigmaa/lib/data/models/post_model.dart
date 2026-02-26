@@ -30,6 +30,7 @@ class PostModel extends Post {
     super.hashtags = const [],
     super.mentions = const [],
     super.visibility = PostVisibility.public,
+    super.isArchived = false,
   });
 
   /// Creates PostModel from JSON response
@@ -69,6 +70,7 @@ class PostModel extends Post {
         hashtags: List<String>.from(json['hashtags'] ?? []),
         mentions: List<String>.from(json['mentions'] ?? []),
         visibility: _parseVisibility(json['visibility']),
+        isArchived: json['is_archived'] as bool? ?? false,
       );
     } catch (e, stackTrace) {
       logger.error('Error parsing PostModel from JSON', e, stackTrace);
@@ -207,6 +209,7 @@ class PostModel extends Post {
       'hashtags': hashtags,
       'mentions': mentions,
       'visibility': visibility.toString().split('.').last,
+      'is_archived': isArchived,
     };
   }
 
@@ -234,6 +237,7 @@ class PostModel extends Post {
       hashtags: post.hashtags,
       mentions: post.mentions,
       visibility: post.visibility,
+      isArchived: post.isArchived,
     );
   }
 

@@ -581,3 +581,42 @@ func (h *UserHandler) DeleteAccount(c *gin.Context) {
 
 	response.Success(c, http.StatusOK, "Account deleted successfully", nil)
 }
+
+// RecalculateStats godoc
+// @Summary Recalculate user stats from actual data
+// @Description Recalculates events_created count from actual events table (fixes inconsistent counts)
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "User ID" format(uuid)
+// @Success 200 {object} response.Response{data=user.UserStats}
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Failure 404 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Router /users/{id}/recalculate-stats [post]
+func (h *UserHandler) RecalculateStats(c *gin.Context) {
+	// Get user ID from path
+	userIDStr := c.Param("id")
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid user ID", err.Error())
+		return
+	}
+
+	// Recalculate stats
+	if err := h.userUsecase.RecalculateEventsCreated(c.Request.Context(), userID); err != nil {
+		response.InternalError(c, "Failed to recalculate stats", err.Error())
+		return
+	}
+
+	// Get updated stats
+	stats, err := h.userUsecase.GetStats(c.Request.Context(), userID)
+	if err != nil {
+		response.InternalError(c, "Failed to get updated stats", err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, "Stats recalculated successfully", stats)
+}

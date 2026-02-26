@@ -635,3 +635,51 @@ func (uc *Usecase) GetAttendeesWithDetails(ctx context.Context, eventID uuid.UUI
 
 	return allAttendees, count, nil
 }
+
+// ArchiveEvent archives an event (host only)
+func (uc *Usecase) ArchiveEvent(ctx context.Context, eventID, userID uuid.UUID) (*event.Event, error) {
+	// Get existing event
+	existingEvent, err := uc.eventRepo.GetByID(ctx, eventID)
+	if err != nil {
+		return nil, ErrEventNotFound
+	}
+
+	// Check if user is the host
+	if existingEvent.HostID != userID {
+		return nil, ErrUnauthorized
+	}
+
+	// Archive the event
+	existingEvent.IsArchived = true
+	existingEvent.UpdatedAt = time.Now().UTC()
+
+	if err := uc.eventRepo.Update(ctx, existingEvent); err != nil {
+		return nil, err
+	}
+
+	return existingEvent, nil
+}
+
+// UnarchiveEvent unarchives an event (host only)
+func (uc *Usecase) UnarchiveEvent(ctx context.Context, eventID, userID uuid.UUID) (*event.Event, error) {
+	// Get existing event
+	existingEvent, err := uc.eventRepo.GetByID(ctx, eventID)
+	if err != nil {
+		return nil, ErrEventNotFound
+	}
+
+	// Check if user is the host
+	if existingEvent.HostID != userID {
+		return nil, ErrUnauthorized
+	}
+
+	// Unarchive the event
+	existingEvent.IsArchived = false
+	existingEvent.UpdatedAt = time.Now().UTC()
+
+	if err := uc.eventRepo.Update(ctx, existingEvent); err != nil {
+		return nil, err
+	}
+
+	return existingEvent, nil
+}

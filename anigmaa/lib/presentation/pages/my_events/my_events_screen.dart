@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../../core/utils/app_logger.dart';
 import '../../../domain/entities/event.dart';
 import '../../../domain/entities/event_category.dart';
 import '../../bloc/my_events/my_events_bloc.dart';
@@ -30,7 +29,7 @@ class _MyEventsScreenState extends State<MyEventsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -70,8 +69,11 @@ class _MyEventsScreenState extends State<MyEventsScreen>
                     final completedEvents = state.events
                         .where((e) => e.isCompleted)
                         .toList();
+                    final archivedEvents = state.events
+                        .where((e) => e.isArchived)
+                        .toList();
 
-                    if (activeEvents.isEmpty && completedEvents.isEmpty) {
+                    if (activeEvents.isEmpty && completedEvents.isEmpty && archivedEvents.isEmpty) {
                       return const Expanded(child: _EmptyState());
                     }
 
@@ -85,6 +87,7 @@ class _MyEventsScreenState extends State<MyEventsScreen>
                               children: [
                                 _ActiveEventsTab(events: activeEvents),
                                 _CompletedEventsTab(events: completedEvents),
+                                _ArchivedEventsTab(events: archivedEvents),
                               ],
                             ),
                           ),
@@ -168,6 +171,7 @@ class _MyEventsScreenState extends State<MyEventsScreen>
           tabs: const [
             Tab(text: 'Aktif'),
             Tab(text: 'Selesai'),
+            Tab(text: 'Arsip'),
           ],
         ),
       ),
@@ -231,6 +235,37 @@ class _CompletedEventsTab extends StatelessWidget {
         itemCount: events.length,
         itemBuilder: (context, index) {
           return _ModernEventCard(event: events[index], isActive: false);
+        },
+      ),
+    );
+  }
+}
+
+class _ArchivedEventsTab extends StatelessWidget {
+  final List<Event> events;
+
+  const _ArchivedEventsTab({required this.events});
+
+  @override
+  Widget build(BuildContext context) {
+    if (events.isEmpty) {
+      return const _EmptyTabState(
+        icon: Icons.archive_outlined,
+        title: 'Belum Ada Event Arsip',
+        subtitle: 'Event yang diarsip akan muncul di sini',
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        context.read<MyEventsBloc>().add(const RefreshMyEvents());
+      },
+      color: AppColors.secondary,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(20),
+        itemCount: events.length,
+        itemBuilder: (context, index) {
+          return _ArchivedEventCard(event: events[index]);
         },
       ),
     );
@@ -314,18 +349,24 @@ class _ModernEventCard extends StatelessWidget {
               if (event.isFree)
                 Positioned(
                   top: 12,
-                  right: 12,
+                  right: 56,
                   child: _PriceBadge(text: 'GRATIS', isFree: true),
                 )
               else if (event.price != null)
                 Positioned(
                   top: 12,
-                  right: 12,
+                  right: 56,
                   child: _PriceBadge(
                     text: 'Rp ${event.price!.toInt().toString()}',
                     isFree: false,
                   ),
                 ),
+              // Menu button
+              Positioned(
+                top: 8,
+                right: 8,
+                child: _EventMenuButton(event: event, isActive: isActive),
+              ),
             ],
           ),
 
@@ -563,6 +604,273 @@ class _ModernEventCard extends StatelessWidget {
             ),
             child: Text(
               'Buat',
+              style: AppTextStyles.button,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDateRange(DateTime start, DateTime end) {
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agu',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
+    return '${start.day} ${months[start.month - 1]} ${start.year}';
+  }
+
+  String _formatTimeRange(DateTime start, DateTime end) {
+    return '${start.hour.toString().padLeft(2, '0')}:${start.minute.toString().padLeft(2, '0')} - ${end.hour.toString().padLeft(2, '0')}:${end.minute.toString().padLeft(2, '0')}';
+  }
+}
+
+/// Archived event card with grayed out appearance
+class _ArchivedEventCard extends StatelessWidget {
+  final Event event;
+
+  const _ArchivedEventCard({required this.event});
+
+  @override
+  Widget build(BuildContext context) {
+    final attendeesCount = event.attendeeIds.length;
+    final maxAttendees = event.maxAttendees;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceAlt,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.divider, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image with grayscale filter and archived badge
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
+                child: ColorFiltered(
+                  colorFilter: const ColorFilter.mode(
+                    Colors.grey,
+                    BlendMode.saturation,
+                  ),
+                  child: event.fullImageUrls.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: event.fullImageUrls.first,
+                          height: 100,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            height: 100,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  AppColors.textTertiary.withValues(alpha: 0.3),
+                                  AppColors.textTertiary.withValues(alpha: 0.2),
+                                ],
+                              ),
+                            ),
+                            child: const Center(
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.textTertiary,
+                                ),
+                              ),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) =>
+                              _buildImagePlaceholder(),
+                        )
+                      : _buildImagePlaceholder(),
+                ),
+              ),
+              // Archived badge
+              Positioned(
+                top: 12,
+                left: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.textTertiary.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.archive_outlined, size: 12, color: AppColors.white),
+                      const SizedBox(width: 4),
+                      Text(
+                        'ARSIP',
+                        style: AppTextStyles.label.copyWith(
+                          color: AppColors.white,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title
+                Text(
+                  event.title,
+                  style: AppTextStyles.bodyLargeBold.copyWith(
+                    letterSpacing: -0.3,
+                    color: AppColors.textSecondary,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+
+                // Date row
+                _InfoRow(
+                  icon: Icons.calendar_today_outlined,
+                  text: _formatDateRange(event.startTime, event.endTime),
+                ),
+                const SizedBox(height: 4),
+
+                // Time row
+                _InfoRow(
+                  icon: Icons.access_time_rounded,
+                  text: _formatTimeRange(event.startTime, event.endTime),
+                ),
+                const SizedBox(height: 4),
+
+                // Location row
+                _InfoRow(
+                  icon: Icons.location_on_outlined,
+                  text: event.location.name,
+                ),
+                const SizedBox(height: 8),
+
+                // Stats
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _StatChip(
+                      icon: Icons.people_outline_rounded,
+                      label: '$attendeesCount/$maxAttendees',
+                      color: AppColors.textTertiary,
+                    ),
+                    if (!event.isFree && event.ticketsSold > 0)
+                      _StatChip(
+                        icon: Icons.confirmation_number_outlined,
+                        label: '${event.ticketsSold} terjual',
+                        color: AppColors.textTertiary,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                // Action buttons
+                _buildActionButtons(context),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImagePlaceholder() {
+    return Container(
+      height: 100,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.textTertiary.withValues(alpha: 0.2),
+            AppColors.textTertiary.withValues(alpha: 0.15),
+          ],
+        ),
+      ),
+      child: const Center(
+        child: Icon(Icons.event_outlined, size: 36, color: AppColors.textTertiary),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _ModernButton(
+            icon: Icons.unarchive,
+            label: 'Pulihkan',
+            color: AppColors.secondary,
+            isFilled: true,
+            onTap: () => _showRestoreDialog(context, event),
+          ),
+        ),
+        const SizedBox(width: 8),
+        _DeleteButton(event: event),
+      ],
+    );
+  }
+
+  void _showRestoreDialog(BuildContext context, Event event) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Pulihkan Event?',
+          style: AppTextStyles.h3.copyWith(color: AppColors.textEmphasis),
+        ),
+        content: Text(
+          'Pulihkan "${event.title}" dari arsip?',
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(
+              'Batal',
+              style: AppTextStyles.button.copyWith(color: AppColors.textSecondary),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              context.read<MyEventsBloc>().add(UnarchiveMyEvent(event.id));
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.secondary,
+              foregroundColor: AppColors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'Pulihkan',
               style: AppTextStyles.button,
             ),
           ),
@@ -866,6 +1174,62 @@ class _DeleteButtonState extends State<_DeleteButton> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Event menu button widget
+class _EventMenuButton extends StatelessWidget {
+  final Event event;
+  final bool isActive;
+
+  const _EventMenuButton({required this.event, required this.isActive});
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      icon: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: AppColors.white.withValues(alpha: 0.9),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Icon(
+          Icons.more_vert,
+          size: 18,
+          color: AppColors.textEmphasis,
+        ),
+      ),
+      color: AppColors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      onSelected: (value) {
+        if (value == 'archive') {
+          context.read<MyEventsBloc>().add(ArchiveMyEvent(event.id));
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem<String>(
+          value: 'archive',
+          child: Row(
+            children: [
+              const Icon(
+                Icons.archive_outlined,
+                size: 18,
+                color: AppColors.textSecondary,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Arsipkan',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textEmphasis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

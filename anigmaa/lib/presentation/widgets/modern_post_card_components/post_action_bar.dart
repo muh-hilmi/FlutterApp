@@ -464,7 +464,50 @@ class _PostActionBarState extends State<PostActionBar>
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    Text('Bagikan Post', style: AppTextStyles.h3),
+                    Text('Opsi Post', style: AppTextStyles.h3),
+                    const SizedBox(height: 20),
+                    // Archive option
+                    if (!widget.post.isArchived)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.pop(context);
+                            context.read<PostsBloc>().add(ArchivePostRequested(widget.post.id));
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.textSecondary.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(
+                                    Icons.archive_outlined,
+                                    color: AppColors.textSecondary,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Text(
+                                  'Arsipkan',
+                                  style: AppTextStyles.bodyMediumBold.copyWith(
+                                    color: AppColors.textEmphasis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 16),
+                    Text('Bagikan', style: AppTextStyles.h3),
                     const SizedBox(height: 20),
                     GridView.count(
                       shrinkWrap: true,

@@ -5,6 +5,8 @@ import '../../../domain/entities/post.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
+import '../common/snackbar_helper.dart';
+
 class ShareBottomSheet extends StatelessWidget {
   final Post post;
 
@@ -260,14 +262,7 @@ class ShareBottomSheet extends StatelessWidget {
   }
 
   void _showShareMessage(BuildContext context, String platform) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(platform),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
+    SnackBarHelper.showInfo(context, platform);
   }
 
   Future<void> _launchURL(String url) async {

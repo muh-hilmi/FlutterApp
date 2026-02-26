@@ -329,6 +329,17 @@ func (uc *Usecase) GetStats(ctx context.Context, userID uuid.UUID) (*user.UserSt
 	return uc.userRepo.GetStats(ctx, userID)
 }
 
+// RecalculateEventsCreated recalculates events_created from actual events table
+func (uc *Usecase) RecalculateEventsCreated(ctx context.Context, userID uuid.UUID) error {
+	// Check if user exists
+	_, err := uc.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return ErrUserNotFound
+	}
+
+	return uc.userRepo.RecalculateEventsCreated(ctx, userID)
+}
+
 // VerifyEmail marks a user's email as verified
 func (uc *Usecase) VerifyEmail(ctx context.Context, userID uuid.UUID) error {
 	existingUser, err := uc.userRepo.GetByID(ctx, userID)

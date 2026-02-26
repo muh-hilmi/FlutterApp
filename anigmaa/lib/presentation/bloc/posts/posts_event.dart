@@ -94,3 +94,23 @@ class SavePostToggled extends PostsEvent {
 }
 
 class LoadSavedPosts extends PostsEvent {}
+
+class ArchivePostRequested extends PostsEvent {
+  final String postId;
+
+  const ArchivePostRequested(this.postId);
+
+  @override
+  List<Object?> get props => [postId];
+}
+
+class UnarchivePostRequested extends PostsEvent {
+  final String postId;
+
+  const UnarchivePostRequested(this.postId);
+
+  @override
+  List<Object?> get props => [postId];
+}
+
+class LoadArchivedPosts extends PostsEvent {}

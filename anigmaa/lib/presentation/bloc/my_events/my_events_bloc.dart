@@ -19,6 +19,8 @@ class MyEventsBloc extends Bloc<MyEventsEvent, MyEventsState> {
     on<DeleteMyEvent>(_onDeleteMyEvent);
     on<NavigateToEdit>(_onNavigateToEdit);
     on<NavigateToCheckIn>(_onNavigateToCheckIn);
+    on<ArchiveMyEvent>(_onArchiveMyEvent);
+    on<UnarchiveMyEvent>(_onUnarchiveMyEvent);
   }
 
   /// Load all events created by the current user
@@ -128,5 +130,57 @@ class MyEventsBloc extends Bloc<MyEventsEvent, MyEventsState> {
   ) {
     // Navigation is handled by the UI layer
     // This event is just for consistency/tracking if needed
+  }
+
+  /// Archive an event
+  void _onArchiveMyEvent(
+    ArchiveMyEvent event,
+    Emitter<MyEventsState> emit,
+  ) {
+    // Only proceed if we have loaded state
+    if (state is! MyEventsLoaded) return;
+
+    final currentState = state as MyEventsLoaded;
+
+    // Update event's isArchived status
+    final updatedEvents = currentState.events.map((e) {
+      if (e.id == event.eventId) {
+        return e.copyWith(isArchived: true);
+      }
+      return e;
+    }).toList();
+
+    emit(
+      MyEventsLoaded(
+        events: updatedEvents,
+        successMessage: 'Event berhasil diarsipkan',
+      ),
+    );
+  }
+
+  /// Unarchive an event
+  void _onUnarchiveMyEvent(
+    UnarchiveMyEvent event,
+    Emitter<MyEventsState> emit,
+  ) {
+    // Only proceed if we have loaded state
+    if (state is! MyEventsLoaded) return;
+
+    final currentState = state as MyEventsLoaded;
+
+    // Update event's isArchived status
+    final updatedEvents = currentState.events.map((e) {
+      if (e.id == event.eventId) {
+        return e.copyWith(isArchived: false);
+      }
+      return e;
+    }).toList();
+
+    emit(
+      MyEventsLoaded(
+        events: updatedEvents,
+        successMessage: 'Arsip event berhasil dibatalkan',
+      ),
+    );
   }
 }

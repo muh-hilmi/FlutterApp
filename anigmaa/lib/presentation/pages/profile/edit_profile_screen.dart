@@ -15,6 +15,7 @@ import '../../bloc/user/user_event.dart';
 import '../../bloc/user/user_state.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/app_logger.dart';
 
 /// Edit Profile Screen with API integration
 ///
@@ -1319,9 +1320,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
         if (placemarks.isNotEmpty && mounted) {
           final placemark = placemarks.first;
+
+          // Log GPS output format for debugging
+          AppLogger().info('===== GPS Placemark Output =====');
+          AppLogger().info('name: ${placemark.name}');
+          AppLogger().info('street: ${placemark.street}');
+          AppLogger().info('subLocality: ${placemark.subLocality}');
+          AppLogger().info('locality: ${placemark.locality}');
+          AppLogger().info('subAdministrativeArea: ${placemark.subAdministrativeArea}');
+          AppLogger().info('administrativeArea: ${placemark.administrativeArea}');
+          AppLogger().info('postalCode: ${placemark.postalCode}');
+          AppLogger().info('country: ${placemark.country}');
+          AppLogger().info('==============================');
+
+          final locationValue = placemark.subAdministrativeArea ?? '';
+          AppLogger().info('SAVING LOCATION: "$locationValue"');
           setState(() {
-            _locationController.text =
-                '${placemark.locality ?? ''}, ${placemark.administrativeArea ?? ''}';
+            _locationController.text = locationValue;
           });
         }
       }
@@ -1467,6 +1482,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       if (mounted) {
         final userBloc = context.read<UserBloc>();
+
+        // Log what's being saved
+        AppLogger().info('===== SAVING PROFILE =====');
+        AppLogger().info('Location being saved: "${_locationController.text}"');
+        AppLogger().info('========================');
 
         // Trigger the update via bloc
         userBloc.add(

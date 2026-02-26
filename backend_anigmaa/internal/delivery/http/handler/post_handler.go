@@ -1141,3 +1141,113 @@ func (h *PostHandler) GetUserPosts(c *gin.Context) {
 	meta := response.NewPaginationMeta(total, limit, offset, len(posts))
 	response.Paginated(c, http.StatusOK, "Posts retrieved successfully", postResponses, meta)
 }
+
+// ArchivePost godoc
+// @Summary Archive a post
+// @Description Archive a post (author only)
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Post ID" format(uuid)
+// @Success 200 {object} response.Response{data=post.Post}
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Failure 403 {object} response.Response
+// @Failure 404 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Router /posts/{id}/archive [patch]
+func (h *PostHandler) ArchivePost(c *gin.Context) {
+	// Get user ID from context
+	userIDStr, exists := middleware.GetUserID(c)
+	if !exists {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid user ID", err.Error())
+		return
+	}
+
+	// Parse post ID from path
+	postIDStr := c.Param("id")
+	postID, err := uuid.Parse(postIDStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid post ID", err.Error())
+		return
+	}
+
+	// Call usecase
+	archivedPost, err := h.postUsecase.ArchivePost(c.Request.Context(), postID, userID)
+	if err != nil {
+		if err == postUsecase.ErrPostNotFound {
+			response.NotFound(c, "Post not found")
+			return
+		}
+		if err == postUsecase.ErrUnauthorized {
+			response.Forbidden(c, "Only the post author can archive this post")
+			return
+		}
+		response.InternalError(c, "Failed to archive post", err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, "Post archived successfully", archivedPost)
+}
+
+// UnarchivePost godoc
+// @Summary Unarchive a post
+// @Description Unarchive a post (author only)
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Post ID" format(uuid)
+// @Success 200 {object} response.Response{data=post.Post}
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Failure 403 {object} response.Response
+// @Failure 404 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Router /posts/{id}/unarchive [patch]
+func (h *PostHandler) UnarchivePost(c *gin.Context) {
+	// Get user ID from context
+	userIDStr, exists := middleware.GetUserID(c)
+	if !exists {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid user ID", err.Error())
+		return
+	}
+
+	// Parse post ID from path
+	postIDStr := c.Param("id")
+	postID, err := uuid.Parse(postIDStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid post ID", err.Error())
+		return
+	}
+
+	// Call usecase
+	unarchivedPost, err := h.postUsecase.UnarchivePost(c.Request.Context(), postID, userID)
+	if err != nil {
+		if err == postUsecase.ErrPostNotFound {
+			response.NotFound(c, "Post not found")
+			return
+		}
+		if err == postUsecase.ErrUnauthorized {
+			response.Forbidden(c, "Only the post author can unarchive this post")
+			return
+		}
+		response.InternalError(c, "Failed to unarchive post", err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, "Post unarchived successfully", unarchivedPost)
+}

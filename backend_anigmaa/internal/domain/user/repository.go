@@ -38,6 +38,7 @@ type Repository interface {
 	GetStats(ctx context.Context, userID uuid.UUID) (*UserStats, error)
 	IncrementEventsAttended(ctx context.Context, userID uuid.UUID) error
 	IncrementEventsCreated(ctx context.Context, userID uuid.UUID) error
+	RecalculateEventsCreated(ctx context.Context, userID uuid.UUID) error
 	UpdateAverageRating(ctx context.Context, userID uuid.UUID, rating float64) error
 
 	// Search

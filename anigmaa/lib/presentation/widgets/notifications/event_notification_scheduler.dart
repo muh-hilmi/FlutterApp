@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../common/snackbar_helper.dart';
 
 /// Event notification scheduler
 ///
@@ -94,14 +95,10 @@ class EventNotification {
     required String message,
     Duration duration = const Duration(seconds: 3),
   }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: const Color(0xFF1F2937),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        duration: duration,
-      ),
+    SnackBarHelper.showInfo(
+      context,
+      message,
+      duration: duration,
     );
   }
 
@@ -110,26 +107,11 @@ class EventNotification {
     required String message,
     VoidCallback? onAction,
   }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.green),
-            const SizedBox(width: 12),
-            Expanded(child: Text(message)),
-          ],
-        ),
-        backgroundColor: const Color(0xFF1F2937),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        action: onAction != null
-            ? SnackBarAction(
-                label: 'LIHAT',
-                textColor: const Color(0xFFBBC863),
-                onPressed: onAction,
-              )
-            : null,
-      ),
+    SnackBarHelper.showSuccess(
+      context,
+      message,
+      actionLabel: onAction != null ? 'LIHAT' : null,
+      onActionPressed: onAction,
     );
   }
 
@@ -137,19 +119,9 @@ class EventNotification {
     required BuildContext context,
     required String message,
   }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.error_outline, color: Colors.red),
-            const SizedBox(width: 12),
-            Expanded(child: Text(message)),
-          ],
-        ),
-        backgroundColor: const Color(0xFF1F2937),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
+    SnackBarHelper.showError(
+      context,
+      message,
     );
   }
 }
