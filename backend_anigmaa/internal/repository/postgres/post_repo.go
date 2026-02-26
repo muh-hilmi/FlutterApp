@@ -89,6 +89,7 @@ func (r *postRepository) GetWithDetails(ctx context.Context, postID, userID uuid
 			e.host_id as event_host_id, eh.name as event_host_name, eh.avatar_url as event_host_avatar_url,
 			e.max_attendees as event_max_attendees,
 			(SELECT COUNT(*) FROM event_attendees WHERE event_id = e.id AND status = 'confirmed') as event_attendees_count,
+			(SELECT COUNT(*) FROM event_interests WHERE event_id = e.id) as interests_count,
 			e.price as event_price, e.is_free as event_is_free,
 			e.status as event_status, e.privacy as event_privacy,
 			COALESCE(
@@ -317,6 +318,7 @@ func (r *postRepository) GetFeed(ctx context.Context, userID uuid.UUID, limit, o
 				e.max_attendees as event_max_attendees,
 				(SELECT COUNT(*) FROM event_attendees WHERE event_id = e.id AND status = 'confirmed') as event_attendees_count,
 				(SELECT COUNT(*) FROM event_interests WHERE event_id = e.id) as interests_count,
+				EXISTS(SELECT 1 FROM event_interests WHERE event_id = e.id AND user_id = $1) as event_is_interested,
 				e.price as event_price, e.is_free as event_is_free,
 				e.status as event_status, e.privacy as event_privacy,
 				COALESCE(
@@ -362,6 +364,8 @@ func (r *postRepository) GetFeed(ctx context.Context, userID uuid.UUID, limit, o
 		var eventHostName, eventHostAvatarURL *string
 		var eventMaxAttendees *int
 		var eventAttendeesCount *int
+		var eventInterestsCount *int
+		var eventIsInterested *bool
 		var eventPrice *float64
 		var eventIsFree *bool
 		var eventStatus, eventPrivacy *string
@@ -377,7 +381,7 @@ func (r *postRepository) GetFeed(ctx context.Context, userID uuid.UUID, limit, o
 			&eventStartTime, &eventEndTime,
 			&eventLocationName, &eventLocationAddress, &eventLocationLat, &eventLocationLng,
 			&eventHostID, &eventHostName, &eventHostAvatarURL,
-			&eventMaxAttendees, &eventAttendeesCount, &eventPrice, &eventIsFree,
+			&eventMaxAttendees, &eventAttendeesCount, &eventInterestsCount, &eventIsInterested, &eventPrice, &eventIsFree,
 			&eventStatus, &eventPrivacy,
 			&eventImageURLs,
 		)
@@ -418,6 +422,12 @@ func (r *postRepository) GetFeed(ctx context.Context, userID uuid.UUID, limit, o
 			}
 			if eventAttendeesCount != nil {
 				eventSummary.AttendeesCount = *eventAttendeesCount
+			}
+			if eventInterestsCount != nil {
+				eventSummary.InterestsCount = *eventInterestsCount
+			}
+			if eventIsInterested != nil {
+				eventSummary.IsInterested = *eventIsInterested
 			}
 
 			// Set event times
@@ -497,6 +507,7 @@ func (r *postRepository) GetUserPosts(ctx context.Context, authorID, viewerID uu
 			e.host_id as event_host_id, eh.name as event_host_name, eh.avatar_url as event_host_avatar_url,
 			e.max_attendees as event_max_attendees,
 			(SELECT COUNT(*) FROM event_attendees WHERE event_id = e.id AND status = 'confirmed') as event_attendees_count,
+			(SELECT COUNT(*) FROM event_interests WHERE event_id = e.id) as interests_count,
 			e.price as event_price, e.is_free as event_is_free,
 			e.status as event_status, e.privacy as event_privacy,
 			COALESCE(
@@ -533,6 +544,8 @@ func (r *postRepository) GetUserPosts(ctx context.Context, authorID, viewerID uu
 		var eventHostName, eventHostAvatarURL *string
 		var eventMaxAttendees *int
 		var eventAttendeesCount *int
+		var eventInterestsCount *int
+		var eventIsInterested *bool
 		var eventPrice *float64
 		var eventIsFree *bool
 		var eventStatus, eventPrivacy *string
@@ -548,7 +561,7 @@ func (r *postRepository) GetUserPosts(ctx context.Context, authorID, viewerID uu
 			&eventStartTime, &eventEndTime,
 			&eventLocationName, &eventLocationAddress, &eventLocationLat, &eventLocationLng,
 			&eventHostID, &eventHostName, &eventHostAvatarURL,
-			&eventMaxAttendees, &eventAttendeesCount, &eventPrice, &eventIsFree,
+			&eventMaxAttendees, &eventAttendeesCount, &eventInterestsCount, &eventIsInterested, &eventPrice, &eventIsFree,
 			&eventStatus, &eventPrivacy,
 			&eventImageURLs,
 		)
@@ -624,6 +637,12 @@ func (r *postRepository) GetUserPosts(ctx context.Context, authorID, viewerID uu
 			}
 			if eventAttendeesCount != nil {
 				eventSummary.AttendeesCount = *eventAttendeesCount
+			}
+			if eventInterestsCount != nil {
+				eventSummary.InterestsCount = *eventInterestsCount
+			}
+			if eventIsInterested != nil {
+				eventSummary.IsInterested = *eventIsInterested
 			}
 
 			// Set price

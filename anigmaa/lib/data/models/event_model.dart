@@ -2,6 +2,8 @@ import '../../domain/entities/event.dart';
 import '../../domain/entities/event_category.dart';
 import '../../domain/entities/event_host.dart';
 import '../../domain/entities/event_location.dart';
+import '../../core/services/auth_service.dart';
+import '../../injection_container.dart' as di;
 
 class EventModel extends Event {
   const EventModel({
@@ -54,6 +56,13 @@ class EventModel extends Event {
         json['interests_count'] ??
         json['pin_count'] ??
         json['likes_count'];
+    final isInterestedByCurrentUser =
+        _parseBool(
+          json['is_interested'] ??
+              json['isInterested'] ??
+              json['is_user_interested'] ??
+              json['is_interested_by_current_user'],
+        );
 
     // Parse location - expect nested object (backend standard)
     // Fallback to flat fields for backward compatibility (should be removed once backend is standardized)
@@ -94,6 +103,40 @@ class EventModel extends Event {
     final parsedEndTime =
         _parseDateTime(endTime) ?? DateTime.now().add(const Duration(hours: 2));
 
+    // Build base list first (from explicit IDs if present, otherwise from count).
+    final resolvedInterestedUserIds = interestedUserIds != null
+        ? List<String>.from(interestedUserIds)
+        : (interestedCount != null
+              ? List<String>.generate(
+                  interestedCount is int
+                      ? interestedCount
+                      : (interestedCount as num).toInt(),
+                  (i) => 'interested_$i',
+                )
+              : <String>[]);
+
+    // Keep current-user interest state in sync even when backend only sends
+    // count + `is_interested` without real interested_user_ids.
+    if (isInterestedByCurrentUser != null) {
+      try {
+        final currentUserId = di.sl<AuthService>().userId;
+        if (currentUserId != null && currentUserId.isNotEmpty) {
+          final hasCurrentUser = resolvedInterestedUserIds.contains(currentUserId);
+          if (isInterestedByCurrentUser && !hasCurrentUser) {
+            if (resolvedInterestedUserIds.isNotEmpty) {
+              resolvedInterestedUserIds[0] = currentUserId;
+            } else {
+              resolvedInterestedUserIds.add(currentUserId);
+            }
+          } else if (!isInterestedByCurrentUser && hasCurrentUser) {
+            resolvedInterestedUserIds.remove(currentUserId);
+          }
+        }
+      } catch (_) {
+        // If DI/Auth isn't ready yet, keep parsed list as-is.
+      }
+    }
+
     return EventModel(
       id: json['id'] as String? ?? '',
       title: json['title'] as String? ?? 'Untitled Event',
@@ -132,17 +175,7 @@ class EventModel extends Event {
           : (isFree == 1 || isFree == '1' || isFree == true),
       status: _parseEventStatus(json['status'] as String?),
       requirements: json['requirements'] as String?,
-      // Generate dummy interested IDs based on count if available
-      interestedUserIds: interestedUserIds != null
-          ? List<String>.from(interestedUserIds)
-          : (interestedCount != null
-                ? List<String>.generate(
-                    interestedCount is int
-                        ? interestedCount
-                        : (interestedCount as num).toInt(),
-                    (i) => 'interested_$i',
-                  )
-                : <String>[]),
+      interestedUserIds: resolvedInterestedUserIds,
       isUserAttending: json['is_user_attending'] as bool? ?? false,
       ticketingEnabled: json['ticketing_enabled'] as bool? ?? false,
       ticketsSold: json['tickets_sold'] as int? ?? 0,
@@ -253,6 +286,18 @@ class EventModel extends Event {
     }
 
     // Silently fail on unknown types
+    return null;
+  }
+
+  static bool? _parseBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is int) return value > 0;
+    if (value is String) {
+      final lower = value.toLowerCase();
+      if (lower == 'true' || lower == '1') return true;
+      if (lower == 'false' || lower == '0') return false;
+    }
     return null;
   }
 }

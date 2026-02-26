@@ -910,18 +910,15 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
     final currentState = state as EventsLoaded;
 
     // Check if event already exists in state
-    final existingEvent = currentState.events.firstWhere(
+    final existingEventIndex = currentState.events.indexWhere(
       (e) => e.id == event.event.id,
-      orElse: () => event.event,
     );
+    final existingEvent = existingEventIndex >= 0
+        ? currentState.events[existingEventIndex]
+        : null;
 
-    // If the passed event has different data (e.g., updated interest count),
-    // we need to update it in the state
-    final needsUpdate =
-        existingEvent.interestedCount != event.event.interestedCount ||
-        existingEvent.isInterested != event.event.isInterested;
-
-    if (!currentState.events.any((e) => e.id == event.event.id)) {
+    // If event doesn't exist in state, add it
+    if (existingEvent == null) {
       // Event not in state - add it
       // FIX: Check for duplicate by ID - replace if exists, otherwise add
       final updatedEvents = [
@@ -953,7 +950,16 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
           nearbyEvents: updatedNearbyEvents,
         ),
       );
-    } else if (needsUpdate) {
+      return;
+    }
+
+    // If the passed event has different data (e.g., updated interest count),
+    // we need to update it in the state
+    final needsUpdate =
+        existingEvent.interestedCount != event.event.interestedCount ||
+        existingEvent.isInterested != event.event.isInterested;
+
+    if (needsUpdate) {
       // Event exists but needs update (e.g., interest count changed)
       List<Event> updateEventInList(List<Event> events) {
         return events.map((e) {

@@ -240,7 +240,7 @@ class PostModel extends Post {
   /// Parse attached event with proper error handling
   static Event? _parseAttachedEvent(Map<String, dynamic> json) {
     try {
-      final eventData = json['attached_event'];
+      final eventData = json['attached_event'] ?? json['attachedEvent'];
       if (eventData == null) return null;
 
       // Parse as EventModel

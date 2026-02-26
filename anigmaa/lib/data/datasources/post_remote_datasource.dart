@@ -76,20 +76,27 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   @override
   Future<List<PostModel>> getPostsByUser(String userId, {int page = 1, int limit = 20}) async {
     try {
-      // Get posts by user ID (backend endpoint: /profile/{userId}/posts)
+      // Get posts by user ID (backend endpoint: /users/{userId}/posts)
+      logger.d('[PostRemoteDataSource] Fetching posts for user: $userId');
       final offset = (page - 1) * limit;
       final response = await dioClient.get(
-        '/profile/$userId/posts',
+        '/users/$userId/posts',
         queryParameters: {'limit': limit, 'offset': offset},
       );
 
+      logger.d('[PostRemoteDataSource] Response status: ${response.statusCode}');
+      logger.d('[PostRemoteDataSource] Response data: ${response.data}');
+
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? response.data;
+        logger.d('[PostRemoteDataSource] Posts count: ${data.length}');
         return data.map((json) => PostModel.fromJson(json)).toList();
       } else {
         throw ServerFailure('Failed to fetch user posts');
       }
     } on DioException catch (e) {
+      logger.e('[PostRemoteDataSource] DioException: ${e.message}');
+      logger.e('[PostRemoteDataSource] Response: ${e.response?.data}');
       throw _handleDioException(e);
     }
   }

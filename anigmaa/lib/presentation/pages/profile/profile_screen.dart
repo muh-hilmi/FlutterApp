@@ -117,57 +117,59 @@ class _ProfileScreenState extends State<ProfileScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      body: BlocListener<UserBloc, UserState>(
-        listener: (context, state) {
-          if (state is UserLoaded ||
-              state is UserActionSuccess ||
-              state is UserError) {
-            _confirmationTimer?.cancel();
-            setState(() {
-              _isProcessing = false;
-              _unfollowConfirmation = false;
-            });
+      body: SafeArea(
+        child: BlocListener<UserBloc, UserState>(
+          listener: (context, state) {
+            if (state is UserLoaded ||
+                state is UserActionSuccess ||
+                state is UserError) {
+              _confirmationTimer?.cancel();
+              setState(() {
+                _isProcessing = false;
+                _unfollowConfirmation = false;
+              });
 
-            if (state is UserError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: AppColors.error,
-                ),
-              );
+              if (state is UserError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              }
             }
-          }
-        },
-        child: BlocBuilder<UserBloc, UserState>(
-          buildWhen: (previous, current) {
-            return current is UserLoading ||
-                current is UserLoaded ||
-                current is UserError ||
-                current is UserActionSuccess;
           },
-          builder: (context, state) {
-            if (state is UserLoading) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.secondary),
-              );
-            }
-
-            if (state is UserError) {
-              return _buildErrorState(state);
-            }
-
-            if (state is UserLoaded) {
-              if (_tabController == null) {
+          child: BlocBuilder<UserBloc, UserState>(
+            buildWhen: (previous, current) {
+              return current is UserLoading ||
+                  current is UserLoaded ||
+                  current is UserError ||
+                  current is UserActionSuccess;
+            },
+            builder: (context, state) {
+              if (state is UserLoading) {
                 return const Center(
                   child: CircularProgressIndicator(color: AppColors.secondary),
                 );
               }
 
-              return _buildProfileContent(state);
-            }
+              if (state is UserError) {
+                return _buildErrorState(state);
+              }
 
-            return const SizedBox.shrink();
-          },
+              if (state is UserLoaded) {
+                if (_tabController == null) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: AppColors.secondary),
+                  );
+                }
+
+                return _buildProfileContent(state);
+              }
+
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );

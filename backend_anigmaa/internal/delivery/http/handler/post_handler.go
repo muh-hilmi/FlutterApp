@@ -1077,3 +1077,67 @@ func (h *PostHandler) GetBookmarks(c *gin.Context) {
 	meta := response.NewPaginationMeta(total, limit, offset, len(posts))
 	response.Paginated(c, http.StatusOK, "Bookmarks retrieved successfully", postResponses, meta)
 }
+
+// GetUserPosts godoc
+// @Summary Get posts by user ID
+// @Description Get all posts created by a specific user (by user ID, not username)
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "User ID" format(uuid)
+// @Param limit query int false "Limit" default(20)
+// @Param offset query int false "Offset" default(0)
+// @Success 200 {object} response.Response{data=[]post.PostResponse}
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Router /users/{id}/posts [get]
+func (h *PostHandler) GetUserPosts(c *gin.Context) {
+	// Parse user ID from path (route uses :id parameter)
+	userIdStr := c.Param("id")
+	authorID, err := uuid.Parse(userIdStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid user ID", err.Error())
+		return
+	}
+
+	// Get viewer ID (current user) for interaction flags
+	viewerID := uuid.Nil
+	if viewerIDStr, exists := middleware.GetUserID(c); exists {
+		viewerID, _ = uuid.Parse(viewerIDStr)
+	}
+
+	// Parse query parameters
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
+
+	// Get total count for pagination
+	total, err := h.postUsecase.CountUserPosts(c.Request.Context(), authorID)
+	if err != nil {
+		// If count fails, default to 0 but continue
+		total = 0
+	}
+
+	// Get user posts
+	posts, err := h.postUsecase.GetUserPosts(c.Request.Context(), authorID, viewerID, limit, offset)
+	if err != nil {
+		response.InternalError(c, "Failed to get user posts", err.Error())
+		return
+	}
+
+	// Ensure posts is not nil (return empty array instead)
+	if posts == nil {
+		posts = []post.PostWithDetails{}
+	}
+
+	// Transform to Flutter-compatible response format
+	postResponses := make([]post.PostResponse, len(posts))
+	for i, p := range posts {
+		postResponses[i] = p.ToResponse()
+	}
+
+	// Create pagination metadata with correct total
+	meta := response.NewPaginationMeta(total, limit, offset, len(posts))
+	response.Paginated(c, http.StatusOK, "Posts retrieved successfully", postResponses, meta)
+}

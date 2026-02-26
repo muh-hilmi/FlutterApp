@@ -436,6 +436,11 @@ class UserBloc extends Bloc<UserEvent, UserState> with NetworkResilienceBloc {
             userEvents: actualEventsList, // Added: actual events for profile
           ),
         );
+
+        // Trigger posts loading AFTER UserLoaded state is emitted
+        if (postRepository != null) {
+          add(LoadUserPostsEvent(event.userId));
+        }
       } else {
         emit(const UserError('Fitur ini belum tersedia. Maaf ya! 🙏'));
       }
@@ -627,17 +632,14 @@ class UserBloc extends Bloc<UserEvent, UserState> with NetworkResilienceBloc {
     LoadUserPostsEvent event,
     Emitter<UserState> emit,
   ) async {
-    // Only load posts if current state is UserLoaded
-    if (state is! UserLoaded) return;
-
-    final currentState = state as UserLoaded;
-
+    // Load posts independently - don't require UserLoaded state
     if (postRepository == null) {
-      _logger.warning('PostRepository not available');
+      _logger.warning('[UserBloc] PostRepository not available');
       return;
     }
 
     try {
+      _logger.info('[UserBloc] Loading posts for user ${event.userId}...');
       final result = await postRepository!.getUserPosts(
         event.userId,
         limit: 50,
@@ -646,18 +648,30 @@ class UserBloc extends Bloc<UserEvent, UserState> with NetworkResilienceBloc {
       result.fold(
         (failure) {
           _logger.error('[UserBloc] Failed to load user posts: ${failure.message}');
-          // Keep current state, just log error
+          // If state is UserLoaded, update it with error status
+          if (state is UserLoaded) {
+            final currentState = state as UserLoaded;
+            emit(currentState.copyWith(userPosts: [], postsCount: 0));
+          }
         },
         (paginatedPosts) {
           _logger.info(
             '[UserBloc] Loaded ${paginatedPosts.data.length} posts for user ${event.userId}',
           );
-          emit(
-            currentState.copyWith(
-              userPosts: paginatedPosts.data,
-              postsCount: paginatedPosts.data.length,
-            ),
-          );
+          // If state is UserLoaded, merge the posts into it
+          if (state is UserLoaded) {
+            final currentState = state as UserLoaded;
+            emit(
+              currentState.copyWith(
+                userPosts: paginatedPosts.data,
+                postsCount: paginatedPosts.data.length,
+              ),
+            );
+          } else {
+            // If not in UserLoaded state yet, store posts for later
+            // When UserLoaded happens, it will pick up these posts
+            _logger.info('[UserBloc] Posts loaded but state not UserLoaded yet - will be picked up later');
+          }
         },
       );
     } catch (e) {

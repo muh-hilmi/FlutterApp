@@ -243,6 +243,7 @@ func main() {
 			users.POST("/:id/follow", userHandler.FollowUser)
 			users.DELETE("/:id/follow", userHandler.UnfollowUser)
 			users.GET("/:id/stats", userHandler.GetUserStats)
+			users.GET("/:id/posts", postHandler.GetUserPosts) // Get posts by user ID
 		}
 
 		// Event routes

@@ -299,9 +299,16 @@ class EventRepositoryImpl implements EventRepository {
       final interestData = await remoteDataSource.toggleInterest(eventId);
       logger.d('[EventRepository] Toggle interest API response: $interestData');
 
-      // Use toggle API response as source of truth
+      // Use toggle API response as source of truth for count.
+      // Some responses may miss/garble `is_interested`, so we fallback to
+      // deterministic local toggle state to keep UI (pin color/emoji) in sync.
       final newInterestCount = interestData?['interest_count'] as int?;
-      final isInterested = interestData?['is_interested'] == true;
+      final hadInterestedBefore =
+          cachedEvent?.interestedUserIds.contains(userId) ?? false;
+      final dynamic rawIsInterested = interestData?['is_interested'];
+      final isInterested = rawIsInterested is bool
+          ? rawIsInterested
+          : !hadInterestedBefore;
 
       if (newInterestCount == null) {
         return Left(ServerFailure('Invalid interest count from API'));

@@ -86,6 +86,7 @@ type EventSummary struct {
 	MaxAttendees    int       `json:"max_attendees,omitempty"`
 	AttendeesCount  int       `json:"attendees_count"`
 	InterestsCount  int       `json:"interests_count"`
+	IsInterested    bool      `json:"is_interested"`
 	IsFree          bool      `json:"is_free"`
 	Price           *float64  `json:"price,omitempty"`
 	Status          string    `json:"status,omitempty"`
