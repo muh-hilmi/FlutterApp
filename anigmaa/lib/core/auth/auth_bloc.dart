@@ -215,7 +215,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthStateData> {
 
       switch (result) {
         case TokenValidationResult.invalid:
-          // Token is invalid - clear it and go to login
+          // Token is invalid (401/403) - clear it and go to login
           _logger.warning('[AuthBloc] Token invalid, clearing auth data');
           await _authService.clearAuthData();
           _retryTimer?.cancel();
@@ -228,8 +228,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthStateData> {
           break;
 
         case TokenValidationResult.networkError:
-          // Network error - don't clear token
-          _logger.warning('[AuthBloc] Network error during validation');
+          // Network error - DON'T clear token, allow offline mode
+          _logger.warning('[AuthBloc] Network error during validation - keeping tokens');
           _validationCompleter?.complete(false);
 
           final newRetryCount = state.retryCount + 1;

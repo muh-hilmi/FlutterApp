@@ -69,6 +69,20 @@ class CommunitiesError extends CommunitiesState {
   List<Object?> get props => [message];
 }
 
+/// Offline state - shows cached communities when network is unavailable
+class CommunitiesOffline extends CommunitiesState {
+  final List<Community> cachedCommunities;
+  final String? message;
+
+  const CommunitiesOffline({
+    required this.cachedCommunities,
+    this.message = 'Offline — menampilkan data terakhir',
+  });
+
+  @override
+  List<Object?> get props => [cachedCommunities, message];
+}
+
 class CommunityCreated extends CommunitiesState {
   final Community community;
 

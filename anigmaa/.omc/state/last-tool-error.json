@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cd \\\"C:\\\\Users\\\\mailh\\\\OneDrive\\\\Desktop\\\\FlutterApp\\\\backend_anigmaa\\\" && docker compose down -v 2>&1\",\"description\":\"Stop containers AND remove volumes (clean DB state)\"}",
-  "error": "Exit code 127\n/usr/bin/bash: line 1: docker: command not found\n\n/usr/bin/bash: line 1: docker: command not found",
-  "timestamp": "2026-02-26T06:38:03.489Z",
+  "tool_input_preview": "{\"command\":\"cd \\\"C:\\\\Users\\\\mailh\\\\OneDrive\\\\Desktop\\\\FlutterApp\\\\anigmaa\\\" && flutter pub get\",\"timeout\":120000,\"description\":\"Install Hive dependencies\"}",
+  "error": "Exit code 1\nResolving dependencies...\nBecause no versions of dart_style match >3.1.3 <3.1.4 and dart_style >=3.1.1 <3.1.2 depends on analyzer ^7.5.2, dart_style >=3.1.1 <3.1.2-∞ or >3.1.3 <3.1.4-∞ requires analyzer ^7.5.2.\nAnd because dart_style >=3.1.2 <3.1.3 depends on analyzer ^8.0.0, dart_style >=3.1.1 <3.1.3-∞ or >3.1.3 <3.1.4-∞ requires analyzer ^7.5.2 or ^8.0.0.\nAnd because dart_style >=3.1.4 depends on analyzer ^10.0.0 and dart_style 3.1.3 depends on analyzer >=8.2.0 <10.0.0, dart_style ...",
+  "timestamp": "2026-02-28T17:21:40.761Z",
   "retry_count": 1
 }

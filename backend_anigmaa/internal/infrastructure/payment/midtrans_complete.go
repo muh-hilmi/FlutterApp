@@ -3,7 +3,10 @@ package payment
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
 	"crypto/sha512"
+	"crypto/subtle"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -204,20 +207,30 @@ func (m *MidtransClient) GetTransactionStatus(ctx context.Context, orderID strin
 	return &status, nil
 }
 
-// VerifySignature verifies the webhook signature from Midtrans
-// Signature = SHA512(order_id + status_code + gross_amount + server_key)
+// VerifySignature verifies the webhook signature from Midtrans.
+// Formula: SHA512(order_id + status_code + gross_amount + server_key)
+// Uses constant-time comparison to prevent timing-based signature oracle attacks.
 func (m *MidtransClient) VerifySignature(orderID, statusCode, grossAmount, signatureKey string) bool {
 	payload := orderID + statusCode + grossAmount + m.serverKey
 	hash := sha512.Sum512([]byte(payload))
 	expectedSig := fmt.Sprintf("%x", hash)
-	return expectedSig == signatureKey
+	// subtle.ConstantTimeCompare prevents timing attacks where an attacker
+	// could infer bytes of the expected signature by measuring response time.
+	return subtle.ConstantTimeCompare([]byte(expectedSig), []byte(signatureKey)) == 1
 }
 
-// GenerateOrderID generates a unique order ID
+// GenerateOrderID generates a collision-resistant order ID.
+// Format: {prefix}-{unix_nano_hex}{random_4_bytes_hex}
+// The random suffix ensures uniqueness even for concurrent purchases
+// within the same nanosecond (e.g. tests, bulk operations).
 func GenerateOrderID(prefix string) string {
-	timestamp := time.Now().Unix()
-	randomStr := fmt.Sprintf("%d", timestamp)
-	return fmt.Sprintf("%s-%s", prefix, randomStr)
+	nano := fmt.Sprintf("%x", time.Now().UnixNano())
+	b := make([]byte, 4)
+	if _, err := rand.Read(b); err != nil {
+		// Fallback: extra timestamp bits — still better than seconds-only
+		b = []byte(fmt.Sprintf("%04d", time.Now().Nanosecond()%10000))
+	}
+	return fmt.Sprintf("%s-%s%s", prefix, nano, hex.EncodeToString(b))
 }
 
 // GetClientKey returns the client key for frontend

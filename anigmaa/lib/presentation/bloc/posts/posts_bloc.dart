@@ -14,6 +14,8 @@ import '../../../domain/usecases/get_bookmarked_posts.dart';
 import 'posts_event.dart';
 import 'posts_state.dart';
 import '../../../domain/entities/comment.dart';
+import '../../../core/services/connectivity_service.dart';
+import '../../../injection_container.dart';
 
 const int postsPerPage = 20;
 
@@ -257,6 +259,32 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
   }
 
   Future<void> _onLoadPosts(LoadPosts event, Emitter<PostsState> emit) async {
+    // Check connectivity first
+    final connectivityService = sl<ConnectivityService>();
+
+    if (!connectivityService.isOnline) {
+      // Offline - try to load from cache
+      final currentState = _getCurrentState();
+
+      if (currentState != null && currentState.posts.isNotEmpty) {
+        // We have cached data
+        emit(PostsOffline(
+          cachedPosts: currentState.posts,
+          commentsByPostId: currentState.commentsByPostId,
+          paginationMeta: currentState.paginationMeta,
+        ));
+        return;
+      }
+
+      // No cached data - emit offline state with empty list
+      emit(const PostsOffline(
+        cachedPosts: [],
+        message: 'Offline — belum ada data tersimpan',
+      ));
+      return;
+    }
+
+    // Online - proceed with loading
     emit(PostsLoading());
 
     try {
@@ -266,6 +294,26 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
 
       result.fold(
         (failure) {
+          // Check if this is a network error and we have cached data
+          final currentState = _getCurrentState();
+          final errorMessage = failure.toString().toLowerCase();
+
+          final isNetworkError = errorMessage.contains('network') ||
+              errorMessage.contains('connection') ||
+              errorMessage.contains('timeout') ||
+              errorMessage.contains('socket');
+
+          if (isNetworkError && currentState != null && currentState.posts.isNotEmpty) {
+            // Network error but we have cached data - show offline state
+            emit(PostsOffline(
+              cachedPosts: currentState.posts,
+              commentsByPostId: currentState.commentsByPostId,
+              paginationMeta: currentState.paginationMeta,
+            ));
+            return;
+          }
+
+          // No cached data or not a network error - show error
           emit(PostsError('Failed to load posts: ${failure.toString()}'));
         },
         (paginatedResponse) {
@@ -278,6 +326,25 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
         },
       );
     } catch (e) {
+      // Check if exception is network-related and we have cached data
+      final currentState = _getCurrentState();
+      final errorMessage = e.toString().toLowerCase();
+
+      final isNetworkError = errorMessage.contains('network') ||
+          errorMessage.contains('connection') ||
+          errorMessage.contains('timeout') ||
+          errorMessage.contains('socket');
+
+      if (isNetworkError && currentState != null && currentState.posts.isNotEmpty) {
+        // Network error but we have cached data
+        emit(PostsOffline(
+          cachedPosts: currentState.posts,
+          commentsByPostId: currentState.commentsByPostId,
+          paginationMeta: currentState.paginationMeta,
+        ));
+        return;
+      }
+
       emit(PostsError('Exception loading posts: $e'));
     }
   }

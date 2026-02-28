@@ -5,6 +5,8 @@ import '../../../domain/usecases/join_community.dart' as usecases;
 import '../../../domain/usecases/leave_community.dart' as usecases;
 import '../../../domain/usecases/create_community.dart';
 import '../../../core/utils/network_resilience.dart';
+import '../../../core/services/connectivity_service.dart';
+import '../../../injection_container.dart';
 import 'communities_event.dart';
 import 'communities_state.dart';
 
@@ -40,25 +42,95 @@ class CommunitiesBloc extends Bloc<CommunitiesEvent, CommunitiesState>
     LoadCommunities event,
     Emitter<CommunitiesState> emit,
   ) async {
+    // Check connectivity first
+    final connectivityService = sl<ConnectivityService>();
+
+    if (!connectivityService.isOnline) {
+      // Offline - try to use cached data
+      if (state is CommunitiesLoaded) {
+        final currentState = state as CommunitiesLoaded;
+        emit(CommunitiesOffline(
+          cachedCommunities: currentState.filteredCommunities.isNotEmpty
+              ? currentState.filteredCommunities
+              : currentState.allCommunities,
+        ));
+        return;
+      }
+
+      // No cached data
+      emit(const CommunitiesOffline(
+        cachedCommunities: [],
+        message: 'Offline — belum ada data tersimpan',
+      ));
+      return;
+    }
+
+    // Online - proceed with loading
     emit(CommunitiesLoading());
 
-    // Use executeWithRetry for automatic retry on transient failures
-    final result = await executeWithRetry(
-      () => getCommunities(const GetCommunitiesParams()),
-      maxRetries: 3,
-    );
+    try {
+      // Use executeWithRetry but with timeout to prevent infinite blocking
+      final result = await executeWithRetry(
+        () => getCommunities(const GetCommunitiesParams()).timeout(
+          const Duration(seconds: 8),
+          onTimeout: () => throw Exception('Communities load timeout'),
+        ),
+        maxRetries: 3,
+      );
 
-    result.fold(
-      (failure) => emit(CommunitiesError(failure.message)),
-      (response) {
-        emit(CommunitiesLoaded(
-          allCommunities: response.data,
-          filteredCommunities: response.data,
-          joinedCommunities: const [],
-          selectedLocation: 'Jakarta',
+      result.fold(
+        (failure) {
+          // Check if this is a network error and we have cached data
+          final currentState = state is CommunitiesLoaded ? state as CommunitiesLoaded : null;
+          final errorMessage = failure.message.toLowerCase();
+
+          final isNetworkError = errorMessage.contains('network') ||
+              errorMessage.contains('connection') ||
+              errorMessage.contains('timeout') ||
+              errorMessage.contains('socket');
+
+          if (isNetworkError && currentState != null) {
+            emit(CommunitiesOffline(
+              cachedCommunities: currentState.filteredCommunities.isNotEmpty
+                  ? currentState.filteredCommunities
+                  : currentState.allCommunities,
+            ));
+            return;
+          }
+
+          // No cached data or non-network error - show error
+          emit(CommunitiesError(failure.message));
+        },
+        (response) {
+          emit(CommunitiesLoaded(
+            allCommunities: response.data,
+            filteredCommunities: response.data,
+            joinedCommunities: const [],
+            selectedLocation: 'Jakarta',
+          ));
+        },
+      );
+    } catch (e) {
+      // Check if exception is network-related
+      final currentState = state is CommunitiesLoaded ? state as CommunitiesLoaded : null;
+      final errorMessage = e.toString().toLowerCase();
+
+      final isNetworkError = errorMessage.contains('timeout') ||
+          errorMessage.contains('network') ||
+          errorMessage.contains('connection') ||
+          errorMessage.contains('socket');
+
+      if (isNetworkError && currentState != null) {
+        emit(CommunitiesOffline(
+          cachedCommunities: currentState.filteredCommunities.isNotEmpty
+              ? currentState.filteredCommunities
+              : currentState.allCommunities,
         ));
-      },
-    );
+        return;
+      }
+
+      emit(CommunitiesError('Failed to load communities: $e'));
+    }
   }
 
   Future<void> _onLoadJoinedCommunities(

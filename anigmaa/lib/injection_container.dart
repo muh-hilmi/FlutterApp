@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -7,6 +8,10 @@ import 'core/services/auth_service.dart';
 import 'core/services/google_auth_service.dart';
 import 'core/services/payment_service.dart';
 import 'core/services/api_service.dart';
+import 'core/services/connectivity_service.dart';
+import 'core/services/auto_refresh_service.dart';
+import 'core/storage/cache_storage_service.dart';
+import 'core/storage/location_cache_service.dart';
 import 'core/api/dio_client.dart';
 import 'core/auth/auth_bloc.dart';
 
@@ -71,6 +76,7 @@ import 'domain/usecases/get_ranked_feed.dart';
 
 // Data
 import 'data/datasources/event_local_datasource.dart';
+import 'data/datasources/event_local_datasource_impl.dart';
 import 'data/datasources/event_remote_datasource.dart';
 import 'data/datasources/post_remote_datasource.dart';
 import 'data/datasources/ticket_remote_datasource.dart';
@@ -78,6 +84,7 @@ import 'data/datasources/ticket_local_datasource.dart';
 import 'data/datasources/auth_remote_datasource.dart';
 import 'data/datasources/user_remote_datasource.dart';
 import 'data/datasources/community_local_datasource.dart';
+import 'data/datasources/community_local_datasource_impl.dart';
 import 'data/datasources/community_remote_datasource.dart';
 import 'data/datasources/qna_remote_datasource.dart';
 import 'data/datasources/ranking_remote_datasource.dart';
@@ -123,6 +130,26 @@ Future<void> init() async {
   sl.registerLazySingleton(() => AuthService(sl(), sl()));
   sl.registerLazySingleton(() => GoogleAuthService());
   sl.registerLazySingleton(() => ApiService());
+  sl.registerLazySingleton(() => ConnectivityService());
+
+  // Initialize CacheStorageService (await initialization)
+  final cacheStorage = CacheStorageService();
+  await cacheStorage.init();
+  sl.registerLazySingleton(() => cacheStorage);
+
+  // Initialize Hive (required before any Hive box can be opened)
+  await Hive.initFlutter();
+
+  // Initialize LocationCacheService
+  final locationCache = LocationCacheService();
+  await locationCache.init();
+  sl.registerLazySingleton(() => locationCache);
+
+  sl.registerLazySingleton(() => AutoRefreshService(
+    connectivityService: sl(),
+    authService: sl(),
+    authDataSource: sl(),
+  ));
 
   // Register PaymentService for Midtrans integration
   final paymentService = PaymentService();
@@ -145,8 +172,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => AuthBloc(sl(), sl(), sl()));
 
   // Features - Events
-  // Bloc
-  sl.registerFactory(
+  // Bloc - SINGLETON to persist across tab navigation
+  sl.registerLazySingleton(
     () => EventsBloc(
       getEvents: sl(),
       getEventsByCategory: sl(),
@@ -161,8 +188,8 @@ Future<void> init() async {
   );
 
   // Features - User
-  // Bloc
-  sl.registerFactory(
+  // Bloc - SINGLETON to persist across tab navigation
+  sl.registerLazySingleton(
     () => UserBloc(
       authService: sl(),
       getCurrentUser: sl(),
@@ -179,8 +206,8 @@ Future<void> init() async {
   );
 
   // Features - Posts
-  // Bloc
-  sl.registerFactory(
+  // Bloc - SINGLETON to persist across tab navigation
+  sl.registerLazySingleton(
     () => PostsBloc(
       getPosts: sl(),
       createPost: sl(),
@@ -210,8 +237,8 @@ Future<void> init() async {
   );
 
   // Features - Communities
-  // Bloc
-  sl.registerFactory(
+  // Bloc - SINGLETON to persist across tab navigation
+  sl.registerLazySingleton(
     () => CommunitiesBloc(
       getCommunities: sl(),
       getJoinedCommunities: sl(),
@@ -360,7 +387,7 @@ Future<void> init() async {
 
   // Data sources - Local
   sl.registerLazySingleton<EventLocalDataSource>(
-    () => EventLocalDataSourceImpl(),
+    () => EventLocalDataSourceImpl(sl<CacheStorageService>()),
   );
 
   sl.registerLazySingleton<TicketLocalDataSource>(
@@ -368,7 +395,7 @@ Future<void> init() async {
   );
 
   sl.registerLazySingleton<CommunityLocalDataSource>(
-    () => CommunityLocalDataSourceImpl(),
+    () => CommunityLocalDataSourceImpl(sl<CacheStorageService>()),
   );
 
   // Repository - Events (Real repository with API)

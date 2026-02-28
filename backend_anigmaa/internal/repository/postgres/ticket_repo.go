@@ -341,7 +341,13 @@ func (r *ticketRepository) GetTransaction(ctx context.Context, transactionID str
 	return &t, nil
 }
 
-// UpdateTransactionStatus updates a transaction status
+// UpdateTransactionStatus updates a transaction status atomically.
+//
+// The WHERE clause includes AND status = 'pending' so that if two webhook
+// deliveries race, only the first UPDATE wins (rowsAffected = 1) and the
+// second gets rowsAffected = 0, returning ticket.ErrAlreadyProcessed.
+// This makes the webhook handler idempotent at the database level without
+// needing an application-level lock.
 func (r *ticketRepository) UpdateTransactionStatus(ctx context.Context, transactionID string, status ticket.TransactionStatus) error {
 	now := time.Now()
 	var completedAt *time.Time
@@ -349,13 +355,12 @@ func (r *ticketRepository) UpdateTransactionStatus(ctx context.Context, transact
 		completedAt = &now
 	}
 
-	query := `
+	result, err := r.db.ExecContext(ctx, `
 		UPDATE ticket_transactions
 		SET status = $1, completed_at = $2
 		WHERE transaction_id = $3
-	`
-
-	result, err := r.db.ExecContext(ctx, query, status, completedAt, transactionID)
+		  AND status = 'pending'
+	`, status, completedAt, transactionID)
 	if err != nil {
 		return err
 	}
@@ -366,7 +371,10 @@ func (r *ticketRepository) UpdateTransactionStatus(ctx context.Context, transact
 	}
 
 	if rowsAffected == 0 {
-		return sql.ErrNoRows
+		// Either the transaction_id doesn't exist, or it was already processed
+		// by a concurrent webhook delivery. Return the sentinel so callers can
+		// distinguish this case from a genuine not-found.
+		return ticket.ErrAlreadyProcessed
 	}
 
 	return nil
@@ -424,4 +432,111 @@ func (r *ticketRepository) CountEventTickets(ctx context.Context, eventID uuid.U
 	var count int
 	err := r.db.QueryRowContext(ctx, query, eventID).Scan(&count)
 	return count, err
+}
+
+// AtomicPurchase creates a ticket inside a serialised DB transaction:
+//  1. Locks the event row with SELECT … FOR UPDATE (blocks concurrent purchasers)
+//  2. Checks capacity — returns ticket.ErrEventFull if sold out
+//  3. INSERTs the ticket
+//  4. Increments events.tickets_sold atomically in the same transaction
+//
+// This is the only correct way to sell tickets; the non-transactional Create
+// must not be used for ticket purchases.
+func (r *ticketRepository) AtomicPurchase(ctx context.Context, t *ticket.Ticket) error {
+	if t.ID == uuid.Nil {
+		t.ID = uuid.New()
+	}
+
+	if t.AttendanceCode == "" {
+		code, err := generateAttendanceCode()
+		if err != nil {
+			return fmt.Errorf("failed to generate attendance code: %w", err)
+		}
+		t.AttendanceCode = code
+	}
+
+	t.PurchasedAt = time.Now()
+
+	tx, err := r.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback() //nolint:errcheck
+
+	// Lock the event row so no other goroutine/instance can read-then-write
+	// the capacity counter until this transaction commits or rolls back.
+	var maxAttendees, ticketsSold int
+	err = tx.QueryRowContext(ctx,
+		`SELECT max_attendees, tickets_sold FROM events WHERE id = $1 FOR UPDATE`,
+		t.EventID,
+	).Scan(&maxAttendees, &ticketsSold)
+	if err != nil {
+		return fmt.Errorf("failed to lock event row: %w", err)
+	}
+
+	if ticketsSold >= maxAttendees {
+		return ticket.ErrEventFull
+	}
+
+	// Insert the ticket.
+	_, err = tx.ExecContext(ctx, `
+		INSERT INTO tickets (id, user_id, event_id, attendance_code, price_paid, purchased_at, is_checked_in, status)
+		VALUES ($1, $2, $3, $4, $5, $6, FALSE, $7)
+	`, t.ID, t.UserID, t.EventID, t.AttendanceCode, t.PricePaid, t.PurchasedAt, t.Status)
+	if err != nil {
+		return fmt.Errorf("failed to insert ticket: %w", err)
+	}
+
+	// Increment the denormalized counter inside the same transaction.
+	_, err = tx.ExecContext(ctx,
+		`UPDATE events SET tickets_sold = tickets_sold + 1 WHERE id = $1`,
+		t.EventID,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to increment tickets_sold: %w", err)
+	}
+
+	return tx.Commit()
+}
+
+// DecrementTicketsSold decrements events.tickets_sold by 1 (floor 0).
+// Call this whenever a pending ticket is cancelled, failed, or expired so
+// the capacity counter stays in sync with actual sellable spots.
+func (r *ticketRepository) DecrementTicketsSold(ctx context.Context, eventID uuid.UUID) error {
+	_, err := r.db.ExecContext(ctx,
+		`UPDATE events SET tickets_sold = GREATEST(tickets_sold - 1, 0) WHERE id = $1`,
+		eventID,
+	)
+	return err
+}
+
+// ExpirePendingTickets bulk-expires all tickets that are still 'pending' and
+// were purchased before olderThan (i.e. the Midtrans snap token has lapsed).
+// Returns the affected tickets so the caller can decrement tickets_sold.
+func (r *ticketRepository) ExpirePendingTickets(ctx context.Context, olderThan time.Time) ([]ticket.Ticket, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		UPDATE tickets
+		SET status = 'expired'
+		WHERE status = 'pending'
+		  AND purchased_at < $1
+		RETURNING id, user_id, event_id, attendance_code, price_paid, purchased_at,
+		          is_checked_in, checked_in_at, status
+	`, olderThan)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tickets []ticket.Ticket
+	for rows.Next() {
+		var t ticket.Ticket
+		if err := rows.Scan(
+			&t.ID, &t.UserID, &t.EventID, &t.AttendanceCode,
+			&t.PricePaid, &t.PurchasedAt, &t.IsCheckedIn, &t.CheckedInAt, &t.Status,
+		); err != nil {
+			return nil, err
+		}
+		tickets = append(tickets, t)
+	}
+	return tickets, rows.Err()
 }

@@ -96,6 +96,24 @@ class PostsError extends PostsState {
   List<Object?> get props => [message];
 }
 
+/// Offline state - shows cached data when network is unavailable
+class PostsOffline extends PostsState {
+  final List<Post> cachedPosts;
+  final Map<String, List<Comment>> commentsByPostId;
+  final PaginationMeta? paginationMeta;
+  final String? message;
+
+  const PostsOffline({
+    required this.cachedPosts,
+    this.commentsByPostId = const {},
+    this.paginationMeta,
+    this.message = 'Offline — menampilkan data terakhir',
+  });
+
+  @override
+  List<Object?> get props => [cachedPosts, commentsByPostId, paginationMeta, message];
+}
+
 class CommentsLoading extends PostsState {
   final List<Post> posts;
 

@@ -314,45 +314,35 @@ class _LocationPickerState extends State<LocationPicker> {
   }
 
   String _getLocationName(Placemark place) {
-    // Priority: name > street > subLocality > locality
+    // Use subAdministrativeArea for profile location (e.g., "Kabupaten Boyolali")
+    if (place.subAdministrativeArea != null &&
+        place.subAdministrativeArea!.isNotEmpty) {
+      return place.subAdministrativeArea!;
+    }
+    // Fallback to locality
+    if (place.locality != null && place.locality!.isNotEmpty) {
+      return place.locality!;
+    }
+    // Last resort: name (but avoid overly specific names)
     if (place.name != null &&
         place.name!.isNotEmpty &&
         place.name!.length < 50) {
       return place.name!;
     }
-    if (place.street != null && place.street!.isNotEmpty) {
-      return place.street!;
-    }
-    if (place.subLocality != null && place.subLocality!.isNotEmpty) {
-      return place.subLocality!;
-    }
-    if (place.locality != null && place.locality!.isNotEmpty) {
-      return place.locality!;
-    }
     return 'Lokasi Terpilih';
   }
 
   String _formatAddress(Placemark place) {
-    List<String> parts = [];
-    if (place.street != null && place.street!.isNotEmpty) {
-      parts.add(place.street!);
-    }
-    if (place.subLocality != null && place.subLocality!.isNotEmpty) {
-      parts.add(place.subLocality!);
-    }
-    if (place.locality != null && place.locality!.isNotEmpty) {
-      parts.add(place.locality!);
-    }
+    // Only use subAdministrativeArea (e.g., "Kabupaten Boyolali" → "Boyolali")
     if (place.subAdministrativeArea != null &&
         place.subAdministrativeArea!.isNotEmpty) {
-      parts.add(place.subAdministrativeArea!);
+      return place.subAdministrativeArea!;
     }
-    if (place.administrativeArea != null &&
-        place.administrativeArea!.isNotEmpty) {
-      parts.add(place.administrativeArea!);
+    // Fallback to locality if subAdministrativeArea is not available
+    if (place.locality != null && place.locality!.isNotEmpty) {
+      return place.locality!;
     }
-
-    return parts.isNotEmpty ? parts.join(', ') : 'Alamat tidak tersedia';
+    return 'Alamat tidak tersedia';
   }
 
   Future<void> _searchLocation(String query) async {

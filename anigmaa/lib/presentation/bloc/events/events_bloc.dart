@@ -9,7 +9,9 @@ import '../../../domain/usecases/get_event_by_id.dart';
 import '../../../domain/usecases/update_event.dart';
 import '../../../domain/usecases/toggle_event_interest.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/connectivity_service.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../injection_container.dart';
 
 import 'events_event.dart';
 import 'events_state.dart';
@@ -64,58 +66,107 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
     LoadEvents event,
     Emitter<EventsState> emit,
   ) async {
+    // Check connectivity first
+    final connectivityService = sl<ConnectivityService>();
+
+    if (!connectivityService.isOnline) {
+      // Offline - try to use cached data
+      if (state is EventsLoaded) {
+        final currentState = state as EventsLoaded;
+        emit(EventsOffline(
+          cachedEvents: currentState.filteredEvents.isNotEmpty
+              ? currentState.filteredEvents
+              : currentState.events,
+        ));
+        return;
+      }
+
+      // No cached data
+      emit(const EventsOffline(
+        cachedEvents: [],
+        message: 'Offline — belum ada data tersimpan',
+      ));
+      return;
+    }
+
+    // Online - proceed with loading
     emit(EventsLoading());
 
-    // Fetch feed and nearby events in parallel
-    final results = await Future.wait([
-      getEvents(const GetEventsParams(limit: 20, offset: 0)),
-      getNearbyEvents(const GetNearbyEventsParams(limit: 10)),
-    ]);
+    try {
+      // NON-BLOCKING: Fetch feed events first with 5s timeout
+      final feedResult = await getEvents(
+        const GetEventsParams(limit: 20, offset: 0),
+      ).timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => throw Exception('Feed events timeout'),
+      );
 
-    final feedResult = results[0];
-    final nearbyResult = results[1];
+      await feedResult.fold(
+        (failure) async {
+          // Check if this is a network error and we have cached data
+          final currentState = state is EventsLoaded ? state as EventsLoaded : null;
+          final errorMessage = failure.message.toLowerCase();
 
-    feedResult.fold((failure) => emit(EventsError(failure.message)), (
-      paginatedResponse,
-    ) {
-      final allEvents = paginatedResponse.data;
-      // Filter out events that have already ended
-      final now = DateTime.now().toUtc();
+          final isNetworkError = errorMessage.contains('network') ||
+              errorMessage.contains('connection') ||
+              errorMessage.contains('timeout') ||
+              errorMessage.contains('socket');
 
-      final upcomingEvents = allEvents
-          .where((event) => event.endTime.isAfter(now))
-          .toList();
+          if (isNetworkError && currentState != null) {
+            emit(EventsOffline(
+              cachedEvents: currentState.filteredEvents.isNotEmpty
+                  ? currentState.filteredEvents
+                  : currentState.events,
+            ));
+            return;
+          }
 
-      // Process nearby events result
-      List<Event> nearbyEvents = [];
-      nearbyResult.fold(
-        (failure) {
-          AppLogger().error(
-            '[EventsBloc] Failed to fetch nearby events: ${failure.message}',
-          );
-          // If real API fails, fallback to simple filtering as "Starting Soon"
-          nearbyEvents = upcomingEvents
-              .where((event) => event.isStartingSoon)
-              .toList();
+          emit(EventsError(failure.message));
         },
-        (response) {
-          nearbyEvents = response.data
+        (paginatedResponse) async {
+          final allEvents = paginatedResponse.data;
+          // Filter out events that have already ended
+          final now = DateTime.now().toUtc();
+
+          final upcomingEvents = allEvents
               .where((event) => event.endTime.isAfter(now))
               .toList();
+
+          // Emit IMMEDIATELY with feed data (non-blocking)
+          emit(
+            EventsLoaded(
+              events: allEvents,
+              filteredEvents: upcomingEvents,
+              nearbyEvents: [], // Empty for now, will update
+              paginationMeta: paginatedResponse.meta,
+            ),
+          );
+
+          // Fetch nearby events in BACKGROUND (non-blocking)
+          _fetchNearbyEventsInBackground(upcomingEvents);
         },
       );
+    } catch (e) {
+      // Check if exception is network-related
+      final currentState = state is EventsLoaded ? state as EventsLoaded : null;
+      final errorMessage = e.toString().toLowerCase();
 
-      // Events loaded: ${upcomingEvents.length} feed, ${nearbyEvents.length} nearby
+      final isNetworkError = errorMessage.contains('timeout') ||
+          errorMessage.contains('network') ||
+          errorMessage.contains('connection') ||
+          errorMessage.contains('socket');
 
-      emit(
-        EventsLoaded(
-          events: allEvents,
-          filteredEvents: upcomingEvents,
-          nearbyEvents: nearbyEvents,
-          paginationMeta: paginatedResponse.meta,
-        ),
-      );
-    });
+      if (isNetworkError && currentState != null) {
+        emit(EventsOffline(
+          cachedEvents: currentState.filteredEvents.isNotEmpty
+              ? currentState.filteredEvents
+              : currentState.events,
+        ));
+        return;
+      }
+
+      emit(EventsError('Failed to load events: $e'));
+    }
   }
 
   Future<void> _onLoadEventsByMode(
@@ -124,14 +175,13 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
   ) async {
     emit(EventsLoading());
 
-    // Fetch feed and nearby events in parallel
-    final results = await Future.wait([
-      getEvents(GetEventsParams(limit: 50, offset: 0, mode: event.mode)),
-      getNearbyEvents(const GetNearbyEventsParams(limit: 10)),
-    ]);
-
-    final feedResult = results[0];
-    final nearbyResult = results[1];
+    // NON-BLOCKING: Fetch feed events first
+    final feedResult = await getEvents(
+      GetEventsParams(limit: 50, offset: 0, mode: event.mode),
+    ).timeout(
+      const Duration(seconds: 5),
+      onTimeout: () => throw Exception('Feed events timeout'),
+    );
 
     feedResult.fold((failure) => emit(EventsError(failure.message)), (
       paginatedResponse,
@@ -143,29 +193,18 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
           .where((event) => event.endTime.isAfter(now))
           .toList();
 
-      // Process nearby events result
-      List<Event> nearbyEvents = [];
-      nearbyResult.fold(
-        (failure) {
-          nearbyEvents = upcomingEvents
-              .where((event) => event.isStartingSoon)
-              .toList();
-        },
-        (response) {
-          nearbyEvents = response.data
-              .where((event) => event.endTime.isAfter(now))
-              .toList();
-        },
-      );
-
+      // Emit IMMEDIATELY with feed data
       emit(
         EventsLoaded(
           events: allEvents,
           filteredEvents: upcomingEvents,
-          nearbyEvents: nearbyEvents,
+          nearbyEvents: [], // Empty for now, will update
           paginationMeta: paginatedResponse.meta,
         ),
       );
+
+      // Fetch nearby events in BACKGROUND (non-blocking)
+      _fetchNearbyEventsInBackground(upcomingEvents);
     });
   }
 
@@ -1155,6 +1194,48 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
           );
         },
       );
+    }
+  }
+
+  /// Fetch nearby events in background (non-blocking)
+  /// Called after feed events are loaded to avoid blocking UI
+  Future<void> _fetchNearbyEventsInBackground(List<Event> upcomingEvents) async {
+    if (!isClosed) {
+      try {
+        final nearbyResult = await getNearbyEvents(
+          const GetNearbyEventsParams(limit: 10),
+        ).timeout(
+          const Duration(seconds: 5),
+          onTimeout: () {
+            AppLogger().warning('[EventsBloc] Nearby events fetch timeout');
+            throw Exception('Nearby events timeout');
+          },
+        );
+
+        nearbyResult.fold(
+          (failure) {
+            AppLogger().error('[EventsBloc] Background nearby events failed: ${failure.message}');
+            // Silently fail - UI already shows feed events
+          },
+          (response) {
+            if (!isClosed && state is EventsLoaded) {
+              final currentState = state as EventsLoaded;
+              final now = DateTime.now().toUtc();
+
+              final nearbyEvents = response.data
+                  .where((event) => event.endTime.isAfter(now))
+                  .toList();
+
+              // Update state with nearby events
+              emit(currentState.copyWith(nearbyEvents: nearbyEvents));
+              AppLogger().info('[EventsBloc] Background nearby events loaded: ${nearbyEvents.length}');
+            }
+          },
+        );
+      } catch (e) {
+        AppLogger().warning('[EventsBloc] Background nearby events error: $e');
+        // Silently fail - UI already shows feed events
+      }
     }
   }
 }

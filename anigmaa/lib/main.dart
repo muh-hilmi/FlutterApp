@@ -198,8 +198,6 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
   int _currentIndex = 0;
   int _homeTabIndex =
       0; // Track which tab is active in HomeScreen (0=Feed, 1=Events)
-  final GlobalKey<DiscoverScreenState> _discoverKey =
-      GlobalKey<DiscoverScreenState>();
   bool _isSpeedDialOpen = false;
 
   void _onHomeTabChanged(int tabIndex) {
@@ -307,14 +305,13 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                 );
               },
               child: IndexedStack(
-                key: ValueKey<int>(_currentIndex),
                 index: _currentIndex,
                 children: [
                   HomeScreen(
                     key: const Key('home_feed'),
                     onTabChanged: _onHomeTabChanged,
                   ), // Home with Feed/Events tabs
-                  DiscoverScreen(key: _discoverKey), // Redesigned Discover Page
+                  const DiscoverScreen(), // Redesigned Discover Page
                   const NewCommunityScreen(key: Key('communities_screen')),
                   ProfileScreen(
                     key: const Key('profile_screen'),
@@ -514,26 +511,8 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       onTap: () {
         AppLogger().info('Tab changed: $_currentIndex -> $index');
 
-        // Reload feed posts when returning to Home tab (index 0)
-        // This fixes bug where saved posts from profile pollute home feed
-        if (index == 0 && _currentIndex != 0) {
-          context.read<PostsBloc>().add(LoadPosts());
-        }
-
-        // Force reload current user profile when tapping Profile tab (index 3)
-        // This fixes bug where visiting other user's profile pollutes navbar profile
-        if (index == 3) {
-          final authService = di.sl<AuthService>();
-          final currentUserId = authService.userId;
-
-          // Load current user profile and posts
-          context.read<UserBloc>().add(LoadUserProfile());
-          if (currentUserId != null) {
-            context.read<UserBloc>().add(LoadUserPostsEvent(currentUserId));
-          }
-        } else {
-          // Do nothing
-        }
+        // DO NOT manually reload - BLoCs are now singletons with persistent state
+        // Cache is preserved across tab switches
 
         setState(() {
           _currentIndex = index;

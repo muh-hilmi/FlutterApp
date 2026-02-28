@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/jwt_helper.dart';
 
 class AuthService {
   static const String _keyIsLoggedIn = 'is_logged_in';
@@ -126,5 +127,44 @@ class AuthService {
   Future<bool> get hasValidToken async {
     final token = await accessToken;
     return token != null && token.isNotEmpty;
+  }
+
+  // Check if refresh token exists (for offline-first auth)
+  Future<bool> get hasRefreshToken async {
+    final token = await refreshToken;
+    return token != null && token.isNotEmpty;
+  }
+
+  // Check if access token is expired (using JWT expiry claim)
+  Future<bool> isAccessTokenExpired() async {
+    final token = await accessToken;
+
+    if (token == null || token.isEmpty) {
+      return true; // No token = expired
+    }
+
+    return JwtHelper.isExpired(token);
+  }
+
+  // Check if access token is expiring soon (within 5 minutes)
+  Future<bool> isAccessTokenExpiringSoon({int minutes = 5}) async {
+    final token = await accessToken;
+
+    if (token == null || token.isEmpty) {
+      return true; // No token = expiring
+    }
+
+    return JwtHelper.isExpiringSoon(token, minutes: minutes);
+  }
+
+  // Get remaining time until access token expires
+  Future<Duration?> getAccessTokenTimeUntilExpiry() async {
+    final token = await accessToken;
+
+    if (token == null || token.isEmpty) {
+      return null;
+    }
+
+    return JwtHelper.getTimeUntilExpiry(token);
   }
 }

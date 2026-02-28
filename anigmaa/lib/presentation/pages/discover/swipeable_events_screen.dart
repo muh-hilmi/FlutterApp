@@ -31,7 +31,7 @@ class SwipeableEventsScreen extends StatefulWidget {
 }
 
 class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   // Local state to manage the stack of events
   List<Event> _sourceEvents = []; // Unfiltered source from bloc (for sync detection)
   List<Event> _events = [];       // Filtered (ended events excluded)
@@ -41,6 +41,9 @@ class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
   // Join Confirmation State
   Event? _pendingJoinEvent;
   late AnimationController _sheetController;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -171,6 +174,7 @@ class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     return BlocListener<TicketsBloc, TicketsState>(
       listener: (context, state) {
         if (state is TicketPurchased) {
@@ -207,18 +211,27 @@ class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
         backgroundColor: AppColors.white,
         body: BlocBuilder<EventsBloc, EventsState>(
           builder: (context, state) {
-            if (state is EventsLoading) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.secondary),
-              );
-            }
-            if (state is EventsError) {
-              return ErrorStateWidget(
-                message: _getUserFriendlyError(state.message),
-                onRetry: () => context.read<EventsBloc>().add(LoadEvents()),
-              );
-            }
-          if (state is EventsLoaded) {
+            // Keep state alive across tab switches
+            return _buildContent(state);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(EventsState state) {
+    if (state is EventsLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.secondary),
+      );
+    }
+    if (state is EventsError) {
+      return ErrorStateWidget(
+        message: _getUserFriendlyError(state.message),
+        onRetry: () => context.read<EventsBloc>().add(LoadEvents()),
+      );
+    }
+    if (state is EventsLoaded) {
             // Sync local events with bloc state only when the source list changes.
             // Compare against _sourceEvents (unfiltered) so our extra hasEnded
             // filter doesn't make the length differ and trigger infinite resyncs.
@@ -333,10 +346,6 @@ class _SwipeableEventsScreenState extends State<SwipeableEventsScreen>
             );
           }
           return const SizedBox.shrink();
-        },
-      ),
-      ),
-    );
   }
 
   Widget _buildEmptyState() {

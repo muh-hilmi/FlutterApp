@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"wsl.exe docker compose down -v 2>&1\",\"timeout\":120000,\"description\":\"Stop containers via default WSL\"}",
-  "error": "Exit code 1\nno configuration file provided: not found\n\nno configuration file provided: not found",
-  "timestamp": "2026-02-26T05:41:03.604Z",
-  "retry_count": 4
+  "tool_input_preview": "{\"command\":\"wsl -e bash -c \\\"docker exec anigmaa_backend go build ./... 2>&1\\\"\",\"timeout\":120000}",
+  "error": "Exit code 1\nError response from daemon: Container 1ad18f12e8aae349b5d04a49e63f80e0e6a6440f9c2f4a40df4db9320eadfca9 is restarting, wait until the container is running\n\nError response from daemon: Container 1ad18f12e8aae349b5d04a49e63f80e0e6a6440f9c2f4a40df4db9320eadfca9 is restarting, wait until the container is running",
+  "timestamp": "2026-02-28T16:49:37.709Z",
+  "retry_count": 2
 }

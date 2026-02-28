@@ -8,6 +8,7 @@ import '../../bloc/communities/communities_bloc.dart';
 import '../../bloc/communities/communities_state.dart';
 import '../../bloc/communities/communities_event.dart';
 import '../../widgets/common/error_state_widget.dart';
+import '../../widgets/common/offline_banner.dart';
 import 'community_detail_screen.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -141,17 +142,31 @@ class _DiscoverCommunitiesScreenState extends State<DiscoverCommunitiesScreen> {
       appBar: _buildAppBar(),
       body: Column(
         children: [
+          // Offline banner
+          const OfflineBanner(),
+
           _buildCategoryFilter(),
+
           Expanded(
             child: BlocBuilder<CommunitiesBloc, CommunitiesState>(
               builder: (context, state) {
-                if (state is CommunitiesLoading) {
+                // Extract communities from whatever state we have
+                List<Community> communities = [];
+                if (state is CommunitiesLoaded) {
+                  communities = state.filteredCommunities;
+                } else if (state is CommunitiesOffline) {
+                  communities = state.cachedCommunities;
+                }
+
+                // Initial loading - show spinner only if we have NO data at all
+                if (state is CommunitiesLoading && communities.isEmpty) {
                   return const Center(
                     child: CircularProgressIndicator(color: AppColors.secondary),
                   );
                 }
 
-                if (state is CommunitiesError) {
+                // Show error only if NO cached data
+                if (state is CommunitiesError && communities.isEmpty) {
                   return ErrorStateWidget(
                     message: _getUserFriendlyError(state.message),
                     onRetry: () {
@@ -160,42 +175,19 @@ class _DiscoverCommunitiesScreenState extends State<DiscoverCommunitiesScreen> {
                   );
                 }
 
-                if (state is CommunitiesLoaded) {
-                  var communities = state.filteredCommunities;
+                // Apply category filter if selected
+                if (_selectedCategory != null) {
+                  communities = communities
+                      .where((c) => c.category == _selectedCategory)
+                      .toList();
+                }
 
-                  // Filter by category if selected
-                  if (_selectedCategory != null) {
-                    communities = communities
-                        .where((c) => c.category == _selectedCategory)
-                        .toList();
-                  }
-
+                // If we have communities (loaded or offline), render them
+                if (communities.isNotEmpty) {
                   // Precache visible images when communities are loaded
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     _precacheVisibleImages(communities);
                   });
-
-                  if (communities.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.groups_outlined,
-                            size: 64,
-                            color: AppColors.border,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No communities found',
-                            style: AppTextStyles.bodyLargeBold.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
 
                   return RefreshIndicator(
                     color: AppColors.secondary,
@@ -230,7 +222,26 @@ class _DiscoverCommunitiesScreenState extends State<DiscoverCommunitiesScreen> {
                   );
                 }
 
-                return const SizedBox.shrink();
+                // Empty state
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.groups_outlined,
+                        size: 64,
+                        color: AppColors.border,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No communities found',
+                        style: AppTextStyles.bodyLargeBold.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
               },
             ),
           ),

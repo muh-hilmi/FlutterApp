@@ -20,6 +20,7 @@ import '../../bloc/user/user_event.dart';
 import '../../widgets/posts/modern_post_card.dart';
 import '../../widgets/profile/profile_header_widget.dart';
 import '../../widgets/profile/profile_menu_widget.dart';
+import '../../widgets/common/offline_banner.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -37,7 +38,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   String? _currentUserId;
   bool _isOwnProfile = false;
   TabController? _tabController;
@@ -45,6 +46,9 @@ class _ProfileScreenState extends State<ProfileScreen>
   bool _unfollowConfirmation = false;
   Timer? _confirmationTimer;
   String? _lastLoadedUserId;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -83,8 +87,15 @@ class _ProfileScreenState extends State<ProfileScreen>
           _tabController = TabController(length: 2, vsync: this);
         });
 
-        context.read<UserBloc>().add(LoadUserById(targetUserId));
-        context.read<UserBloc>().add(LoadUserPostsEvent(targetUserId));
+        // Load data ONLY if not already loaded or in error state
+        final currentState = context.read<UserBloc>().state;
+        if (currentState is UserLoading == false &&
+            (currentState is UserInitial ||
+             currentState is UserError ||
+             (currentState is UserLoaded && currentState.user.id != targetUserId))) {
+          context.read<UserBloc>().add(LoadUserById(targetUserId));
+          context.read<UserBloc>().add(LoadUserPostsEvent(targetUserId));
+        }
       }
     }
   }
@@ -115,62 +126,73 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
       backgroundColor: AppColors.white,
-      body: SafeArea(
-        child: BlocListener<UserBloc, UserState>(
-          listener: (context, state) {
-            if (state is UserLoaded ||
-                state is UserActionSuccess ||
-                state is UserError) {
-              _confirmationTimer?.cancel();
-              setState(() {
-                _isProcessing = false;
-                _unfollowConfirmation = false;
-              });
+      body: Column(
+        children: [
+          // Offline banner (shows at top when offline)
+          const OfflineBanner(),
 
-              if (state is UserError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: AppColors.error,
-                  ),
-                );
-              }
-            }
-          },
-          child: BlocBuilder<UserBloc, UserState>(
-            buildWhen: (previous, current) {
-              return current is UserLoading ||
-                  current is UserLoaded ||
-                  current is UserError ||
-                  current is UserActionSuccess;
-            },
-            builder: (context, state) {
-              if (state is UserLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(color: AppColors.secondary),
-                );
-              }
+          // Main content
+          Expanded(
+            child: SafeArea(
+              child: BlocListener<UserBloc, UserState>(
+                listener: (context, state) {
+                  if (state is UserLoaded ||
+                      state is UserActionSuccess ||
+                      state is UserError) {
+                    _confirmationTimer?.cancel();
+                    setState(() {
+                      _isProcessing = false;
+                      _unfollowConfirmation = false;
+                    });
 
-              if (state is UserError) {
-                return _buildErrorState(state);
-              }
+                    if (state is UserError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message),
+                          backgroundColor: AppColors.error,
+                        ),
+                      );
+                    }
+                  }
+                },
+                child: BlocBuilder<UserBloc, UserState>(
+                  buildWhen: (previous, current) {
+                    return current is UserLoading ||
+                        current is UserLoaded ||
+                        current is UserError ||
+                        current is UserActionSuccess;
+                  },
+                  builder: (context, state) {
+                    if (state is UserLoading) {
+                      return const Center(
+                        child: CircularProgressIndicator(color: AppColors.secondary),
+                      );
+                    }
 
-              if (state is UserLoaded) {
-                if (_tabController == null) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: AppColors.secondary),
-                  );
-                }
+                    if (state is UserError) {
+                      return _buildErrorState(state);
+                    }
 
-                return _buildProfileContent(state);
-              }
+                    if (state is UserLoaded) {
+                      if (_tabController == null) {
+                        return const Center(
+                          child: CircularProgressIndicator(color: AppColors.secondary),
+                        );
+                      }
 
-              return const SizedBox.shrink();
-            },
+                      return _buildProfileContent(state);
+                    }
+
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

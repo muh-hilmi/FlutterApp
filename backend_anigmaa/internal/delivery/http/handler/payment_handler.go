@@ -2,9 +2,12 @@ package handler
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
+	"github.com/anigmaa/backend/internal/domain/ticket"
 	"github.com/anigmaa/backend/internal/infrastructure/payment"
+	ticket_uc "github.com/anigmaa/backend/internal/usecase/ticket"
 	"github.com/anigmaa/backend/pkg/response"
 	"github.com/gin-gonic/gin"
 )
@@ -12,12 +15,14 @@ import (
 // PaymentHandler handles payment-related HTTP requests
 type PaymentHandler struct {
 	midtransClient *payment.MidtransClient
+	ticketUsecase  *ticket_uc.Usecase
 }
 
 // NewPaymentHandler creates a new payment handler for Midtrans
-func NewPaymentHandler(midtransClient *payment.MidtransClient) *PaymentHandler {
+func NewPaymentHandler(midtransClient *payment.MidtransClient, ticketUsecase *ticket_uc.Usecase) *PaymentHandler {
 	return &PaymentHandler{
 		midtransClient: midtransClient,
+		ticketUsecase:  ticketUsecase,
 	}
 }
 
@@ -51,14 +56,12 @@ type InitiatePaymentResponse struct {
 // @Failure 500 {object} response.Response
 // @Router /api/v1/payments/initiate [post]
 func (h *PaymentHandler) InitiatePayment(c *gin.Context) {
-	// Parse request
 	var req InitiatePaymentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, "Invalid request format", err.Error())
 		return
 	}
 
-	// Prepare customer details
 	customerDetails := payment.CustomerDetails{
 		FirstName: req.FirstName,
 		Email:     req.Email,
@@ -70,7 +73,6 @@ func (h *PaymentHandler) InitiatePayment(c *gin.Context) {
 		customerDetails.Phone = req.Phone
 	}
 
-	// Prepare item details
 	itemDetails := []payment.ItemDetail{
 		{
 			ID:       req.ItemID,
@@ -80,19 +82,16 @@ func (h *PaymentHandler) InitiatePayment(c *gin.Context) {
 		},
 	}
 
-	// Prepare callbacks
 	callbacks := &payment.Callbacks{
-		Finish:  "anigmaa://payment/finish",
-		Error:   "anigmaa://payment/error",
+		Finish: "anigmaa://payment/finish",
+		Error:  "anigmaa://payment/error",
 	}
 
-	// Set expiry to 1 hour
 	expiry := &payment.Expiry{
 		Unit:     "hour",
 		Duration: 1,
 	}
 
-	// Prepare Snap request
 	snapReq := &payment.SnapRequest{
 		TransactionDetails: payment.TransactionDetails{
 			OrderID:     req.OrderID,
@@ -107,14 +106,12 @@ func (h *PaymentHandler) InitiatePayment(c *gin.Context) {
 		Expiry:    expiry,
 	}
 
-	// Create Snap token
 	snapResp, err := h.midtransClient.CreateSnapToken(c.Request.Context(), snapReq)
 	if err != nil {
 		response.InternalError(c, "Failed to create payment token", err.Error())
 		return
 	}
 
-	// Return response
 	response.Success(c, http.StatusOK, "Payment initiated successfully", InitiatePaymentResponse{
 		Token:       snapResp.Token,
 		RedirectURL: snapResp.RedirectURL,
@@ -156,7 +153,6 @@ func (h *PaymentHandler) CheckPaymentStatus(c *gin.Context) {
 		return
 	}
 
-	// Query Midtrans for transaction status
 	status, err := h.midtransClient.GetTransactionStatus(c.Request.Context(), req.OrderID)
 	if err != nil {
 		response.InternalError(c, "Failed to get transaction status", err.Error())
@@ -189,7 +185,30 @@ type MidtransWebhookRequest struct {
 	SignatureKey      string `json:"signature_key"`
 }
 
-// MidtransWebhook handles payment notifications from Midtrans
+// mapMidtransStatus converts a Midtrans transaction_status string to the
+// internal TransactionStatus enum.
+// Returns (status, ok) — ok is false for statuses that require no DB action
+// (e.g. "pending" means payment not yet attempted, nothing to update).
+func mapMidtransStatus(midtransStatus string) (ticket.TransactionStatus, bool) {
+	switch midtransStatus {
+	case "capture", "settlement":
+		return ticket.TransactionSuccess, true
+	case "deny", "cancel", "expire", "failure":
+		return ticket.TransactionFailed, true
+	case "refund", "partial_refund":
+		return ticket.TransactionRefunded, true
+	default:
+		// "pending" and unknown statuses: no action needed
+		return "", false
+	}
+}
+
+// MidtransWebhook handles payment notifications from Midtrans.
+//
+// Security: SHA-512 signature is verified before any processing.
+// Idempotency: ProcessPaymentCallback skips already-terminal transactions,
+// so duplicate webhook deliveries are safe.
+//
 // @Summary Midtrans payment notification webhook
 // @Description Handle payment notifications from Midtrans
 // @Tags payments
@@ -200,37 +219,64 @@ type MidtransWebhookRequest struct {
 // @Failure 400 {object} response.Response
 // @Router /api/v1/webhooks/midtrans [post]
 func (h *PaymentHandler) MidtransWebhook(c *gin.Context) {
-	// Parse notification from Midtrans
 	var notification MidtransWebhookRequest
 	if err := c.ShouldBindJSON(&notification); err != nil {
 		response.BadRequest(c, "Invalid notification format", err.Error())
 		return
 	}
 
-	// Verify signature for security
-	isValid := h.midtransClient.VerifySignature(
+	// Verify SHA-512 signature: SHA512(order_id + status_code + gross_amount + server_key)
+	if !h.midtransClient.VerifySignature(
 		notification.OrderID,
 		notification.StatusCode,
 		notification.GrossAmount,
 		notification.SignatureKey,
-	)
-
-	if !isValid {
+	) {
+		log.Printf("[Webhook] INVALID signature for order_id=%s status=%s — rejecting",
+			notification.OrderID, notification.TransactionStatus)
 		response.BadRequest(c, "Invalid signature", "Webhook signature verification failed")
 		return
 	}
 
-	// TODO: Update transaction status in your database based on notification.TransactionStatus
-	// Possible statuses: capture, settlement, pending, deny, cancel, expire, refund
-
-	// Log the notification for debugging
-	fmt.Printf("[Midtrans Webhook] OrderID: %s, Status: %s, PaymentType: %s\n",
+	log.Printf("[Webhook] received order_id=%s midtrans_status=%s payment_type=%s",
 		notification.OrderID, notification.TransactionStatus, notification.PaymentType)
 
-	// Always return 200 to Midtrans to prevent retries
+	// Map Midtrans status to internal status.
+	internalStatus, shouldProcess := mapMidtransStatus(notification.TransactionStatus)
+	if !shouldProcess {
+		// "pending" or unknown: acknowledge without touching the DB.
+		log.Printf("[Webhook] no action needed for status=%s order_id=%s",
+			notification.TransactionStatus, notification.OrderID)
+		response.Success(c, http.StatusOK, "Webhook acknowledged", gin.H{
+			"order_id": notification.OrderID,
+			"action":   "none",
+		})
+		return
+	}
+
+	// Process the payment outcome — activates or cancels ticket accordingly.
+	// Pass gross_amount so the usecase can validate it against the DB record.
+	if err := h.ticketUsecase.ProcessPaymentCallback(
+		c.Request.Context(),
+		notification.OrderID,
+		internalStatus,
+		notification.GrossAmount,
+	); err != nil {
+		// Log the error but still return 200 to prevent Midtrans from retrying
+		// indefinitely (the error is likely a DB issue, not a bad payload).
+		log.Printf("[Webhook] ERROR processing order_id=%s: %v", notification.OrderID, err)
+		// Return 200 so Midtrans stops retrying; the issue will be visible in logs.
+		response.Success(c, http.StatusOK, "Webhook received", gin.H{
+			"order_id": notification.OrderID,
+			"warning":  fmt.Sprintf("processing error: %v", err),
+		})
+		return
+	}
+
+	log.Printf("[Webhook] SUCCESS order_id=%s internal_status=%s", notification.OrderID, internalStatus)
 	response.Success(c, http.StatusOK, "Webhook processed successfully", gin.H{
-		"order_id":           notification.OrderID,
-		"transaction_status": notification.TransactionStatus,
+		"order_id":        notification.OrderID,
+		"internal_status": string(internalStatus),
 	})
 }
 
@@ -246,10 +292,4 @@ func (h *PaymentHandler) GetClientKey(c *gin.Context) {
 		"client_key": h.midtransClient.GetClientKey(),
 		"is_sandbox": true,
 	})
-}
-
-// getFrontendURL returns the frontend URL (should be from config)
-func getFrontendURL() string {
-	// TODO: Get from config
-	return "https://anigmaa.id"
 }

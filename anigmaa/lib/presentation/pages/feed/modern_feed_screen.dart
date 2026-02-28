@@ -13,6 +13,7 @@ import '../../bloc/ranked_feed/ranked_feed_bloc.dart';
 import '../../bloc/ranked_feed/ranked_feed_event.dart';
 import '../../bloc/ranked_feed/ranked_feed_state.dart';
 import '../../widgets/common/error_state_widget.dart';
+import '../../widgets/common/offline_banner.dart';
 import '../../widgets/posts/modern_post_card.dart';
 import '../create_post/create_post_screen.dart';
 import '../../../injection_container.dart';
@@ -40,9 +41,16 @@ class _ModernFeedScreenState extends State<ModernFeedScreen> {
     _scrollController.addListener(_onScroll);
     _rankedFeedBloc = sl<RankedFeedBloc>();
 
-    // Load posts and events
-    context.read<PostsBloc>().add(LoadPosts());
-    context.read<EventsBloc>().add(LoadEvents());
+    // Load posts and events ONLY if not already loaded
+    final postsState = context.read<PostsBloc>().state;
+    final eventsState = context.read<EventsBloc>().state;
+
+    if (postsState is PostsInitial || postsState is PostsError) {
+      context.read<PostsBloc>().add(LoadPosts());
+    }
+    if (eventsState is EventsInitial || eventsState is EventsError) {
+      context.read<EventsBloc>().add(LoadEvents());
+    }
   }
 
   // Helper function to convert technical errors to user-friendly messages
@@ -179,116 +187,146 @@ class _ModernFeedScreenState extends State<ModernFeedScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: BlocBuilder<PostsBloc, PostsState>(
-        buildWhen: (previous, current) {
-          // Only rebuild when posts actually change
-          return previous.runtimeType != current.runtimeType ||
-              (current is PostsLoaded &&
-                  previous is PostsLoaded &&
-                  current.posts.length != previous.posts.length);
-        },
-        builder: (context, postsState) {
-          return BlocBuilder<EventsBloc, EventsState>(
-            buildWhen: (previous, current) {
-              // Only rebuild when events actually change
-              return previous.runtimeType != current.runtimeType;
-            },
-            builder: (context, eventsState) {
-              // Wait for both posts and events to load
-              if (postsState is PostsLoading || eventsState is EventsLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(
-                    color: Color(0xFFBBC863),
-                    strokeWidth: 3,
-                  ),
-                );
-              }
+      body: Column(
+        children: [
+          // Offline banner (shows at top when offline)
+          const OfflineBanner(),
 
-              if (postsState is PostsError) {
-                return ErrorStateWidget(
-                  message: _getUserFriendlyError(postsState.message),
-                  onRetry: () {
-                    context.read<PostsBloc>().add(LoadPosts());
-                    context.read<EventsBloc>().add(LoadEvents());
-                  },
-                );
-              }
+          // Main content
+          Expanded(
+            child: BlocBuilder<PostsBloc, PostsState>(
+              buildWhen: (previous, current) {
+                return previous.runtimeType != current.runtimeType;
+              },
+              builder: (context, postsState) {
+                // Handle different post states
+                List<Post> posts = [];
 
-              if (eventsState is EventsError) {
-                return ErrorStateWidget(
-                  message: _getUserFriendlyError(eventsState.message),
-                  onRetry: () {
-                    context.read<PostsBloc>().add(LoadPosts());
-                    context.read<EventsBloc>().add(LoadEvents());
-                  },
-                );
-              }
-
-              if (postsState is PostsLoaded && eventsState is EventsLoaded) {
-                // Trigger ranking when data is ready (only once to prevent infinite loop)
-                if (!_hasLoadedRanking) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _hasLoadedRanking = true;
-                    _loadRankedFeed(postsState.posts, eventsState.events);
-                  });
+                // Extract posts from whatever state we have
+                if (postsState is PostsLoaded) {
+                  posts = postsState.posts;
+                } else if (postsState is PostsOffline) {
+                  posts = postsState.cachedPosts;
                 }
 
-                // Build UI with ranking results
-                return BlocBuilder<RankedFeedBloc, RankedFeedState>(
-                  bloc: _rankedFeedBloc,
+                // Combine with events state
+                return BlocBuilder<EventsBloc, EventsState>(
                   buildWhen: (previous, current) {
-                    // Only rebuild when ranking actually changes
                     return previous.runtimeType != current.runtimeType;
                   },
-                  builder: (context, rankedState) {
-                    List<Post> displayPosts = postsState.posts;
+                  builder: (context, eventsState) {
+                    // Extract events from whatever state we have
+                    List<Event> events = [];
+                    if (eventsState is EventsLoaded) {
+                      events = eventsState.events;
+                    } else if (eventsState is EventsOffline) {
+                      events = eventsState.cachedEvents;
+                    }
 
-                    // If ranking succeeded, sort posts
-                    if (rankedState is RankedFeedLoaded) {
-                      displayPosts = _sortPostsByRanking(
-                        postsState.posts,
-                        rankedState.rankedFeed.forYouPosts,
+                    // Initial loading - show spinner only if we have NO data at all
+                    if ((postsState is PostsLoading || postsState is PostsInitial) &&
+                        (eventsState is EventsLoading || eventsState is EventsInitial) &&
+                        posts.isEmpty &&
+                        events.isEmpty) {
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFFBBC863),
+                          strokeWidth: 3,
+                        ),
                       );
                     }
 
-                    // Show ALL posts including current user's posts
-                    final feedPosts = displayPosts;
-
-                    // Precache visible images when posts are loaded
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      _precacheVisibleImages(feedPosts);
-                    });
-
-                    if (feedPosts.isEmpty) {
-                      return _buildEmptyState();
+                    // Show error states ONLY if we have no cached data
+                    if (postsState is PostsError && posts.isEmpty) {
+                      return ErrorStateWidget(
+                        message: _getUserFriendlyError(postsState.message),
+                        onRetry: () {
+                          context.read<PostsBloc>().add(LoadPosts());
+                          context.read<EventsBloc>().add(LoadEvents());
+                        },
+                      );
                     }
 
-                    return RefreshIndicator(
-                      onRefresh: () async {
-                        context.read<PostsBloc>().add(RefreshPosts());
-                        context.read<EventsBloc>().add(LoadEvents());
-                        await Future.delayed(const Duration(seconds: 1));
-                      },
-                      color: const Color(0xFFBBC863),
-                      child: ListView.builder(
-                        controller: _scrollController,
-                        padding: EdgeInsets.zero,
-                        itemCount: feedPosts.length,
-                        itemBuilder: (context, index) {
-                          final post = feedPosts[index];
-                          return ModernPostCard(post: post);
+                    if (eventsState is EventsError && events.isEmpty) {
+                      return ErrorStateWidget(
+                        message: _getUserFriendlyError(eventsState.message),
+                        onRetry: () {
+                          context.read<PostsBloc>().add(LoadPosts());
+                          context.read<EventsBloc>().add(LoadEvents());
                         },
-                      ),
-                    );
+                      );
+                    }
+
+                    // If we have posts (loaded or offline), render them
+                    if (posts.isNotEmpty) {
+                      return _buildFeedContent(posts, events);
+                    }
+
+                    // Fallback: no posts to show
+                    return _buildEmptyState();
                   },
                 );
-              }
-
-              return _buildEmptyState();
-            },
-          );
-        },
+              },
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildFeedContent(List<Post> posts, List<Event> events) {
+    // Trigger ranking when data is ready (only once to prevent infinite loop)
+    if (!_hasLoadedRanking && events.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _hasLoadedRanking = true;
+        _loadRankedFeed(posts, events);
+      });
+    }
+
+    // Build UI with ranking results
+    return BlocBuilder<RankedFeedBloc, RankedFeedState>(
+      bloc: _rankedFeedBloc,
+      buildWhen: (previous, current) {
+        return previous.runtimeType != current.runtimeType;
+      },
+      builder: (context, rankedState) {
+        List<Post> displayPosts = posts;
+
+        // If ranking succeeded, sort posts
+        if (rankedState is RankedFeedLoaded) {
+          displayPosts = _sortPostsByRanking(
+            posts,
+            rankedState.rankedFeed.forYouPosts,
+          );
+        }
+
+        // Precache visible images when posts are loaded
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _precacheVisibleImages(displayPosts);
+        });
+
+        if (displayPosts.isEmpty) {
+          return _buildEmptyState();
+        }
+
+        return RefreshIndicator(
+          onRefresh: () async {
+            context.read<PostsBloc>().add(RefreshPosts());
+            context.read<EventsBloc>().add(LoadEvents());
+            await Future.delayed(const Duration(seconds: 1));
+          },
+          color: const Color(0xFFBBC863),
+          child: ListView.builder(
+            controller: _scrollController,
+            padding: EdgeInsets.zero,
+            itemCount: displayPosts.length,
+            itemBuilder: (context, index) {
+              final post = displayPosts[index];
+              return ModernPostCard(post: post);
+            },
+          ),
+        );
+      },
     );
   }
 

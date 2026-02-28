@@ -87,4 +87,46 @@ class Community extends Equatable {
         isVerified,
         settings,
       ];
+
+  // Serialization support for caching
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'coverImage': coverImage,
+      'icon': icon,
+      'category': category.toString(),
+      'location': location,
+      'memberCount': memberCount,
+      'memberIds': memberIds,
+      'adminIds': adminIds,
+      'createdAt': createdAt.toIso8601String(),
+      'isPublic': isPublic,
+      'isVerified': isVerified,
+      'settings': settings,
+    };
+  }
+
+  factory Community.fromJson(Map<String, dynamic> json) {
+    return Community(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String,
+      coverImage: json['coverImage'] as String?,
+      icon: json['icon'] as String?,
+      category: CommunityCategory.values.firstWhere(
+        (cat) => cat.toString() == json['category'],
+        orElse: () => CommunityCategory.learning,
+      ),
+      location: json['location'] as String,
+      memberCount: json['memberCount'] as int,
+      memberIds: (json['memberIds'] as List<dynamic>?)?.cast<String>() ?? [],
+      adminIds: (json['adminIds'] as List<dynamic>?)?.cast<String>() ?? [],
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      isPublic: json['isPublic'] as bool? ?? true,
+      isVerified: json['isVerified'] as bool? ?? false,
+      settings: json['settings'] as Map<String, dynamic>?,
+    );
+  }
 }

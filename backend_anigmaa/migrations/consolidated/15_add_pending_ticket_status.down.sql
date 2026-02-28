@@ -1,0 +1,3 @@
+-- PostgreSQL does not support removing enum values once added.
+-- To fully revert, recreate the type without 'pending' (requires no existing rows using it).
+-- This is intentionally left as a no-op; handle via a full schema reset in dev environments.

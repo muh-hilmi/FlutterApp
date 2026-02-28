@@ -108,6 +108,20 @@ class EventsError extends EventsState {
   List<Object?> get props => [message];
 }
 
+/// Offline state - shows cached events when network is unavailable
+class EventsOffline extends EventsState {
+  final List<Event> cachedEvents;
+  final String? message;
+
+  const EventsOffline({
+    required this.cachedEvents,
+    this.message = 'Offline — menampilkan data terakhir',
+  });
+
+  @override
+  List<Object?> get props => [cachedEvents, message];
+}
+
 class EventCreated extends EventsState {
   final Event event;
 

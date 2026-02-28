@@ -27,6 +27,7 @@ import (
 	"github.com/anigmaa/backend/internal/usecase/qna"
 	"github.com/anigmaa/backend/internal/usecase/ticket"
 	"github.com/anigmaa/backend/internal/usecase/user"
+	"github.com/anigmaa/backend/internal/workers"
 	"github.com/anigmaa/backend/pkg/jwt"
 	"github.com/anigmaa/backend/pkg/validator"
 	"github.com/gin-gonic/gin"
@@ -135,7 +136,7 @@ func main() {
 	qnaHandler := handler.NewQnAHandler(qnaUsecase, validate)
 	uploadHandler := handler.NewUploadHandler(storageService)
 	communityHandler := handler.NewCommunityHandler(communityUsecase, validate)
-	paymentHandler := handler.NewPaymentHandler(midtransClient)
+	paymentHandler := handler.NewPaymentHandler(midtransClient, ticketUsecase)
 	feedRankingHandler := handler.NewFeedRankingHandler(feedRanker)
 
 	// Setup router
@@ -145,6 +146,9 @@ func main() {
 	router.Use(middleware.CORS(cfg.CORS.AllowedOrigins))
 	router.Use(middleware.Logger())
 	router.Use(middleware.Recovery())
+	// Rate limiting: 200 req/min per IP globally.
+	// Webhook gets its own tighter limiter (30/min) applied at route level below.
+	router.Use(middleware.RateLimit(200, time.Minute))
 
 	// Swagger documentation
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -413,7 +417,9 @@ func main() {
 		}
 
 		// Webhook routes (public - no auth required)
+		// Tighter rate limit: Midtrans retries at most ~10x, so 30/min is generous.
 		webhooks := v1.Group("/webhooks")
+		webhooks.Use(middleware.RateLimit(30, time.Minute))
 		{
 			webhooks.POST("/midtrans", paymentHandler.MidtransWebhook)
 		}
@@ -427,6 +433,13 @@ func main() {
 			payments.GET("/client-key", paymentHandler.GetClientKey)
 		}
 	}
+
+	// Start background workers
+	workerCtx, workerCancel := context.WithCancel(context.Background())
+	defer workerCancel()
+	expiryWorker := workers.NewTicketExpiryWorker(ticketUsecase, 5*time.Minute)
+	go expiryWorker.Start(workerCtx)
+	log.Println("✓ Ticket expiry worker started")
 
 	// Start server
 	addr := fmt.Sprintf(":%s", cfg.Server.Port)

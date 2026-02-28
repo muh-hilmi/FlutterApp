@@ -307,7 +307,10 @@ class _DiscoverMapViewState extends State<DiscoverMapView> {
             zoom: 13.0,
           ),
           onMapCreated: (controller) {
-            widget.mapController.complete(controller);
+            // Guard against duplicate completion when widget rebuilds
+            if (!widget.mapController.isCompleted) {
+              widget.mapController.complete(controller);
+            }
             widget.onMapReady?.call();
           },
           trafficEnabled: false,

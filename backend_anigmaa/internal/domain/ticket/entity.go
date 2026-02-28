@@ -1,10 +1,19 @@
 package ticket
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+// ErrEventFull is returned by AtomicPurchase when the event has no spots left.
+// Defined here so both the repository and usecase layers share the same sentinel.
+var ErrEventFull = errors.New("event is full")
+
+// ErrAlreadyProcessed is returned by UpdateTransactionStatus when the DB row
+// was already in a terminal state (idempotency guard at the database level).
+var ErrAlreadyProcessed = errors.New("transaction already processed")
 
 // TransactionStatus represents the status of a payment transaction
 type TransactionStatus string

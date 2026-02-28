@@ -7,6 +7,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:anigmaa/domain/entities/event.dart';
 import 'package:anigmaa/domain/entities/event_category.dart';
+import 'package:anigmaa/domain/entities/post.dart';
 import 'package:anigmaa/presentation/bloc/events/events_bloc.dart';
 import 'package:anigmaa/presentation/bloc/events/events_event.dart';
 import 'package:anigmaa/presentation/bloc/events/events_state.dart';
@@ -16,12 +17,14 @@ import 'package:anigmaa/presentation/bloc/posts/posts_state.dart';
 import 'package:anigmaa/presentation/bloc/user/user_bloc.dart';
 import 'package:anigmaa/presentation/bloc/user/user_state.dart' show UserLoaded;
 import 'package:anigmaa/presentation/pages/event_detail/event_detail_screen.dart';
+import 'package:anigmaa/presentation/widgets/common/offline_banner.dart';
 import '../../bloc/ranked_feed/ranked_feed_bloc.dart';
 import '../../bloc/ranked_feed/ranked_feed_event.dart';
 import '../../bloc/ranked_feed/ranked_feed_state.dart';
 import '../../../injection_container.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/storage/location_cache_service.dart';
 import 'widgets/discover_map_view.dart';
 
 class DiscoverScreen extends StatefulWidget {
@@ -55,6 +58,7 @@ class DiscoverScreenState extends State<DiscoverScreen>
   bool _hasAppliedInitialFilter = false;
   bool _hasCenteredMap = false;
   bool _isMapReady = false;
+  bool _isLocating = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -65,8 +69,20 @@ class DiscoverScreenState extends State<DiscoverScreen>
     WidgetsBinding.instance.addObserver(this);
     _rankedFeedBloc = sl<RankedFeedBloc>();
     _searchController.addListener(_filterEvents);
-    _loadInitialData();
-    _determinePosition();
+
+    // Load data ONLY if not already loaded
+    final eventsState = context.read<EventsBloc>().state;
+    final postsState = context.read<PostsBloc>().state;
+
+    if (eventsState is EventsInitial || eventsState is EventsError) {
+      context.read<EventsBloc>().add(const LoadEventsByMode(mode: 'for_you'));
+    }
+    if (postsState is PostsInitial || postsState is PostsError) {
+      context.read<PostsBloc>().add(LoadPosts());
+    }
+
+    // Load cache first (guaranteed), THEN try GPS in background
+    _initLocation();
   }
 
   @override
@@ -80,6 +96,41 @@ class DiscoverScreenState extends State<DiscoverScreen>
   void _loadInitialData() {
     context.read<EventsBloc>().add(const LoadEventsByMode(mode: 'for_you'));
     context.read<PostsBloc>().add(LoadPosts());
+  }
+
+  /// Load cache first (guaranteed fast), then try live GPS in background.
+  /// This prevents the race condition where GPS returns before cache,
+  /// leaving the screen stuck on the default Jakarta LatLng.
+  Future<void> _initLocation() async {
+    await _loadCachedLocation();
+    _determinePosition(); // runs in background, may override cache with real GPS
+  }
+
+  Future<void> _loadCachedLocation() async {
+    try {
+      final cacheStorage = sl<LocationCacheService>();
+      final location = await cacheStorage.getLastLocation();
+
+      if (location != null && mounted) {
+        final cachedPosition = LatLng(location['latitude']!, location['longitude']!);
+        setState(() {
+          _currentPosition = cachedPosition;
+        });
+        debugPrint('Loaded cached location: $cachedPosition');
+      }
+    } catch (e) {
+      debugPrint('Error loading cached location: $e');
+    }
+  }
+
+  Future<void> _saveLocation(double lat, double lng) async {
+    try {
+      final cacheStorage = sl<LocationCacheService>();
+      await cacheStorage.saveLocation(lat, lng);
+      debugPrint('Saved location: $lat, $lng');
+    } catch (e) {
+      debugPrint('Error saving location: $e');
+    }
   }
 
   Future<LatLng?> _determinePosition() async {
@@ -107,6 +158,10 @@ class DiscoverScreenState extends State<DiscoverScreen>
 
       if (mounted) {
         final newPosition = LatLng(position.latitude, position.longitude);
+
+        // Save to cache
+        await _saveLocation(position.latitude, position.longitude);
+
         setState(() {
           _currentPosition = newPosition;
         });
@@ -171,19 +226,37 @@ class DiscoverScreenState extends State<DiscoverScreen>
     }
   }
 
-  /// Re-fetch current GPS location and center map
+  /// Re-fetch current GPS location and center map.
+  /// Falls back to cached location when GPS is unavailable (e.g. offline).
   Future<void> _refreshLocationAndCenter() async {
-    // Show quick feedback - move to last known position first
-    final lastPosition = await Geolocator.getLastKnownPosition();
-    if (lastPosition != null && _mapController.isCompleted) {
-      final quickPos = LatLng(lastPosition.latitude, lastPosition.longitude);
-      await _centerMapOnLocation(quickPos);
-    }
+    if (_isLocating) return;
+    setState(() => _isLocating = true);
 
-    // Then get fresh position
-    final position = await _determinePosition();
-    if (position != null && _mapController.isCompleted) {
-      await _centerMapOnLocation(position);
+    try {
+      final position = await _determinePosition();
+      if (position != null) {
+        if (_mapController.isCompleted) await _centerMapOnLocation(position);
+        return;
+      }
+
+      // GPS failed — fall back to cache
+      final cacheStorage = sl<LocationCacheService>();
+      final cached = await cacheStorage.getLastLocation();
+      if (cached != null && mounted) {
+        final cachedPos = LatLng(cached['latitude']!, cached['longitude']!);
+        setState(() => _currentPosition = cachedPos);
+        if (_mapController.isCompleted) await _centerMapOnLocation(cachedPos);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('GPS tidak tersedia, menggunakan lokasi terakhir'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } finally {
+      if (mounted) setState(() => _isLocating = false);
     }
   }
 
@@ -336,40 +409,91 @@ class DiscoverScreenState extends State<DiscoverScreen>
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: BlocBuilder<PostsBloc, PostsState>(
-        builder: (context, postsState) {
-          return BlocConsumer<EventsBloc, EventsState>(
-            listener: (context, state) {
-              if (state is EventsLoaded) {
-                setState(() {
-                  _allEvents = state.filteredEvents;
-                });
+      body: Column(
+        children: [
+          // Offline banner (shows at top when offline)
+          const OfflineBanner(),
 
+          // Main content
+          Expanded(
+            child: BlocBuilder<PostsBloc, PostsState>(
+              builder: (context, postsState) {
+                // Extract posts from whatever state we have
+                List<Post> posts = [];
                 if (postsState is PostsLoaded) {
-                  _triggerRankingIfNeeded(postsState, state.events);
+                  posts = postsState.posts;
+                } else if (postsState is PostsOffline) {
+                  posts = postsState.cachedPosts;
                 }
 
-                if (!_hasAppliedInitialFilter) {
-                  _hasAppliedInitialFilter = true;
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _applyModeFilter();
-                  });
-                }
-              }
-            },
-            builder: (context, eventsState) {
-              return BlocBuilder<RankedFeedBloc, RankedFeedState>(
-                bloc: _rankedFeedBloc,
-                builder: (context, rankedState) {
-                  _updateRankedFeedData(rankedState);
-                  return _isMapView
-                      ? _buildMapMode(locationName)
-                      : _buildCardsMode(locationName);
-                },
-              );
-            },
-          );
-        },
+                return BlocConsumer<EventsBloc, EventsState>(
+                  listener: (context, state) {
+                    // Extract events from whatever state we have
+                    List<Event> events = [];
+                    if (state is EventsLoaded) {
+                      events = state.events;
+                      setState(() {
+                        _allEvents = state.filteredEvents;
+                      });
+
+                      if (postsState is PostsLoaded) {
+                        _triggerRankingIfNeeded(postsState, events);
+                      }
+
+                      if (!_hasAppliedInitialFilter) {
+                        _hasAppliedInitialFilter = true;
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          _applyModeFilter();
+                        });
+                      }
+                    } else if (state is EventsOffline) {
+                      // Use cached events when offline
+                      setState(() {
+                        _allEvents = state.cachedEvents;
+                      });
+
+                      if (!_hasAppliedInitialFilter) {
+                        _hasAppliedInitialFilter = true;
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          _applyModeFilter();
+                        });
+                      }
+                    }
+                  },
+                  builder: (context, eventsState) {
+                    // Extract events from whatever state we have
+                    List<Event> events = [];
+                    if (eventsState is EventsLoaded) {
+                      events = eventsState.events;
+                    } else if (eventsState is EventsOffline) {
+                      events = eventsState.cachedEvents;
+                    }
+
+                    // Initial loading - show spinner only if we have NO data at all
+                    if ((postsState is PostsLoading || postsState is PostsInitial) &&
+                        (eventsState is EventsLoading || eventsState is EventsInitial) &&
+                        posts.isEmpty &&
+                        events.isEmpty) {
+                      return const Center(
+                        child: CircularProgressIndicator(color: AppColors.secondary),
+                      );
+                    }
+
+                    return BlocBuilder<RankedFeedBloc, RankedFeedState>(
+                      bloc: _rankedFeedBloc,
+                      builder: (context, rankedState) {
+                        _updateRankedFeedData(rankedState);
+                        return _isMapView
+                            ? _buildMapMode(locationName)
+                            : _buildCardsMode(locationName);
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -471,15 +595,27 @@ class DiscoverScreenState extends State<DiscoverScreen>
           ),
         ],
       ),
-      child: IconButton(
-        icon: const Icon(
-          Icons.my_location,
-          color: AppColors.secondary,
-          size: 22,
-        ),
-        onPressed: _refreshLocationAndCenter,
-        padding: EdgeInsets.zero,
-      ),
+      child: _isLocating
+          ? const Padding(
+              padding: EdgeInsets.all(11),
+              child: SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.secondary,
+                ),
+              ),
+            )
+          : IconButton(
+              icon: const Icon(
+                Icons.my_location,
+                color: AppColors.secondary,
+                size: 22,
+              ),
+              onPressed: _refreshLocationAndCenter,
+              padding: EdgeInsets.zero,
+            ),
     );
   }
 

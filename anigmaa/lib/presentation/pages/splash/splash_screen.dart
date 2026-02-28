@@ -1,17 +1,12 @@
 import 'dart:async';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../../../core/services/auth_service.dart';
-import '../../../core/services/google_auth_service.dart';
-import '../../../core/auth/auth_bloc.dart';
-import '../../../core/auth/auth_state.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/datasources/auth_remote_datasource.dart';
+import '../../../data/models/user_model.dart';
 import '../../../injection_container.dart' as di;
-import '../server_unavailable/server_unavailable_screen.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../core/constants/app_config.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -23,7 +18,6 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   String _statusText = 'Menyiapkan...';
   final _logger = AppLogger();
-  StreamSubscription? _authBlocSubscription;
 
   @override
   void initState() {
@@ -37,178 +31,131 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!mounted) return;
 
-    // Quick server check first - don't waste time on auth if server is down
+    final authService = di.sl<AuthService>();
+
+    // STEP 1: Check if refresh token exists locally
     setState(() {
-      _statusText = 'Mengecek koneksi...';
+      _statusText = 'Memeriksa session...';
     });
 
-    final serverReachable = await _quickServerCheck();
+    final hasRefreshToken = await authService.hasRefreshToken;
 
-    if (!mounted) return;
-
-    if (!serverReachable) {
-      // Server down - skip silent sign-in and token validation
-      // Go straight to login
-      _logger.info('[Splash] Server unreachable, skipping auth checks');
+    if (!hasRefreshToken) {
+      // No token at all - go to login/onboarding
+      _logger.info('[Splash] No refresh token found');
       _navigateToLogin();
       return;
     }
 
-    final authService = di.sl<AuthService>();
-    final authBloc = di.sl<AuthBloc>();
+    // STEP 2: Check if access token is still valid (skip backend call)
+    _logger.info('[Splash] Refresh token found, checking access token expiry...');
 
-    // Check if user has a token stored
-    final hasToken = await authService.hasValidToken;
+    final isAccessTokenExpired = await authService.isAccessTokenExpired();
 
-    if (!hasToken) {
-      // No token - try Google silent sign-in or go to login
-      _tryGoogleSignInOrLogin();
+    if (!isAccessTokenExpired) {
+      // Access token is still valid - skip backend call entirely
+      _logger.info('[Splash] Access token still valid, skipping backend refresh');
+
+      // Check profile completion using cached data
+      final needsProfileCompletion = await _needsProfileCompletion();
+
+      if (!mounted) return;
+
+      if (needsProfileCompletion) {
+        Navigator.pushReplacementNamed(context, '/complete-profile');
+      } else {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
       return;
     }
 
-    // Token exists - validate it via AuthBloc
+    // STEP 3: Access token is expired - try to refresh it (with timeout)
+    _logger.info('[Splash] Access token expired, attempting refresh...');
+
     setState(() {
-      _statusText = 'Mengecek session...';
-    });
-
-    // Start validation first, then listen to state changes
-    authBloc.validateToken();
-
-    // Listen to AuthBloc state changes
-    _authBlocSubscription = authBloc.stream.listen((authState) {
-      if (!mounted) return;
-
-      switch (authState.state) {
-        case AuthState.validated:
-          // Token is valid - navigate to home
-          _authBlocSubscription?.cancel();
-          Navigator.pushReplacementNamed(context, '/home');
-          break;
-
-        case AuthState.unauthenticated:
-          // Token is invalid - go to login
-          _authBlocSubscription?.cancel();
-          _navigateToLogin();
-          break;
-
-        case AuthState.serverUnavailable:
-          // Server unreachable - show server unavailable screen
-          // Don't cancel subscription here - ServerUnavailableScreen will handle navigation
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ServerUnavailableScreen(
-                errorMessage: authState.errorMessage,
-                retryCount: authState.retryCount,
-              ),
-            ),
-          );
-          break;
-
-        case AuthState.offlineMode:
-          // Enter offline mode - navigate to home with limited features
-          _authBlocSubscription?.cancel();
-          Navigator.pushReplacementNamed(context, '/home');
-          break;
-
-        case AuthState.validating:
-        case AuthState.refreshing:
-          // Still validating - update status
-          setState(() {
-            _statusText = authState.state.description;
-          });
-          break;
-
-        default:
-          break;
-      }
-    });
-  }
-
-  Future<void> _tryGoogleSignInOrLogin() async {
-    setState(() {
-      _statusText = 'Mengecek akun...';
+      _statusText = 'Memperbarui session...';
     });
 
     try {
-      final googleAuthService = di.sl<GoogleAuthService>();
-      final googleAccount = await googleAuthService.signInSilently().timeout(
+      final authDataSource = di.sl<AuthRemoteDataSource>();
+      final storedRefreshToken = await authService.refreshToken;
+
+      if (storedRefreshToken == null) {
+        // Shouldn't happen, but handle gracefully
+        _logger.warning('[Splash] Refresh token null after check');
+        _navigateToLogin();
+        return;
+      }
+
+      // Try to refresh token via backend (5 second timeout)
+      final authResponse = await authDataSource.refreshToken(storedRefreshToken).timeout(
         const Duration(seconds: 5),
-        onTimeout: () => null,
+        onTimeout: () {
+          throw Exception('Refresh token timeout');
+        },
       );
 
-      if (googleAccount != null) {
-        // Silent sign-in succeeded, authenticate with backend
-        setState(() {
-          _statusText = 'Login otomatis...';
-        });
+      // STEP 4: Refresh success - save new tokens and go to home
+      _logger.info('[Splash] Token refresh successful');
+      await authService.updateTokens(
+        accessToken: authResponse.accessToken,
+        refreshToken: authResponse.refreshToken,
+      );
 
-        final idToken = await googleAuthService.getIdToken();
-
-        if (idToken != null) {
-          final authDataSource = di.sl<AuthRemoteDataSource>();
-          // Faster timeout for silent sign-in (5s vs 10s for manual login)
-          final authResponse = await authDataSource.loginWithGoogle(idToken).timeout(
-            const Duration(seconds: 5),
-            onTimeout: () {
-              throw Exception('Silent sign-in timeout');
-            },
-          );
-
-          final authService = di.sl<AuthService>();
-          final authBloc = di.sl<AuthBloc>();
-
-          await authService.saveAuthData(
-            userId: authResponse.user.id,
-            email: authResponse.user.email ?? '',
-            name: authResponse.user.name,
-            accessToken: authResponse.accessToken,
-            refreshToken: authResponse.refreshToken,
-          );
-
-          // Notify AuthBloc that token was refreshed
-          authBloc.add(AuthTokenRefreshed(
-            accessToken: authResponse.accessToken,
-            refreshToken: authResponse.refreshToken,
-          ));
-
-          if (mounted) {
-            // Check if user has completed profile
-            final user = authResponse.user;
-            final needsProfileCompletion =
-                user.dateOfBirth == null ||
-                user.location == null ||
-                user.location!.isEmpty;
-
-            if (needsProfileCompletion) {
-              Navigator.pushReplacementNamed(context, '/complete-profile');
-            } else {
-              Navigator.pushReplacementNamed(context, '/home');
-            }
-          }
-          return;
-        }
+      // Update user data if changed
+      if (authResponse.user.id.isNotEmpty) {
+        await authService.setUserId(authResponse.user.id);
+        await authService.setUserEmail(authResponse.user.email ?? '');
+        await authService.setUserName(authResponse.user.name);
       }
+
+      // Check profile completion and navigate
+      _checkProfileCompletionAndNavigate(authResponse.user);
+
     } catch (e) {
-      // Silent sign-in failed, this is normal
-      _logger.debug('Google silent sign-in failed: $e');
+      // STEP 5: Refresh failed - check if it's network error or invalid token
+      _logger.warning('[Splash] Token refresh failed: $e');
+
+      final errorMsg = e.toString().toLowerCase();
+
+      // Is this a network/timeout error (not auth failure)?
+      final isNetworkError = errorMsg.contains('timeout') ||
+          errorMsg.contains('connection') ||
+          errorMsg.contains('network') ||
+          errorMsg.contains('socket');
+
+      if (isNetworkError) {
+        // Network error - BUT user has refresh token locally
+        // Allow offline access to Home (Instagram/TikTok style)
+        _logger.info('[Splash] Network error but token exists - allowing offline access');
+        _navigateToHomeOffline();
+      } else {
+        // Auth error (401/403) - token is actually invalid
+        _logger.info('[Splash] Token invalid - clearing and going to login');
+        await authService.clearAuthData();
+        _navigateToLogin();
+      }
     }
+  }
 
-    // NO AUTH: Route based on onboarding status
-    if (!mounted) return;
 
+  Future<bool> _needsProfileCompletion() async {
+    // Check cached user data for profile completion
+    // We use SharedPreferences data since we're skipping backend call
     final authService = di.sl<AuthService>();
 
-    String route;
-    if (authService.hasSeenOnboarding) {
-      // User has seen onboarding, go to login
-      route = '/login';
-    } else {
-      // First time user, show onboarding
-      route = '/onboarding';
+    // For now, assume profile is complete if we have user data
+    // In production, you might store profile completion status separately
+    final userId = authService.userId;
+
+    // If we don't have user ID stored, assume profile not complete
+    if (userId == null || userId.isEmpty) {
+      return true;
     }
 
-    Navigator.pushReplacementNamed(context, route);
+    // TODO: Store and check profile completion flag
+    // For now, return false to avoid forcing profile completion on cached data
+    return false;
   }
 
   void _navigateToLogin() {
@@ -226,41 +173,32 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-  /// Quick server check - returns true if server is reachable
-  /// Uses lightweight HEAD request to minimize server load
-  Future<bool> _quickServerCheck() async {
-    try {
-      final dio = Dio(BaseOptions(
-        baseUrl: AppConfig.apiUrl,
-        connectTimeout: const Duration(seconds: 3),
-        receiveTimeout: const Duration(seconds: 3),
-      ));
+  Future<void> _checkProfileCompletionAndNavigate(UserModel user) async {
+    if (!mounted) return;
 
-      // HEAD request to root - minimal server load
-      // Any response (even 404) means server is up
-      await dio.head(
-        '/',
-        options: Options(
-          validateStatus: (status) => status != null && status < 600,
-        ),
-      ).timeout(
-        const Duration(seconds: 3),
-        onTimeout: () {
-          throw Exception('Server check timeout');
-        },
-      );
+    // Check if user has completed essential profile fields
+    final needsProfileCompletion =
+        user.dateOfBirth == null ||
+        user.location == null ||
+        user.location!.isEmpty;
 
-      _logger.debug('[Splash] Server is reachable');
-      return true;
-    } catch (e) {
-      _logger.debug('[Splash] Server check failed: $e');
-      return false;
+    if (needsProfileCompletion) {
+      Navigator.pushReplacementNamed(context, '/complete-profile');
+    } else {
+      Navigator.pushReplacementNamed(context, '/home');
+    }
+  }
+
+  void _navigateToHomeOffline() {
+    // Navigate to home with cached/offline data (Instagram/TikTok style)
+    _logger.info('[Splash] Entering offline mode with cached data');
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, '/home');
     }
   }
 
   @override
   void dispose() {
-    _authBlocSubscription?.cancel();
     super.dispose();
   }
 

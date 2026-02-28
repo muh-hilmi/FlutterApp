@@ -379,6 +379,9 @@ class UserBloc extends Bloc<UserEvent, UserState> with NetworkResilienceBloc {
       if (getUserById != null) {
         final result = await getUserById!(
           GetUserByIdParams(userId: event.userId),
+        ).timeout(
+          const Duration(seconds: 8),
+          onTimeout: () => throw Exception('Request timeout. Cek koneksi internet kamu! 📡'),
         );
 
         // Use fold to extract result
@@ -401,7 +404,10 @@ class UserBloc extends Bloc<UserEvent, UserState> with NetworkResilienceBloc {
         List<Event> actualEventsList = const []; // Store actual events for profile tab
         final currentUserId = authService.userId;
         if (event.userId == currentUserId && getMyEvents != null) {
-          final eventsResult = await getMyEvents!(const GetMyEventsParams());
+          final eventsResult = await getMyEvents!(const GetMyEventsParams()).timeout(
+            const Duration(seconds: 8),
+            onTimeout: () => throw Exception('Request timeout. Cek koneksi internet kamu! 📡'),
+          );
           eventsResult.fold(
             (f) {
               _logger.warning('Failed to get actual events count: ${f.message}');
@@ -643,6 +649,9 @@ class UserBloc extends Bloc<UserEvent, UserState> with NetworkResilienceBloc {
       final result = await postRepository!.getUserPosts(
         event.userId,
         limit: 50,
+      ).timeout(
+        const Duration(seconds: 8),
+        onTimeout: () => throw Exception('Request timeout. Cek koneksi internet kamu! 📡'),
       );
 
       result.fold(

@@ -41,7 +41,9 @@
       "Bash(wsl.exe curl:*)",
       "Bash(powershell.exe:*)",
       "Bash(curl:*)",
-      "Bash(wsl.exe:*)"
+      "Bash(wsl.exe:*)",
+      "Bash(test:*)",
+      "mcp__plugin_oh-my-claudecode_t__lsp_diagnostics_directory"
     ]
   },
   "enabledPlugins": {
