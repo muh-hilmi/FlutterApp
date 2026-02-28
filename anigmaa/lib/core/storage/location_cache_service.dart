@@ -33,7 +33,8 @@ class LocationCacheService {
       }
     } catch (e, stackTrace) {
       _logger.error('[LocationCache] Failed to initialize: $e', stackTrace);
-      rethrow;
+      // Don't rethrow — location cache failure is non-fatal.
+      // The service will stay _initialized=false and degrade gracefully.
     }
   }
 

@@ -292,6 +292,14 @@ class _LocationPickerState extends State<LocationPicker> {
 
       if (placemarks.isNotEmpty) {
         final place = placemarks.first;
+        // DEBUG: log all geocoder fields so we can see what the API returns
+        AppLogger().debug('[Geocoder] name=${place.name}');
+        AppLogger().debug('[Geocoder] locality=${place.locality}');
+        AppLogger().debug('[Geocoder] subLocality=${place.subLocality}');
+        AppLogger().debug('[Geocoder] subAdministrativeArea=${place.subAdministrativeArea}');
+        AppLogger().debug('[Geocoder] administrativeArea=${place.administrativeArea}');
+        AppLogger().debug('[Geocoder] country=${place.country}');
+        AppLogger().debug('[Geocoder] postalCode=${place.postalCode}');
         if (mounted) {
           setState(() {
             _locationName = _getLocationName(place);
@@ -299,7 +307,7 @@ class _LocationPickerState extends State<LocationPicker> {
             _isLoadingAddress = false;
           });
         }
-        AppLogger().info('Address updated: $_currentAddress');
+        AppLogger().info('Address updated: name=$_locationName address=$_currentAddress');
       }
     } catch (e) {
       AppLogger().error('Error updating address: $e');
@@ -313,15 +321,27 @@ class _LocationPickerState extends State<LocationPicker> {
     }
   }
 
+  /// Strip common Indonesian area prefixes so e.g.
+  /// "Kabupaten Boyolali" → "Boyolali", "Kecamatan Ngemplak" → "Ngemplak"
+  String _stripAreaPrefix(String area) {
+    const prefixes = [
+      'Kabupaten ', 'Kab. ', 'Kota ', 'Kecamatan ', 'Kec. ', 'Kec ',
+    ];
+    for (final prefix in prefixes) {
+      if (area.startsWith(prefix)) return area.substring(prefix.length).trim();
+    }
+    return area.trim();
+  }
+
   String _getLocationName(Placemark place) {
-    // Use subAdministrativeArea for profile location (e.g., "Kabupaten Boyolali")
+    // Prefer kabupaten/kota level (e.g., "Kabupaten Boyolali" → "Boyolali")
     if (place.subAdministrativeArea != null &&
         place.subAdministrativeArea!.isNotEmpty) {
-      return place.subAdministrativeArea!;
+      return _stripAreaPrefix(place.subAdministrativeArea!);
     }
     // Fallback to locality
     if (place.locality != null && place.locality!.isNotEmpty) {
-      return place.locality!;
+      return _stripAreaPrefix(place.locality!);
     }
     // Last resort: name (but avoid overly specific names)
     if (place.name != null &&
@@ -333,14 +353,14 @@ class _LocationPickerState extends State<LocationPicker> {
   }
 
   String _formatAddress(Placemark place) {
-    // Only use subAdministrativeArea (e.g., "Kabupaten Boyolali" → "Boyolali")
+    // Use kabupaten/kota level, strip prefix (e.g., "Kabupaten Boyolali" → "Boyolali")
     if (place.subAdministrativeArea != null &&
         place.subAdministrativeArea!.isNotEmpty) {
-      return place.subAdministrativeArea!;
+      return _stripAreaPrefix(place.subAdministrativeArea!);
     }
     // Fallback to locality if subAdministrativeArea is not available
     if (place.locality != null && place.locality!.isNotEmpty) {
-      return place.locality!;
+      return _stripAreaPrefix(place.locality!);
     }
     return 'Alamat tidak tersedia';
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:lucide_icons/lucide_icons.dart';
 import 'core/utils/app_logger.dart';
@@ -79,6 +80,9 @@ void main() async {
       statusBarBrightness: Brightness.light,
     ),
   );
+
+  // Initialize Hive before DI so LocationCacheService can open its box
+  await Hive.initFlutter();
 
   try {
     await di.init();

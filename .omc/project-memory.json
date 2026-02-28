@@ -88,8 +88,8 @@
     },
     {
       "path": "anigmaa\\lib\\injection_container.dart",
-      "accessCount": 31,
-      "lastAccessed": 1772301471819,
+      "accessCount": 32,
+      "lastAccessed": 1772302127489,
       "type": "directory"
     },
     {
@@ -129,6 +129,12 @@
       "type": "file"
     },
     {
+      "path": "anigmaa\\lib\\main.dart",
+      "accessCount": 11,
+      "lastAccessed": 1772302261487,
+      "type": "file"
+    },
+    {
       "path": "anigmaa\\lib\\core\\storage\\cache_storage_service.dart",
       "accessCount": 10,
       "lastAccessed": 1772299173619,
@@ -144,12 +150,6 @@
       "path": "backend_anigmaa\\internal\\usecase\\ticket\\usecase.go",
       "accessCount": 7,
       "lastAccessed": 1772299989588,
-      "type": "file"
-    },
-    {
-      "path": "anigmaa\\lib\\main.dart",
-      "accessCount": 7,
-      "lastAccessed": 1772301447744,
       "type": "file"
     },
     {
